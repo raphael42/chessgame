@@ -1,0 +1,227 @@
+{% extends './base.html.twig' %}
+
+{% block title %}TODO{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .case-white {
+            background-color: #f7dfc5;
+        }
+        .case-black {
+            background-color: #c67945;
+        }
+
+
+        /* .case-white img.selected {
+            background-color: #8baf73;
+        }
+        .case-black img.selected {
+            background-color: #646f40;
+        } */
+
+        .case-white.selected {
+            background-color: #8baf73;
+        }
+        .case-black.selected {
+            background-color: #646f40;
+        }
+
+        /* .piece {
+            background-image: url({{ asset('assets/img/chesspieces.png') }});
+        }
+        .piece.bishop.white{
+            background-position: -64px 0;
+        }
+        .piece.knight.white{
+            background-position: -128px 0;
+        }
+        .piece.rook.white{
+            background-position: -192px 0;
+        }
+        .piece.queen.white{
+            background-position: -256px 0;
+        }
+        .piece.king.white{
+            background-position: -320px 0;
+        }
+
+        .piece.pawn.black{
+            background-position: 0 bottom;
+        }
+        .piece.bishop.black{
+            background-position: -64px bottom;
+        }
+        .piece.knight.black{
+            background-position: -128px bottom;
+        }
+        .piece.rook.black{
+            background-position: -192px bottom;
+        }
+        .piece.queen.black{
+            background-position: -256px bottom;
+        }
+        .piece.king.black{
+            background-position: -320px bottom;
+        } */
+        .chess-table {
+            width: 64px;
+            height: 64px;
+            cursor: pointer;
+        }
+
+        .piece {
+            width: 64px;
+            height: 64px;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        $(document).ready(function() {
+            const socket = new WebSocket('ws://localhost:3001');
+
+            try {
+                socket.addEventListener('open', function() {
+                    console.log('CONNECTED');
+                    var idGame = {
+                        idGame: '{{ idGame }}',
+                    };
+                    socket.send(JSON.stringify(idGame));
+                });
+            } catch (error) {
+                console.log(error);
+            }
+
+            socket.addEventListener('message', function(e) {
+                try {
+                    var move = JSON.parse(e.data);
+                    var img = $('#' + move.from).html();
+                    $('#' + move.from).empty();
+                    $('#' + move.to).html(img);
+                } catch(error) {
+                    console.log(error);
+                }
+            });
+
+            var playerColor = '{{ colorPlayer }}';
+            $('.piece.'+playerColor).draggable({
+                containment: 'table',
+                revert: 'invalid',
+                // classes: {
+                //     'ui-draggable-dragging': 'selected'
+                // },
+                start: function(ev, ui) {
+                    var atom = $(this).parent().attr('id');
+                    // $(this).parent().addClass('selected')
+                },
+                // drag: function(ev, ui) {
+                //     $(this).parent().addClass('selected')
+                //     $(this).parent().removeClass('selected')
+                // },
+                // stop: function(ev, ui) {
+                //     // console.log($(this).parent().attr('id'));
+                //     $(this).parent().removeClass('selected')
+                // }
+            });
+
+            $('.chess-table').droppable({
+                classes: {
+                    'ui-droppable-hover': 'selected'
+                },
+                drop: function(ev, ui) {
+                    var dropped = ui.draggable;
+                    var droppedOn = $(this);
+
+                    var idFrom = dropped.parent().attr('id');
+                    var idTo = droppedOn.attr('id');
+                    if ($('#' + idTo).html() !== '') {
+                        console.log($(this).html());
+                        $(this).empty();
+                    }
+
+                    $(droppedOn).droppable('disable');
+                    $(dropped).parent().droppable('enable');
+                    $(dropped).detach().css({top: 0, left: 0}).appendTo(droppedOn);
+
+                    var movePiece = {
+                        from: idFrom,
+                        to: idTo,
+                        color: playerColor
+                    };
+                    socket.send(JSON.stringify(movePiece));
+                }
+            });
+        });
+
+
+        var src = null;
+        {% for piece in whitePieces|filter(piece => piece.isTaken == false) %}
+            src = "{{ asset('assets/img/pieces/white-'~ piece.label ~'.png') }}"
+            $('#{{ piece.position }}').html('<img class="piece white" src="' + src + '" alt>');
+        {% endfor %}
+
+        {% for piece in blackPieces|filter(piece => piece.isTaken == false) %}
+            src = "{{ asset('assets/img/pieces/black-'~ piece.label ~'.png') }}"
+            $('#{{ piece.position }}').html('<img class="piece black" src="' + src + '" alt>');
+        {% endfor %}
+    </script>
+{% endblock %}
+
+{% block body %}
+    <div>
+        <table>
+            {% if colorPlayer == 'white' %}
+                {% for i in 8..1 %}
+                    <tr>
+                        <td id="a{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                        <td id="b{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                        <td id="c{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                        <td id="d{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                        <td id="e{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                        <td id="f{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                        <td id="g{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                        <td id="h{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                        <td><span style="margin-left:5px">{{ i }}</span></td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td class="text-center">a</td>
+                    <td class="text-center">b</td>
+                    <td class="text-center">c</td>
+                    <td class="text-center">d</td>
+                    <td class="text-center">e</td>
+                    <td class="text-center">f</td>
+                    <td class="text-center">g</td>
+                    <td class="text-center">h</td>
+                </tr>
+            {% else %}
+                {% for i in 1..8 %}
+                    <tr>
+                        <td id="h{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                        <td id="g{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                        <td id="f{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                        <td id="e{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                        <td id="d{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                        <td id="c{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                        <td id="b{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                        <td id="a{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                        <td><span style="margin-left:5px">{{ i }}</span></td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td class="text-center">h</td>
+                    <td class="text-center">g</td>
+                    <td class="text-center">f</td>
+                    <td class="text-center">e</td>
+                    <td class="text-center">d</td>
+                    <td class="text-center">c</td>
+                    <td class="text-center">b</td>
+                    <td class="text-center">a</td>
+                </tr>
+            {% endif %}
+        </table>
+    </div>
+{% endblock %}
