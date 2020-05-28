@@ -86,29 +86,12 @@ class FirstController extends AbstractController
             $whitePieces = $whitePlayer->getPieces();
         }
 
-
-
-
-
-        // $whitePlayer = $this->getDoctrine()->getRepository(Entity\Player::class)->findOneBy([
-        //     'color' => 'white',
-        //     'game' => $idGame,
-        // ]);
-        // $piece = $this->getDoctrine()->getRepository(Entity\Piece::class)->findOneBy([
-        //     'position' => 'e2',
-        //     'player' => $whitePlayer->getId(),
-        // ]);
-
-        // echo'<pre>';var_dump($piece);echo'</pre>';
-
-
-
-
         return $this->render('secondpage.html.twig', [
             'idGame' => $idGame,
             'colorPlayer' => $colorPlayer,
             'whitePieces' => $whitePieces,
             'blackPieces' => $blackPieces,
+            'fen' => $game->getFen(),
         ]);
     }
 }

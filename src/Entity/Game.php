@@ -26,6 +26,11 @@ class Game
      */
     private $increment;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $fen;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -51,6 +56,18 @@ class Game
     public function setIncrement(int $increment): self
     {
         $this->increment = $increment;
+
+        return $this;
+    }
+
+    public function getFen(): ?string
+    {
+        return $this->fen;
+    }
+
+    public function setFen(string $fen): self
+    {
+        $this->fen = $fen;
 
         return $this;
     }

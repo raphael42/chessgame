@@ -14,6 +14,7 @@ class MessageHandler implements MessageComponentInterface
     private $debug = false;
     private $playerWhiteEntity;
     private $playerBlackEntity;
+    private $gameEntity;
     private $em;
 
     public function __construct(EntityManagerInterface $em)
@@ -47,16 +48,19 @@ class MessageHandler implements MessageComponentInterface
 
             $msgArray = json_decode($msg, true);
             if (isset($msgArray['idGame'])) { // start of the game : instanciate players entites
-                $gameEntity = $this->em->getRepository(Entity\Game::class)->find($msgArray['idGame']);
+                $this->gameEntity = $this->em->getRepository(Entity\Game::class)->find($msgArray['idGame']);
                 $this->playerWhiteEntity = $this->em->getRepository(Entity\Player::class)->findOneBy([
                     'color' => 'white',
-                    'game' => $gameEntity->getId(),
+                    'game' => $this->gameEntity->getId(),
                 ]);
                 $this->playerBlackEntity = $this->em->getRepository(Entity\Player::class)->findOneBy([
                     'color' => 'black',
-                    'game' => $gameEntity->getId(),
+                    'game' => $this->gameEntity->getId(),
                 ]);
             } else { // next : moving piece
+                $this->gameEntity->setFen($msgArray['fen']);
+                $this->em->persist($this->gameEntity);
+
                 $pieceEntity = $this->em->getRepository(Entity\Piece::class)->findOneBy([
                     'position' => $msgArray['from'],
                     'player' => ($msgArray['color'] === 'white') ? $this->playerWhiteEntity->getId() : $this->playerBlackEntity->getId(),

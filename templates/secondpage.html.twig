@@ -85,6 +85,7 @@
     <script>
         $(document).ready(function() {
             const socket = new WebSocket('ws://localhost:3001');
+            const chess = new ChessScript('{{ fen }}');
 
             try {
                 socket.addEventListener('open', function() {
@@ -105,6 +106,10 @@
                     $('#' + move.from).empty();
                     $('#' + move.to).html(img);
                     $('#' + move.to).droppable('enable');
+                    chess.move({
+                        from: move.from,
+                        to: move.to
+                    });
                 } catch(error) {
                     console.log(error);
                 }
@@ -137,16 +142,27 @@
                     'ui-droppable-hover': 'selected'
                 },
                 drop: function(ev, ui) {
-                    var chessScript = new ChessScript();
-                    console.log(chessScript);
+                    var dropped = ui.draggable;
+                    var droppedOn = $(this);
 
-                    var correctMove = true;
+                    var idFrom = dropped.parent().attr('id');
+                    var idTo = droppedOn.attr('id');
+
+                    var moving = chess.move({
+                        from: idFrom,
+                        to: idTo
+                    });
+
+                    console.log(chess.in_check());
+                    console.log(chess.ascii());
+                    console.log(chess.fen());
+
+                    var correctMove = false;
+                    if (moving !== null) {
+                        correctMove = true;
+                    }
+
                     if (correctMove) {
-                        var dropped = ui.draggable;
-                        var droppedOn = $(this);
-
-                        var idFrom = dropped.parent().attr('id');
-                        var idTo = droppedOn.attr('id');
                         if ($('#' + idTo).html() !== '') {
                             console.log($(this).html());
                             $(this).empty();
@@ -159,7 +175,8 @@
                         var movePiece = {
                             from: idFrom,
                             to: idTo,
-                            color: playerColor
+                            color: playerColor,
+                            fen: chess.fen()
                         };
                         socket.send(JSON.stringify(movePiece));
                     }

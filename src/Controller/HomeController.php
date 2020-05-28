@@ -42,6 +42,7 @@ class HomeController extends AbstractController
         // BOF create game
         $gameEntity = new Entity\Game();
         $gameEntity->setUrl($url);
+        $gameEntity->setFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
         $gameEntity->setIncrement($data['secondsIncrement']);
         $entityManager->persist($gameEntity);
         // EOF create game
