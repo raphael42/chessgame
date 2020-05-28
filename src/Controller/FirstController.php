@@ -17,7 +17,7 @@ class FirstController extends AbstractController
         ]);
 
         $session = new Session();
-        $session->start();
+        // $session->start();
         // $session->set('gameCreator', true); // TODELETE
 
         $player = $this->getDoctrine()->getRepository(Entity\Player::class)->findOneBy([

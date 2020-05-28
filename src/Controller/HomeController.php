@@ -5,6 +5,7 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 use App\Form\GameCreationType;
 use App\Entity;
@@ -22,7 +23,11 @@ class HomeController extends AbstractController
             $url = bin2hex(random_bytes(10));
             $this->createNewGame($url, $data);
 
-            return $this->redirectToRoute('game', ['url' => $url]);
+            $session = new Session();
+            // $session->start();
+            $session->set('gameCreator', true);
+
+            return $this->redirectToRoute('game-second', ['url' => $url]);
         }
 
         return $this->render('index.html.twig', [
