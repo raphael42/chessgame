@@ -79,6 +79,9 @@
 {% block javascripts %}
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script src="{{ asset('assets/js/ChessScript.js') }}"></script>
+
     <script>
         $(document).ready(function() {
             const socket = new WebSocket('ws://localhost:3001');
@@ -101,6 +104,7 @@
                     var img = $('#' + move.from).html();
                     $('#' + move.from).empty();
                     $('#' + move.to).html(img);
+                    $('#' + move.to).droppable('enable');
                 } catch(error) {
                     console.log(error);
                 }
@@ -109,7 +113,8 @@
             var playerColor = '{{ colorPlayer }}';
             $('.piece.'+playerColor).draggable({
                 containment: 'table',
-                revert: 'invalid',
+                // revert: 'invalid',
+                revert: true,
                 // classes: {
                 //     'ui-draggable-dragging': 'selected'
                 // },
@@ -132,26 +137,38 @@
                     'ui-droppable-hover': 'selected'
                 },
                 drop: function(ev, ui) {
-                    var dropped = ui.draggable;
-                    var droppedOn = $(this);
+                    var chessScript = new ChessScript();
+                    console.log(chessScript);
 
-                    var idFrom = dropped.parent().attr('id');
-                    var idTo = droppedOn.attr('id');
-                    if ($('#' + idTo).html() !== '') {
-                        console.log($(this).html());
-                        $(this).empty();
+                    var correctMove = true;
+                    if (correctMove) {
+                        var dropped = ui.draggable;
+                        var droppedOn = $(this);
+
+                        var idFrom = dropped.parent().attr('id');
+                        var idTo = droppedOn.attr('id');
+                        if ($('#' + idTo).html() !== '') {
+                            console.log($(this).html());
+                            $(this).empty();
+                        }
+
+                        $(droppedOn).droppable('disable');
+                        $(dropped).parent().droppable('enable');
+                        $(dropped).detach().css({top: 0, left: 0}).appendTo(droppedOn);
+
+                        var movePiece = {
+                            from: idFrom,
+                            to: idTo,
+                            color: playerColor
+                        };
+                        socket.send(JSON.stringify(movePiece));
                     }
+                }
+            });
 
-                    $(droppedOn).droppable('disable');
-                    $(dropped).parent().droppable('enable');
-                    $(dropped).detach().css({top: 0, left: 0}).appendTo(droppedOn);
-
-                    var movePiece = {
-                        from: idFrom,
-                        to: idTo,
-                        color: playerColor
-                    };
-                    socket.send(JSON.stringify(movePiece));
+            $('.chess-table img').each(function() {
+                if ($(this).hasClass(playerColor)) {
+                    $(this).parent().droppable('disable');
                 }
             });
         });
