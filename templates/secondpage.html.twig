@@ -11,58 +11,14 @@
             background-color: #c67945;
         }
 
-
-        /* .case-white img.selected {
-            background-color: #8baf73;
-        }
-        .case-black img.selected {
-            background-color: #646f40;
-        } */
-
         .case-white.selected {
             background-color: #8baf73;
         }
+
         .case-black.selected {
             background-color: #646f40;
         }
 
-        /* .piece {
-            background-image: url({{ asset('assets/img/chesspieces.png') }});
-        }
-        .piece.bishop.white{
-            background-position: -64px 0;
-        }
-        .piece.knight.white{
-            background-position: -128px 0;
-        }
-        .piece.rook.white{
-            background-position: -192px 0;
-        }
-        .piece.queen.white{
-            background-position: -256px 0;
-        }
-        .piece.king.white{
-            background-position: -320px 0;
-        }
-
-        .piece.pawn.black{
-            background-position: 0 bottom;
-        }
-        .piece.bishop.black{
-            background-position: -64px bottom;
-        }
-        .piece.knight.black{
-            background-position: -128px bottom;
-        }
-        .piece.rook.black{
-            background-position: -192px bottom;
-        }
-        .piece.queen.black{
-            background-position: -256px bottom;
-        }
-        .piece.king.black{
-            background-position: -320px bottom;
-        } */
         .chess-table {
             width: 64px;
             height: 64px;
@@ -106,6 +62,58 @@
                     $('#' + move.from).empty();
                     $('#' + move.to).html(img);
                     $('#' + move.to).droppable('enable');
+
+                    if (move.flag === 'k') { // king side castelling
+                        if (move.color === 'white') {
+                            var img = $('#h1').html();
+                            $('#h1').empty();
+                            $('#h1').droppable('enable');
+                            $('#f1').html(img);
+                            $('#f1').droppable('disable');
+                            $('#f1 img').draggable({
+                                revert: true,
+                            });
+                        } else if (move.color === 'black') {
+                            var img = $('#h8').html();
+                            $('#h8').empty();
+                            $('#h8').droppable('enable');
+                            $('#f8').html(img);
+                            $('#f8').droppable('disable');
+                            $('#f8 img').draggable({
+                                revert: true,
+                            });
+                        }
+                    } else if (move.flag === 'q') { // queen side castelling
+                        if (move.color === 'white') {
+                            var img = $('#a1').html();
+                            $('#a1').empty();
+                            $('#a1').droppable('enable');
+                            $('#d1').html(img);
+                            $('#d1').droppable('disable');
+                            $('#d1 img').draggable({
+                                revert: true,
+                            });
+                        } else if (move.color === 'black') {
+                            var img = $('#a8').html();
+                            $('#a8').empty();
+                            $('#a8').droppable('enable');
+                            $('#d8').html(img);
+                            $('#d8').droppable('disable');
+                            $('#d8 img').draggable({
+                                revert: true,
+                            });
+                        }
+                    } else if (move.flag === 'e') { // en passant capture
+                        if (move.color === 'white') {
+                            var tmp = (move.to).split('');
+                            var idPawnCatured = tmp[0] + (parseInt(tmp[1]) - 1);
+                        } else if (move.color === 'black') {
+                            var tmp = (move.to).split('');
+                            var idPawnCatured = tmp[0] + (parseInt(tmp[1]) + 1);
+                        }
+                        $('#' + idPawnCatured).empty();
+                    }
+
                     chess.move({
                         from: move.from,
                         to: move.to
@@ -117,7 +125,7 @@
 
             var playerColor = '{{ colorPlayer }}';
             $('.piece.'+playerColor).draggable({
-                containment: 'table',
+                // containment: 'table',
                 // revert: 'invalid',
                 revert: true,
                 // classes: {
@@ -132,7 +140,6 @@
                 //     $(this).parent().removeClass('selected')
                 // },
                 // stop: function(ev, ui) {
-                //     // console.log($(this).parent().attr('id'));
                 //     $(this).parent().removeClass('selected')
                 // }
             });
@@ -142,41 +149,84 @@
                     'ui-droppable-hover': 'selected'
                 },
                 drop: function(ev, ui) {
-                    var dropped = ui.draggable;
-                    var droppedOn = $(this);
+                    var droppedFrom = ui.draggable;
+                    var droppedTo = $(this);
 
-                    var idFrom = dropped.parent().attr('id');
-                    var idTo = droppedOn.attr('id');
+                    var idFrom = droppedFrom.parent().attr('id');
+                    var idTo = droppedTo.attr('id');
 
                     var moving = chess.move({
                         from: idFrom,
                         to: idTo
                     });
 
-                    console.log(chess.in_check());
-                    console.log(chess.ascii());
-                    console.log(chess.fen());
-
-                    var correctMove = false;
                     if (moving !== null) {
-                        correctMove = true;
-                    }
+                        var flag = moving.flags;
+                        if (flag === 'k') { // king side castelling
+                            if (playerColor === 'white') {
+                                var img = $('#h1').html();
+                                $('#h1').empty();
+                                $('#h1').droppable('enable');
+                                $('#f1').html(img);
+                                $('#f1').droppable('disable');
+                                $('#f1 img').draggable({
+                                    revert: true,
+                                });
+                            } else if (playerColor === 'black') {
+                                var img = $('#h8').html();
+                                $('#h8').empty();
+                                $('#h8').droppable('enable');
+                                $('#f8').html(img);
+                                $('#f8').droppable('disable');
+                                $('#f8 img').draggable({
+                                    revert: true,
+                                });
+                            }
+                        } else if (flag === 'q') { // queen side castelling
+                            if (playerColor === 'white') {
+                                var img = $('#a1').html();
+                                $('#a1').empty();
+                                $('#a1').droppable('enable');
+                                $('#d1').html(img);
+                                $('#d1').droppable('disable');
+                                $('#d1 img').draggable({
+                                    revert: true,
+                                });
+                            } else if (playerColor === 'black') {
+                                var img = $('#a8').html();
+                                $('#a8').empty();
+                                $('#a8').droppable('enable');
+                                $('#d8').html(img);
+                                $('#d8').droppable('disable');
+                                $('#d8 img').draggable({
+                                    revert: true,
+                                });
+                            }
+                        } else if (flag === 'e') { // en passant capture
+                            if (playerColor === 'white') {
+                                var tmp = (moving.to).split('');
+                                var idPawnCatured = tmp[0] + (parseInt(tmp[1]) - 1);
+                            } else if (playerColor === 'black') {
+                                var tmp = (moving.to).split('');
+                                var idPawnCatured = tmp[0] + (parseInt(tmp[1]) + 1);
+                            }
+                            $('#' + idPawnCatured).empty();
+                        }
 
-                    if (correctMove) {
-                        if ($('#' + idTo).html() !== '') {
-                            console.log($(this).html());
+                        if ($(droppedTo).html() !== '') {
                             $(this).empty();
                         }
 
-                        $(droppedOn).droppable('disable');
-                        $(dropped).parent().droppable('enable');
-                        $(dropped).detach().css({top: 0, left: 0}).appendTo(droppedOn);
+                        $(droppedTo).droppable('disable');
+                        $(droppedFrom).parent().droppable('enable');
+                        $(droppedFrom).detach().css({top: 0, left: 0}).appendTo(droppedTo);
 
                         var movePiece = {
                             from: idFrom,
                             to: idTo,
                             color: playerColor,
-                            fen: chess.fen()
+                            fen: chess.fen(),
+                            flag: flag
                         };
                         socket.send(JSON.stringify(movePiece));
                     }
@@ -190,17 +240,59 @@
             });
         });
 
+        function placePieces(fen) {
+            var tmp = fen.split(' ');
+            var tmp2 = tmp[0].split('/');
 
-        var src = null;
-        {% for piece in whitePieces|filter(piece => piece.isTaken == false) %}
-            src = "{{ asset('assets/img/pieces/white-'~ piece.label ~'.png') }}"
-            $('#{{ piece.position }}').html('<img class="piece white" src="' + src + '" alt>');
-        {% endfor %}
+            var piecesLabel = {
+                'r': 'black-rook',
+                'n': 'black-knight',
+                'b': 'black-bishop',
+                'q': 'black-queen',
+                'k': 'black-king',
+                'p': 'black-pawn',
+                'R': 'white-rook',
+                'N': 'white-knight',
+                'B': 'white-bishop',
+                'Q': 'white-queen',
+                'K': 'white-king',
+                'P': 'white-pawn',
+            };
 
-        {% for piece in blackPieces|filter(piece => piece.isTaken == false) %}
-            src = "{{ asset('assets/img/pieces/black-'~ piece.label ~'.png') }}"
-            $('#{{ piece.position }}').html('<img class="piece black" src="' + src + '" alt>');
-        {% endfor %}
+            var column = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+            var columnKey = 0;
+            var line = 8;
+            var chessboard = [];
+            var atom = '';
+            for (var i in tmp2) {
+                atom = tmp2[i].split('');
+                columnKey = 0;
+                for (var j in atom) {
+                    if ($.inArray(atom[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) {
+                        chessboard[column[columnKey] + line] = piecesLabel[atom[j]];
+                        columnKey += 1;
+                    } else {
+                        columnKey += parseInt(atom[j]);
+                    }
+                }
+                line--;
+            }
+
+            var src = null;
+            var color = null;
+            for (var k in chessboard) {
+                src = "{{ asset('assets/img/pieces/chessboard.png') }}";
+                src = src.replace("chessboard", chessboard[k]);
+
+                color = 'white';
+                if (chessboard[k].indexOf('white') == -1){
+                    color = 'black';
+                }
+                $('#' + k).html('<img class="piece ' + color + '" src="' + src + '" alt>');
+            }
+        }
+
+        placePieces('{{ fen }}');
     </script>
 {% endblock %}
 
