@@ -39,16 +39,6 @@ class Player
      */
     private $time_left;
 
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Piece", mappedBy="player")
-     */
-    private $pieces;
-
-    public function __construct()
-    {
-        $this->pieces = new ArrayCollection();
-    }
-
     public function getId(): ?int
     {
         return $this->id;
@@ -98,37 +88,6 @@ class Player
     public function setTimeLeft(int $time_left): self
     {
         $this->time_left = $time_left;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Piece[]
-     */
-    public function getPieces(): Collection
-    {
-        return $this->pieces;
-    }
-
-    public function addPiece(Piece $piece): self
-    {
-        if (!$this->pieces->contains($piece)) {
-            $this->pieces[] = $piece;
-            $piece->setPlayer($this);
-        }
-
-        return $this;
-    }
-
-    public function removePiece(Piece $piece): self
-    {
-        if ($this->pieces->contains($piece)) {
-            $this->pieces->removeElement($piece);
-            // set the owning side to null (unless already changed)
-            if ($piece->getPlayer() === $this) {
-                $piece->setPlayer(null);
-            }
-        }
 
         return $this;
     }

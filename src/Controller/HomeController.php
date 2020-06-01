@@ -72,81 +72,10 @@ class HomeController extends AbstractController
         $entityManager->persist($playerGuestEntity);
         // EOF create players
 
-        // BOF add pieces
-        if ($playerCreatorColor === 'white') {
-            $arrChar = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-            foreach ($arrChar as $value) {
-                $entityManager = $this->placePiece('pawn', $value.'2', $playerCreatorEntity, $entityManager);
-
-            }
-
-            $entityManager = $this->placePiece('rook', 'a1', $playerCreatorEntity, $entityManager);
-            $entityManager = $this->placePiece('rook', 'h1', $playerCreatorEntity, $entityManager);
-            $entityManager = $this->placePiece('knight', 'b1', $playerCreatorEntity, $entityManager);
-            $entityManager = $this->placePiece('knight', 'g1', $playerCreatorEntity, $entityManager);
-            $entityManager = $this->placePiece('bishop', 'c1', $playerCreatorEntity, $entityManager);
-            $entityManager = $this->placePiece('bishop', 'f1', $playerCreatorEntity, $entityManager);
-            $entityManager = $this->placePiece('queen', 'd1', $playerCreatorEntity, $entityManager);
-            $entityManager = $this->placePiece('king', 'e1', $playerCreatorEntity, $entityManager);
-
-            foreach ($arrChar as $value) {
-                $entityManager = $this->placePiece('pawn', $value.'7', $playerGuestEntity, $entityManager);
-            }
-
-            $entityManager = $this->placePiece('rook', 'a8', $playerGuestEntity, $entityManager);
-            $entityManager = $this->placePiece('rook', 'h8', $playerGuestEntity, $entityManager);
-            $entityManager = $this->placePiece('knight', 'b8', $playerGuestEntity, $entityManager);
-            $entityManager = $this->placePiece('knight', 'g8', $playerGuestEntity, $entityManager);
-            $entityManager = $this->placePiece('bishop', 'c8', $playerGuestEntity, $entityManager);
-            $entityManager = $this->placePiece('bishop', 'f8', $playerGuestEntity, $entityManager);
-            $entityManager = $this->placePiece('queen', 'd8', $playerGuestEntity, $entityManager);
-            $entityManager = $this->placePiece('king', 'e8', $playerGuestEntity, $entityManager);
-        } else {
-            $arrChar = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-            foreach ($arrChar as $value) {
-                $entityManager = $this->placePiece('pawn', $value.'2', $playerGuestEntity, $entityManager);
-            }
-
-            $entityManager = $this->placePiece('rook', 'a1', $playerGuestEntity, $entityManager);
-            $entityManager = $this->placePiece('rook', 'h1', $playerGuestEntity, $entityManager);
-            $entityManager = $this->placePiece('knight', 'b1', $playerGuestEntity, $entityManager);
-            $entityManager = $this->placePiece('knight', 'g1', $playerGuestEntity, $entityManager);
-            $entityManager = $this->placePiece('bishop', 'c1', $playerGuestEntity, $entityManager);
-            $entityManager = $this->placePiece('bishop', 'f1', $playerGuestEntity, $entityManager);
-            $entityManager = $this->placePiece('queen', 'd1', $playerGuestEntity, $entityManager);
-            $entityManager = $this->placePiece('king', 'e1', $playerGuestEntity, $entityManager);
-
-            foreach ($arrChar as $value) {
-                $entityManager = $this->placePiece('pawn', $value.'7', $playerCreatorEntity, $entityManager);
-            }
-
-            $entityManager = $this->placePiece('rook', 'a8', $playerCreatorEntity, $entityManager);
-            $entityManager = $this->placePiece('rook', 'h8', $playerCreatorEntity, $entityManager);
-            $entityManager = $this->placePiece('knight', 'b8', $playerCreatorEntity, $entityManager);
-            $entityManager = $this->placePiece('knight', 'g8', $playerCreatorEntity, $entityManager);
-            $entityManager = $this->placePiece('bishop', 'c8', $playerCreatorEntity, $entityManager);
-            $entityManager = $this->placePiece('bishop', 'f8', $playerCreatorEntity, $entityManager);
-            $entityManager = $this->placePiece('queen', 'd8', $playerCreatorEntity, $entityManager);
-            $entityManager = $this->placePiece('king', 'e8', $playerCreatorEntity, $entityManager);
-        }
-        // EOF add pieces
-
         // BOF update database
         $entityManager->flush();
         // EOF update database
 
         return;
-    }
-
-    private function placePiece(string $label, string $position, Entity\Player $playerEntity, $entityManager)
-    {
-        $pieceEntity = new Entity\Piece();
-        $pieceEntity->setLabel($label);
-        $pieceEntity->setPosition($position);
-        $pieceEntity->setIsTaken(false);
-        $pieceEntity->setPlayer($playerEntity);
-        $entityManager->persist($pieceEntity);
-
-        return $entityManager;
     }
 }
