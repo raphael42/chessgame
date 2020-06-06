@@ -141,6 +141,14 @@
                             promotion: move.promotion,
                         });
 
+                        if (chess.in_checkmate() === true) {
+                            if (move.color === 'w') {
+                                alert('Victoire des blancs !');
+                            } else if (move.color === 'b') {
+                                alert('Victoire des noirs !');
+                            }
+                        }
+
                         if (chess.in_check() === true) {
                             if (move.color === 'white') {
                                 var kingposition = getKingPosition(move.fen, 'black');
@@ -162,6 +170,15 @@
                             from: move.from,
                             to: move.to
                         });
+
+                        console.log(chess.in_checkmate());
+                        if (chess.in_checkmate() === true) {
+                            if (move.color === 'white') {
+                                alert('Victoire des blancs !');
+                            } else if (move.color === 'black') {
+                                alert('Victoire des noirs !');
+                            }
+                        }
 
                         if (chess.in_check() === true) {
                             if (move.color === 'white') {
@@ -254,6 +271,7 @@
                                         $('#' + kingposition).removeClass('in-check');
                                     }
                                 }
+
                                 if ($(droppedTo).html() !== '') {
                                     $(this).empty();
                                 }
@@ -278,6 +296,14 @@
                                     promotion: moving.promotion
                                 };
                                 socket.send(JSON.stringify(movePiece));
+
+                                if (chess.in_checkmate() === true) {
+                                    if (moving.color === 'w') {
+                                        alert('Victoire des blancs !');
+                                    } else if (moving.color === 'b') {
+                                        alert('Victoire des noirs !');
+                                    }
+                                }
                             }
                         });
                     } else {
@@ -370,6 +396,14 @@
                                 flag: flag
                             };
                             socket.send(JSON.stringify(movePiece));
+
+                            if (chess.in_checkmate() === true) {
+                                if (moving.color === 'w') {
+                                    alert('Victoire des blancs !');
+                                } else if (moving.color === 'b') {
+                                    alert('Victoire des noirs !');
+                                }
+                            }
                         }
                     }
                 }
