@@ -29,6 +29,14 @@
             width: 64px;
             height: 64px;
         }
+
+        .case-white.in-check {
+            background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #f7dfc5 89%, #f7dfc5 100%)
+        }
+
+        .case-black.in-check {
+            background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #c67945 89%, #c67945 100%)
+        }
     </style>
 {% endblock %}
 
@@ -125,21 +133,45 @@
                         $('#' + move.to).html('<img class="piece ' + move.color + '" src="' + src + '" alt>');
                         $('#' + move.to).droppable('enable');
 
+                        $('.in-check').removeClass('in-check');
+
                         chess.move({
                             from: move.from,
                             to: move.to,
                             promotion: move.promotion,
                         });
+
+                        if (chess.in_check() === true) {
+                            if (move.color === 'white') {
+                                var kingposition = getKingPosition(move.fen, 'black');
+                                $('#' + kingposition).addClass('in-check');
+                            } else if (move.color === 'black') {
+                                var kingposition = getKingPosition(move.fen, 'white');
+                                $('#' + kingposition).addClass('in-check');
+                            }
+                        }
                     } else {
                         var img = $('#' + move.from).html();
                         $('#' + move.from).empty();
                         $('#' + move.to).html(img);
                         $('#' + move.to).droppable('enable');
 
+                        $('.in-check').removeClass('in-check');
+
                         chess.move({
                             from: move.from,
                             to: move.to
                         });
+
+                        if (chess.in_check() === true) {
+                            if (move.color === 'white') {
+                                var kingposition = getKingPosition(move.fen, 'black');
+                                $('#' + kingposition).addClass('in-check');
+                            } else if (move.color === 'black') {
+                                var kingposition = getKingPosition(move.fen, 'white');
+                                $('#' + kingposition).addClass('in-check');
+                            }
+                        }
                     }
                 } catch(error) {
                     console.log(error);
@@ -195,6 +227,7 @@
                     var promotion = null;
                     if (tmp !== null && tmp['type'] === 'p' && ((playerColor === 'white' && tmp['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (playerColor === 'black' && tmp['color'] === 'b' && idFromLine === 2 && idToLine === 1))) { // TODO finish promotion
                         promotionPiece(function(promotion) {
+                            var wasInCheck = chess.in_check();
                             var moving = chess.move({
                                 from: idFrom,
                                 to: idTo,
@@ -202,6 +235,25 @@
                             });
 
                             if (moving !== null) {
+                                if (chess.in_check() === true) {
+                                    if (moving.color === 'w') {
+                                        var kingposition = getKingPosition(chess.fen(), 'black');
+                                        $('#' + kingposition).addClass('in-check');
+                                    } else if (moving.color === 'b') {
+                                        var kingposition = getKingPosition(chess.fen(), 'white');
+                                        $('#' + kingposition).addClass('in-check');
+                                    }
+                                }
+
+                                if (wasInCheck) {
+                                    if (moving.color === 'w') {
+                                        var kingposition = getKingPosition(chess.fen(), 'black');
+                                        $('#' + kingposition).removeClass('in-check');
+                                    } else if (moving.color === 'b') {
+                                        var kingposition = getKingPosition(chess.fen(), 'white');
+                                        $('#' + kingposition).removeClass('in-check');
+                                    }
+                                }
                                 if ($(droppedTo).html() !== '') {
                                     $(this).empty();
                                 }
@@ -229,12 +281,27 @@
                             }
                         });
                     } else {
+                        var wasInCheck = chess.in_check();
                         var moving = chess.move({
                             from: idFrom,
                             to: idTo,
                         });
 
                         if (moving !== null) {
+                            if (chess.in_check() === true) {
+                                console.log(moving);
+                                if (moving.color === 'w') {
+                                    var kingposition = getKingPosition(chess.fen(), 'black');
+                                    $('#' + kingposition).addClass('in-check');
+                                } else if (moving.color === 'b') {
+                                    var kingposition = getKingPosition(chess.fen(), 'white');
+                                    $('#' + kingposition).addClass('in-check');
+                                }
+                            }
+
+                            if (wasInCheck) {
+                                $('.in-check').removeClass('in-check');
+                            }
                             var flag = moving.flags;
                             if (flag === 'k') { // king side castelling
                                 if (playerColor === 'white') {
@@ -322,6 +389,50 @@
                 $('#promotion-modal').modal('hide');
                 callback(piece);
             });
+        }
+
+        function getKingPosition(fen, color) {
+            var tmp = fen.split(' ');
+            var tmp2 = tmp[0].split('/');
+
+            var piecesLabel = {
+                'r': 'black-rook',
+                'n': 'black-knight',
+                'b': 'black-bishop',
+                'q': 'black-queen',
+                'k': 'black-king',
+                'p': 'black-pawn',
+                'R': 'white-rook',
+                'N': 'white-knight',
+                'B': 'white-bishop',
+                'Q': 'white-queen',
+                'K': 'white-king',
+                'P': 'white-pawn',
+            };
+
+            var column = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+            var columnKey = 0;
+            var line = 8;
+            var chessboard = [];
+            var atom = '';
+
+            for (var i in tmp2) {
+                atom = tmp2[i].split('');
+                columnKey = 0;
+                for (var j in atom) {
+                    if ($.inArray(atom[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) {
+                        if ((color === 'white' && atom[j] === 'K') || (color === 'black' && atom[j] === 'k')) {
+                            return column[columnKey] + line;
+                        }
+                        columnKey += 1;
+                    } else {
+                        columnKey += parseInt(atom[j]);
+                    }
+                }
+                line--;
+            }
+
+            return null;
         }
 
         function placePieces(fen) {
