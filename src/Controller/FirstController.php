@@ -27,11 +27,15 @@ class FirstController extends AbstractController
             'game' => $idGame,
         ]);
 
-        $colorPlayer = $player->getColor();
+        $opponent = $this->getDoctrine()->getRepository(Entity\Player::class)->findOneBy([
+            'game_creator' => !$session->get('gameCreator') ?? true,
+            'game' => $idGame,
+        ]);
 
         return $this->render('secondpage.html.twig', [
             'idGame' => $idGame,
-            'colorPlayer' => $colorPlayer,
+            'player' => $player,
+            'opponent' => $opponent,
             'fen' => $game->getFen(),
         ]);
     }

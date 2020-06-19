@@ -37,6 +37,10 @@
         .case-black.in-check {
             background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #c67945 89%, #c67945 100%)
         }
+
+        .bg-grey {
+            background-color: #cecece;
+        }
     </style>
 {% endblock %}
 
@@ -141,6 +145,10 @@
                             promotion: move.promotion,
                         });
 
+                        if (chess.in_draw() === true) {
+                            alert('Match nul !');
+                        }
+
                         if (chess.in_checkmate() === true) {
                             if (move.color === 'w') {
                                 alert('Victoire des blancs !');
@@ -171,7 +179,10 @@
                             to: move.to
                         });
 
-                        console.log(chess.in_checkmate());
+                        if (chess.in_draw() === true) {
+                            alert('Match nul !');
+                        }
+
                         if (chess.in_checkmate() === true) {
                             if (move.color === 'white') {
                                 alert('Victoire des blancs !');
@@ -190,12 +201,15 @@
                             }
                         }
                     }
+                    if (typeof move.idGame === 'undefined') {
+                        $('#player-turn').text('À votre tour !');
+                    }
                 } catch(error) {
                     console.log(error);
                 }
             });
 
-            var playerColor = '{{ colorPlayer }}';
+            var playerColor = '{{ player.color }}';
             $('.piece.'+playerColor).draggable({
                 // containment: 'table',
                 // revert: 'invalid',
@@ -242,7 +256,7 @@
                         'q': 'queen',
                     };
                     var promotion = null;
-                    if (tmp !== null && tmp['type'] === 'p' && ((playerColor === 'white' && tmp['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (playerColor === 'black' && tmp['color'] === 'b' && idFromLine === 2 && idToLine === 1))) { // TODO finish promotion
+                    if (tmp !== null && tmp['type'] === 'p' && ((playerColor === 'white' && tmp['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (playerColor === 'black' && tmp['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
                         promotionPiece(function(promotion) {
                             var wasInCheck = chess.in_check();
                             var moving = chess.move({
@@ -296,6 +310,7 @@
                                     promotion: moving.promotion
                                 };
                                 socket.send(JSON.stringify(movePiece));
+                                $('#player-turn').text('En attente de l\'adversaire');
 
                                 if (chess.in_checkmate() === true) {
                                     if (moving.color === 'w') {
@@ -315,7 +330,6 @@
 
                         if (moving !== null) {
                             if (chess.in_check() === true) {
-                                console.log(moving);
                                 if (moving.color === 'w') {
                                     var kingposition = getKingPosition(chess.fen(), 'black');
                                     $('#' + kingposition).addClass('in-check');
@@ -396,6 +410,7 @@
                                 flag: flag
                             };
                             socket.send(JSON.stringify(movePiece));
+                            $('#player-turn').text('En attente de l\'adversaire');
 
                             if (chess.in_checkmate() === true) {
                                 if (moving.color === 'w') {
@@ -473,6 +488,21 @@
             var tmp = fen.split(' ');
             var tmp2 = tmp[0].split('/');
 
+            var playerColor = '{{ player.color }}';
+            if (playerColor === 'white') {
+                if (tmp[1] === 'w') {
+                    $('#player-turn').text('À votre tour !');
+                } else {
+                    $('#player-turn').text('En attente de l\'adversaire');
+                }
+            } else {
+                if (tmp[1] === 'w') {
+                    $('#player-turn').text('En attente de l\'adversaire');
+                } else {
+                    $('#player-turn').text('À votre tour !');
+                }
+            }
+
             var piecesLabel = {
                 'r': 'black-rook',
                 'n': 'black-knight',
@@ -526,58 +556,70 @@
 {% endblock %}
 
 {% block body %}
-    <div>
-        <table>
-            {% if colorPlayer == 'white' %}
-                {% for i in 8..1 %}
+    <div class="row">
+        <div class="col-md-4">
+            <span>TODO : Tchat</span>
+        </div>
+        <div class="col-md-4">
+            <table>
+                {% if player.color == 'white' %}
+                    {% for i in 8..1 %}
+                        <tr>
+                            <td id="a{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                            <td id="b{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                            <td id="c{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                            <td id="d{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                            <td id="e{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                            <td id="f{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                            <td id="g{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                            <td id="h{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                            <td><span style="margin-left:5px">{{ i }}</span></td>
+                        </tr>
+                    {% endfor %}
                     <tr>
-                        <td id="a{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                        <td id="b{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                        <td id="c{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                        <td id="d{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                        <td id="e{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                        <td id="f{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                        <td id="g{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                        <td id="h{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                        <td><span style="margin-left:5px">{{ i }}</span></td>
+                        <td class="text-center">a</td>
+                        <td class="text-center">b</td>
+                        <td class="text-center">c</td>
+                        <td class="text-center">d</td>
+                        <td class="text-center">e</td>
+                        <td class="text-center">f</td>
+                        <td class="text-center">g</td>
+                        <td class="text-center">h</td>
                     </tr>
-                {% endfor %}
-                <tr>
-                    <td class="text-center">a</td>
-                    <td class="text-center">b</td>
-                    <td class="text-center">c</td>
-                    <td class="text-center">d</td>
-                    <td class="text-center">e</td>
-                    <td class="text-center">f</td>
-                    <td class="text-center">g</td>
-                    <td class="text-center">h</td>
-                </tr>
-            {% else %}
-                {% for i in 1..8 %}
+                {% else %}
+                    {% for i in 1..8 %}
+                        <tr>
+                            <td id="h{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                            <td id="g{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                            <td id="f{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                            <td id="e{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                            <td id="d{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                            <td id="c{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                            <td id="b{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
+                            <td id="a{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
+                            <td><span style="margin-left:5px">{{ i }}</span></td>
+                        </tr>
+                    {% endfor %}
                     <tr>
-                        <td id="h{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                        <td id="g{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                        <td id="f{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                        <td id="e{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                        <td id="d{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                        <td id="c{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                        <td id="b{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                        <td id="a{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                        <td><span style="margin-left:5px">{{ i }}</span></td>
+                        <td class="text-center">h</td>
+                        <td class="text-center">g</td>
+                        <td class="text-center">f</td>
+                        <td class="text-center">e</td>
+                        <td class="text-center">d</td>
+                        <td class="text-center">c</td>
+                        <td class="text-center">b</td>
+                        <td class="text-center">a</td>
                     </tr>
-                {% endfor %}
-                <tr>
-                    <td class="text-center">h</td>
-                    <td class="text-center">g</td>
-                    <td class="text-center">f</td>
-                    <td class="text-center">e</td>
-                    <td class="text-center">d</td>
-                    <td class="text-center">c</td>
-                    <td class="text-center">b</td>
-                    <td class="text-center">a</td>
-                </tr>
-            {% endif %}
-        </table>
+                {% endif %}
+            </table>
+        </div>
+        <div class="col-md-4">
+            <div class="bg-grey">
+                <div id="timer-player">{{ player.timeLeft|date('i:s') }}</div>
+                <div id="player-turn"></div>
+                <div id="timer-opponent">{{ opponent.timeLeft|date('i:s') }}</div>
+            </div>
+        </div>
     </div>
 
     <div class="modal fade" id="promotion-modal" tabindex="-1" role="dialog">
