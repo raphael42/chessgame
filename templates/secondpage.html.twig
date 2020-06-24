@@ -166,6 +166,7 @@
                                 $('#' + kingposition).addClass('in-check');
                             }
                         }
+                        switchTurn();
                     } else {
                         var img = $('#' + move.from).html();
                         $('#' + move.from).empty();
@@ -200,6 +201,7 @@
                                 $('#' + kingposition).addClass('in-check');
                             }
                         }
+                        switchTurn();
                     }
                     if (typeof move.idGame === 'undefined') {
                         $('#player-turn').text('À votre tour !');
@@ -310,6 +312,7 @@
                                     promotion: moving.promotion
                                 };
                                 socket.send(JSON.stringify(movePiece));
+                                switchTurn();
                                 $('#player-turn').text('En attente de l\'adversaire');
 
                                 if (chess.in_checkmate() === true) {
@@ -410,6 +413,7 @@
                                 flag: flag
                             };
                             socket.send(JSON.stringify(movePiece));
+                            switchTurn();
                             $('#player-turn').text('En attente de l\'adversaire');
 
                             if (chess.in_checkmate() === true) {
@@ -551,7 +555,61 @@
             }
         }
 
+        // timer functions
+        function getTime(time) {
+            var min = Math.floor(time / 60);
+            var sec = time % 60;
+            return min + ':' + (sec < 10 ? '0' + sec : sec);
+        }
+
+        function getSeconds(min, sec) {
+            var time = min * 60 + sec;
+            return time;
+        }
+
+        function switchTurn() {
+            if (turn == 'player') {
+                turn = 'opponent';
+            } else {
+                turn = 'player';
+            }
+        }
+
+        function setUpTimer() {
+            var minutesPlayer = parseInt('{{ player.timeLeft }}' / 60, 10);
+            var secondsPlayer = parseInt('{{ player.timeLeft }}' % 60, 10);
+
+            var minutesOpponent = parseInt('{{ opponent.timeLeft }}' / 60, 10);
+            var secondsOpponent = parseInt('{{ opponent.timeLeft }}' % 60, 10);
+
+            $('#timer-player').text(getTime(getSeconds(minutesPlayer, secondsPlayer)));
+            $('#timer-opponent').text(getTime(getSeconds(minutesOpponent, secondsOpponent)));
+
+            return {
+                player: getSeconds(minutesPlayer, secondsPlayer),
+                opponent: getSeconds(minutesOpponent, secondsOpponent),
+            };
+        }
+
+        function startTimer() {
+            times = setUpTimer();
+
+            timer = setInterval(function() {
+                times[turn]--;
+                $('#timer-' + turn).text(getTime(times[turn]));
+
+                if (times[turn] == 0) {
+                    navigator.vibrate(1000);
+                    clearInterval(timer);
+                    timer = false;
+                }
+            }, 1000);
+        }
+
+        var turn = 'player';
+        var times, timer;
         placePieces('{{ fen }}');
+        setUpTimer();
     </script>
 {% endblock %}
 
@@ -615,10 +673,11 @@
         </div>
         <div class="col-md-4">
             <div class="bg-grey">
-                <div id="timer-player">{{ player.timeLeft|date('i:s') }}</div>
+                <div id="timer-player"></div>
                 <div id="player-turn"></div>
-                <div id="timer-opponent">{{ opponent.timeLeft|date('i:s') }}</div>
+                <div id="timer-opponent"></div>
             </div>
+            <button id="time-change">TMP : Changer le temps</button>
         </div>
     </div>
 

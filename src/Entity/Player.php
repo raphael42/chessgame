@@ -35,7 +35,7 @@ class Player
     private $game_creator;
 
     /**
-     * @ORM\Column(type="time")
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $time_left;
 
@@ -80,12 +80,12 @@ class Player
         return $this;
     }
 
-    public function getTimeLeft(): ?\DateTimeInterface
+    public function getTimeLeft(): ?int
     {
         return $this->time_left;
     }
 
-    public function setTimeLeft(\DateTimeInterface $time_left): self
+    public function setTimeLeft(?int $time_left): self
     {
         $this->time_left = $time_left;
 

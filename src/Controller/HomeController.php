@@ -50,7 +50,8 @@ class HomeController extends AbstractController
         // BOF create players
         $playerCreatorEntity = new Entity\Player();
         $color = $data['color'];
-        $timePerPlayer = $data['timePerPlayer'];
+        // $timePerPlayer = \DateTime::createFromFormat('H:i:s', '00:'.(string) $data['timePerPlayer'].':00');
+        $timePerPlayer = $data['timePerPlayer'] * 60;
         if ($color === 'random') {
             $test = rand(0, 1);
             $color = ($test === 0) ? 'white' : 'black';
