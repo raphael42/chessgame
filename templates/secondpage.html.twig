@@ -201,7 +201,16 @@
                                 $('#' + kingposition).addClass('in-check');
                             }
                         }
-                        switchTurn();
+
+                        if (typeof move.fen !== 'undefined') {
+                            var tmp = move.fen.split(' ');
+                            var tmp2 = parseInt(tmp[5]);
+                            if (tmp2 === 2 && move.color === 'black') {
+                                startTimer();
+                            } else {
+                                switchTurn();
+                            }
+                        }
                     }
                     if (typeof move.idGame === 'undefined') {
                         $('#player-turn').text('À votre tour !');
@@ -413,7 +422,15 @@
                                 flag: flag
                             };
                             socket.send(JSON.stringify(movePiece));
-                            switchTurn();
+
+                            var tmp = chess.fen().split(' ');
+                            var tmp2 = parseInt(tmp[5]);
+                            if (tmp2 === 2 && moving.color === 'b') {
+                                startTimer();
+                            } else {
+                                switchTurn();
+                            }
+
                             $('#player-turn').text('En attente de l\'adversaire');
 
                             if (chess.in_checkmate() === true) {
@@ -677,7 +694,6 @@
                 <div id="player-turn"></div>
                 <div id="timer-opponent"></div>
             </div>
-            <button id="time-change">TMP : Changer le temps</button>
         </div>
     </div>
 
