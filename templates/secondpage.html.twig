@@ -206,7 +206,7 @@
                             var tmp = move.fen.split(' ');
                             var tmp2 = parseInt(tmp[5]);
                             if (tmp2 === 2 && move.color === 'black') {
-                                startTimer();
+                                startTimer('player');
                             } else {
                                 switchTurn();
                             }
@@ -419,14 +419,15 @@
                                 to: idTo,
                                 color: playerColor,
                                 fen: chess.fen(),
-                                flag: flag
+                                flag: flag,
+                                timer: getSecondsWithTime($('#timer-player').text(), ':'),
                             };
                             socket.send(JSON.stringify(movePiece));
 
                             var tmp = chess.fen().split(' ');
                             var tmp2 = parseInt(tmp[5]);
                             if (tmp2 === 2 && moving.color === 'b') {
-                                startTimer();
+                                startTimer('opponent');
                             } else {
                                 switchTurn();
                             }
@@ -584,6 +585,15 @@
             return time;
         }
 
+        function getSecondsWithTime(time, splitChar) {
+            var splitTime = time.split(splitChar);
+            var seconds = splitTime[0] * 60;
+            if (typeof splitTime[1] !== 'undefined') {
+                seconds += parseInt(splitTime[1]);
+            }
+            return seconds;
+        }
+
         function switchTurn() {
             if (turn == 'player') {
                 turn = 'opponent';
@@ -608,8 +618,10 @@
             };
         }
 
-        function startTimer() {
+        function startTimer(playerTurn) {
             times = setUpTimer();
+
+            turn = playerTurn;
 
             timer = setInterval(function() {
                 times[turn]--;
@@ -623,7 +635,7 @@
             }, 1000);
         }
 
-        var turn = 'player';
+        var turn = null;
         var times, timer;
         placePieces('{{ fen }}');
         setUpTimer();
@@ -690,9 +702,9 @@
         </div>
         <div class="col-md-4">
             <div class="bg-grey">
-                <div id="timer-player"></div>
-                <div id="player-turn"></div>
-                <div id="timer-opponent"></div>
+                <div>Votre temps : <span id="timer-player"></span></div>
+                <div><span id="player-turn"></span></div>
+                <div>Temps de l'adversaire : <span id="timer-opponent"></span></div>
             </div>
         </div>
     </div>

@@ -61,6 +61,14 @@ class MessageHandler implements MessageComponentInterface
                 $this->gameEntity->setFen($msgArray['fen']);
                 $this->em->persist($this->gameEntity);
 
+                if ($msgArray['color'] === 'white') {
+                    $this->playerWhiteEntity->setTimeLeft($msgArray['timer']);
+                    $this->em->persist($this->playerWhiteEntity);
+                } else {
+                    $this->playerBlackEntity->setTimeLeft($msgArray['timer']);
+                    $this->em->persist($this->playerBlackEntity);
+                }
+
                 $this->em->flush();
             }
         }
