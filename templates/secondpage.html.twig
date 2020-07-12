@@ -221,7 +221,6 @@
                 }
             });
 
-            var playerColor = '{{ player.color }}';
             $('.piece.'+playerColor).draggable({
                 // containment: 'table',
                 // revert: 'invalid',
@@ -639,12 +638,19 @@
                     navigator.vibrate(1000);
                     clearInterval(timer);
                     timer = false;
+
+                    if ((turn === 'player' && playerColor === 'white') || (turn === 'opponent' && playerColor === 'black')) {
+                        alert('Victoire des noirs !');
+                    } else if ((turn === 'player' && playerColor === 'black') || (turn === 'opponent' && playerColor === 'white')) {
+                        alert('Victoire des blancs !');
+                    }
                 }
             }, 1000);
         }
 
         var turn = null;
         var times, timer;
+        var playerColor = '{{ player.color }}';
         placePieces('{{ fen }}');
         setUpTimer();
     </script>
