@@ -37,6 +37,7 @@ class FirstController extends AbstractController
             'player' => $player,
             'opponent' => $opponent,
             'fen' => $game->getFen(),
+            'increment' => $game->getIncrement(),
         ]);
     }
 }

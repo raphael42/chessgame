@@ -596,7 +596,10 @@
         }
 
         function switchTurn() {
-            if (turn == 'player') {
+            if (typeof times !== 'undefined') { // undefined the first moves, when the timer is not started yet
+                times[turn] += parseInt(increment);
+            }
+            if (turn === 'player') {
                 turn = 'opponent';
             } else {
                 turn = 'player';
@@ -632,7 +635,9 @@
 
             timer = setInterval(function() {
                 times[turn]--;
-                $('#timer-' + turn).text(getTime(times[turn]));
+
+                $('#timer-player').text(getTime(times['player']));
+                $('#timer-opponent').text(getTime(times['opponent']));
 
                 if (times[turn] == 0) {
                     navigator.vibrate(1000);
@@ -662,6 +667,7 @@
         var turn = null;
         var times, timer;
         var playerColor = '{{ player.color }}';
+        var increment = '{{ increment }}';
         placePieces('{{ fen }}');
         setUpTimer();
     </script>
