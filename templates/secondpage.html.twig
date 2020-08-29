@@ -151,9 +151,9 @@
 
                         if (chess.in_checkmate() === true) {
                             if (move.color === 'w') {
-                                alert('Victoire des blancs !');
+                                setWinner('blancs');
                             } else if (move.color === 'b') {
-                                alert('Victoire des noirs !');
+                                setWinner('noirs');
                             }
                         }
 
@@ -186,9 +186,9 @@
 
                         if (chess.in_checkmate() === true) {
                             if (move.color === 'white') {
-                                alert('Victoire des blancs !');
+                                setWinner('blancs');
                             } else if (move.color === 'black') {
-                                alert('Victoire des noirs !');
+                                setWinner('noirs');
                             }
                         }
 
@@ -327,9 +327,9 @@
 
                                 if (chess.in_checkmate() === true) {
                                     if (moving.color === 'w') {
-                                        alert('Victoire des blancs !');
+                                        setWinner('blancs');
                                     } else if (moving.color === 'b') {
-                                        alert('Victoire des noirs !');
+                                        setWinner('noirs');
                                     }
                                 }
                             }
@@ -437,9 +437,9 @@
 
                             if (chess.in_checkmate() === true) {
                                 if (moving.color === 'w') {
-                                    alert('Victoire des blancs !');
+                                    setWinner('blancs');
                                 } else if (moving.color === 'b') {
-                                    alert('Victoire des noirs !');
+                                    setWinner('noirs');
                                 }
                             }
                         }
@@ -640,12 +640,23 @@
                     timer = false;
 
                     if ((turn === 'player' && playerColor === 'white') || (turn === 'opponent' && playerColor === 'black')) {
-                        alert('Victoire des noirs !');
+                        setWinner('noirs');
                     } else if ((turn === 'player' && playerColor === 'black') || (turn === 'opponent' && playerColor === 'white')) {
-                        alert('Victoire des blancs !');
+                        setWinner('blancs');
                     }
                 }
             }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timer);
+            timer = false;
+        }
+
+        function setWinner(playerColor) {
+            alert('Victoire des '+ playerColor +' !');
+            stopTimer()
+            $('#player-turn').text('Victoire des '+ playerColor +' !');
         }
 
         var turn = null;
