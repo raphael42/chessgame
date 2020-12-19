@@ -2,58 +2,6 @@
 
 {% block title %}TODO{% endblock %}
 
-{% block stylesheets %}
-    <style>
-        .case-white {
-            background-color: #f7dfc5;
-        }
-        .case-black {
-            background-color: #c67945;
-        }
-
-        .case-white.selected {
-            background-color: #8baf73;
-        }
-
-        .case-black.selected {
-            background-color: #646f40;
-        }
-
-        .chess-table {
-            width: 64px;
-            height: 64px;
-            cursor: pointer;
-        }
-
-        .piece {
-            width: 64px;
-            height: 64px;
-        }
-
-        .case-white.in-check {
-            background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #f7dfc5 89%, #f7dfc5 100%)
-        }
-
-        .case-black.in-check {
-            background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #c67945 89%, #c67945 100%)
-        }
-
-        .bg-grey {
-            background-color: #cecece;
-        }
-
-        .col-center {
-            display: inline-block;
-            float: none;
-        }
-
-        .tchat {
-            border: 1px solid black;
-            height: 100%;
-        }
-    </style>
-{% endblock %}
-
 {% block javascripts %}
     {# <script src="https://code.jquery.com/jquery-1.12.4.js"></script> #}
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
