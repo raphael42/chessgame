@@ -41,6 +41,16 @@
         .bg-grey {
             background-color: #cecece;
         }
+
+        .col-center {
+            display: inline-block;
+            float: none;
+        }
+
+        .tchat {
+            border: 1px solid black;
+            height: 100%;
+        }
     </style>
 {% endblock %}
 
@@ -675,10 +685,14 @@
 
 {% block body %}
     <div class="row">
-        <div class="col-lg-3 col-md-12 col-sm-12">
-            <span>TODO : Tchat</span>
+        <div class="col-lg-2 col-md-4 col-sm-12">
+            <div class="bg-grey">
+                <div>Votre temps : <span id="timer-player"></span></div>
+                <div><span id="player-turn"></span></div>
+                <div>Temps de l'adversaire : <span id="timer-opponent"></span></div>
+            </div>
         </div>
-        <div class="col-lg-6 col-md-8 col-sm-12">
+        <div class="col-lg-7 col-md-8 col-sm-12 col-center">
             <table>
                 {% if player.color == 'white' %}
                     {% for i in 8..1 %}
@@ -731,11 +745,9 @@
                 {% endif %}
             </table>
         </div>
-        <div class="col-lg-3 col-md-4 col-sm-12">
-            <div class="bg-grey">
-                <div>Votre temps : <span id="timer-player"></span></div>
-                <div><span id="player-turn"></span></div>
-                <div>Temps de l'adversaire : <span id="timer-opponent"></span></div>
+        <div class="col-lg-3 col-md-12 col-sm-12">
+            <div class="tchat">
+                <span>TODO : Tchat</span>
             </div>
         </div>
     </div>
