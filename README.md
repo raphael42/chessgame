@@ -9,3 +9,7 @@ Steps to install the project
 - php bin/console make:migration
 
 - php bin/console doctrine:migrations:migrate
+
+- symfony server:start
+
+- In another terminal window : php bin/console run:websocket-server
