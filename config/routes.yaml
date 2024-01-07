@@ -9,3 +9,9 @@ game:
 game-second:
     path: second-page/{url}
     controller: App\Controller\FirstController::secondfunction
+
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
