@@ -6,7 +6,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "cboden/ratchet": "^0.4.2",
-        "doctrine/annotations": "^1.0",
+        "doctrine/annotations": "*",
         "doctrine/doctrine-bundle": "^2.7",
         "doctrine/doctrine-migrations-bundle": "^3.2",
         "doctrine/orm": "^2.17",
