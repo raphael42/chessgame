@@ -87,9 +87,6 @@
     "guzzlehttp/psr7": {
         "version": "1.6.1"
     },
-    "laminas/laminas-code": {
-        "version": "3.4.1"
-    },
     "laminas/laminas-eventmanager": {
         "version": "3.2.1"
     },
@@ -178,18 +175,6 @@
     },
     "react/stream": {
         "version": "v1.1.0"
-    },
-    "sensio/framework-extra-bundle": {
-        "version": "5.2",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "master",
-            "version": "5.2",
-            "ref": "fb7e19da7f013d0d422fa9bce16f5c510e27609b"
-        },
-        "files": [
-            "./config/packages/sensio_framework_extra.yaml"
-        ]
     },
     "symfony/asset": {
         "version": "v5.0.7"
@@ -409,9 +394,6 @@
     "symfony/polyfill-mbstring": {
         "version": "v1.15.0"
     },
-    "symfony/polyfill-php73": {
-        "version": "v1.15.0"
-    },
     "symfony/polyfill-php80": {
         "version": "v1.20.0"
     },
@@ -457,9 +439,6 @@
         "version": "v5.0.7"
     },
     "symfony/security-csrf": {
-        "version": "v5.0.7"
-    },
-    "symfony/security-guard": {
         "version": "v5.0.7"
     },
     "symfony/security-http": {
