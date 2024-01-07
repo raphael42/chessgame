@@ -1,3 +1,4 @@
+<<<<<<< ours
 index:
     path: /
     controller: App\Controller\HomeController::index
@@ -9,3 +10,10 @@ game:
 game-second:
     path: second-page/{url}
     controller: App\Controller\FirstController::secondfunction
+=======
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
+>>>>>>> theirs
