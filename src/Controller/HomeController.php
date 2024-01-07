@@ -6,13 +6,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Doctrine\ORM\EntityManagerInterface;
 
 use App\Form\GameCreationType;
 use App\Entity;
 
 class HomeController extends AbstractController
 {
-    public function index(Request $request)
+    public function index(Request $request, EntityManagerInterface $entityManager)
     {
         $form = $this->createForm(GameCreationType::class);
         $form->handleRequest($request);
@@ -21,7 +22,7 @@ class HomeController extends AbstractController
             $data = $form->getData();
 
             $url = bin2hex(random_bytes(10));
-            $this->createNewGame($url, $data);
+            $this->createNewGame($url, $data, $entityManager);
 
             $session = new Session();
             // $session->start();
@@ -35,9 +36,9 @@ class HomeController extends AbstractController
         ]);
     }
 
-    private function createNewGame(string $url, array $data) : void
+    private function createNewGame(string $url, array $data, EntityManagerInterface $entityManager) : void
     {
-        $entityManager = $this->getDoctrine()->getManager();
+        // $entityManager = $doctrine->getManager();
 
         // BOF create game
         $gameEntity = new Entity\Game();

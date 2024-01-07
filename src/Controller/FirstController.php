@@ -5,14 +5,15 @@ namespace App\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Doctrine\ORM\EntityManagerInterface;
 
 use App\Entity;
 
 class FirstController extends AbstractController
 {
-    public function secondfunction($url)
+    public function secondfunction($url, EntityManagerInterface $entityManager)
     {
-        $game = $this->getDoctrine()->getRepository(Entity\Game::class)->findOneBy([
+        $game = $entityManager->getRepository(Entity\Game::class)->findOneBy([
             'url' => $url,
         ]);
 
@@ -22,12 +23,12 @@ class FirstController extends AbstractController
         $session->start();
         // $session->set('gameCreator', true); // TODELETE
 
-        $player = $this->getDoctrine()->getRepository(Entity\Player::class)->findOneBy([
+        $player = $entityManager->getRepository(Entity\Player::class)->findOneBy([
             'game_creator' => $session->get('gameCreator') ?? false,
             'game' => $idGame,
         ]);
 
-        $opponent = $this->getDoctrine()->getRepository(Entity\Player::class)->findOneBy([
+        $opponent = $entityManager->getRepository(Entity\Player::class)->findOneBy([
             'game_creator' => !$session->get('gameCreator') ?? true,
             'game' => $idGame,
         ]);
