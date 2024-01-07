@@ -38,8 +38,6 @@ class HomeController extends AbstractController
 
     private function createNewGame(string $url, array $data, EntityManagerInterface $entityManager) : void
     {
-        // $entityManager = $doctrine->getManager();
-
         // BOF create game
         $gameEntity = new Entity\Game();
         $gameEntity->setUrl($url);
