@@ -8,9 +8,36 @@
 .case-white.selected {
     background-color: #8baf73;
 }
-
 .case-black.selected {
     background-color: #646f40;
+}
+
+.case-white.clicked {
+    background-color: #8baf73;
+}
+.case-black.clicked {
+    background-color: #646f40;
+}
+
+.case-white.possible-move::before {
+    content: "";
+    display: block;
+    width: 20px;
+    height: 20px;
+    background-color: #646f40; /* Couleur de fond du cercle */
+    border-radius: 50%;
+    position: relative;
+    transform: translate(-50%, -50%);
+}
+.case-black.possible-move::before {
+    content: "";
+    display: block;
+    width: 20px;
+    height: 20px;
+    background-color: #646f40; /* Couleur de fond du cercle */
+    border-radius: 50%;
+    position: relative;
+    transform: translate(-50%, -50%);
 }
 
 .chess-table {
