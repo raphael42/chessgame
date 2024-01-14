@@ -199,6 +199,7 @@
 
                 // Same square clicked, then it removes the clicked class and do nothing else
                 if (sameSquareClicked) {
+                    $('.chess-table.possible-move').off();
                     return;
                 }
 
@@ -217,212 +218,34 @@
                 }
 
                 $('.chess-table.possible-move').off().on('click', function(event2) {
-                    var squareObjTo = $(this);
-                    console.log('2eme click ' + $(this).attr('id'));
+                    event2.stopPropagation();
+                    var squareIdFrom = pieceObjFrom.parent().attr('id');
+                    var squareIdTo = $(this).attr('id');
 
-                    var droppedFrom = pieceObjFrom;
-                    var droppedTo = squareObjTo;
+                    console.log('2eme click ' + squareIdTo);
 
-                    var idFrom = droppedFrom.parent().attr('id');
-                    var idTo = droppedTo.attr('id');
+                    var squareFromInfos = chess.get(squareIdFrom);
 
-                    var tmp = chess.get(idFrom);
-
-                    var tmp2 = idFrom.split('');
+                    var tmp2 = squareIdFrom.split('');
                     var idFromLine = parseInt(tmp2[1]);
 
-                    var tmp3 = idTo.split('');
+                    var tmp3 = squareIdTo.split('');
                     var idToLine = parseInt(tmp3[1]);
 
-                    var piecesPromotion = {
-                        'r': 'rook',
-                        'n': 'knight',
-                        'b': 'bishop',
-                        'q': 'queen',
-                    };
                     var promotion = null;
-                    if (tmp !== null && tmp['type'] === 'p' && ((playerColor === 'white' && tmp['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (playerColor === 'black' && tmp['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
+                    if (squareFromInfos !== null && squareFromInfos['type'] === 'p' && ((playerColor === 'white' && squareFromInfos['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (playerColor === 'black' && squareFromInfos['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
                         promotionPiece(function(promotion) {
-                            var wasInCheck = chess.in_check();
-                            var moving = chess.move({
-                                from: idFrom,
-                                to: idTo,
-                                promotion: promotion
-                            });
-
-                            if (moving !== null) {
-                                if (chess.in_check() === true) {
-                                    if (moving.color === 'w') {
-                                        var kingposition = getKingPosition(chess.fen(), 'black');
-                                        $('#' + kingposition).addClass('in-check');
-                                    } else if (moving.color === 'b') {
-                                        var kingposition = getKingPosition(chess.fen(), 'white');
-                                        $('#' + kingposition).addClass('in-check');
-                                    }
-                                }
-
-                                if (wasInCheck) {
-                                    if (moving.color === 'w') {
-                                        var kingposition = getKingPosition(chess.fen(), 'black');
-                                        $('#' + kingposition).removeClass('in-check');
-                                    } else if (moving.color === 'b') {
-                                        var kingposition = getKingPosition(chess.fen(), 'white');
-                                        $('#' + kingposition).removeClass('in-check');
-                                    }
-                                }
-
-                                if ($(droppedTo).html() !== '') {
-                                    $(this).empty();
-                                }
-
-                                $(droppedTo).droppable('disable');
-                                $(droppedFrom).parent().droppable('enable');
-                                $(droppedFrom).detach().css({top: 0, left: 0}).appendTo(droppedTo);
-                                src = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
-                                src = src.replace('chessboard', piecesPromotion[promotion]);
-                                src = src.replace('playerColor', playerColor);
-                                $(droppedTo).html('<img class="piece ' + playerColor + '" src="' + src + '" alt>');
-                                $('#' + idTo + ' img').draggable({
-                                    revert: true,
-                                });
-
-                                var movePiece = {
-                                    from: idFrom,
-                                    to: idTo,
-                                    color: playerColor,
-                                    fen: chess.fen(),
-                                    flag: moving.flags,
-                                    promotion: moving.promotion,
-                                    timer: getSecondsWithTime($('#timer-player').text(), ':'),
-                                };
-                                socket.send(JSON.stringify(movePiece));
-                                switchTurn();
-                                $('#player-turn').text('En attente de l\'adversaire');
-
-                                if (chess.in_checkmate() === true) {
-                                    if (moving.color === 'w') {
-                                        setWinner('blancs');
-                                    } else if (moving.color === 'b') {
-                                        setWinner('noirs');
-                                    }
-                                }
-                            }
+                            processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
                         });
                     } else {
-                        var wasInCheck = chess.in_check();
-                        var moving = chess.move({
-                            from: idFrom,
-                            to: idTo,
-                        });
-
-                        if (moving !== null) {
-                            if (chess.in_check() === true) {
-                                if (moving.color === 'w') {
-                                    var kingposition = getKingPosition(chess.fen(), 'black');
-                                    $('#' + kingposition).addClass('in-check');
-                                } else if (moving.color === 'b') {
-                                    var kingposition = getKingPosition(chess.fen(), 'white');
-                                    $('#' + kingposition).addClass('in-check');
-                                }
-                            }
-
-                            if (wasInCheck) {
-                                $('.in-check').removeClass('in-check');
-                            }
-                            var flag = moving.flags;
-                            if (flag === 'k') { // king side castelling
-                                if (playerColor === 'white') {
-                                    var img = $('#h1').html();
-                                    $('#h1').empty();
-                                    $('#h1').droppable('enable');
-                                    $('#f1').html(img);
-                                    $('#f1').droppable('disable');
-                                    $('#f1 img').draggable({
-                                        revert: true,
-                                    });
-                                } else if (playerColor === 'black') {
-                                    var img = $('#h8').html();
-                                    $('#h8').empty();
-                                    $('#h8').droppable('enable');
-                                    $('#f8').html(img);
-                                    $('#f8').droppable('disable');
-                                    $('#f8 img').draggable({
-                                        revert: true,
-                                    });
-                                }
-                            } else if (flag === 'q') { // queen side castelling
-                                if (playerColor === 'white') {
-                                    var img = $('#a1').html();
-                                    $('#a1').empty();
-                                    $('#a1').droppable('enable');
-                                    $('#d1').html(img);
-                                    $('#d1').droppable('disable');
-                                    $('#d1 img').draggable({
-                                        revert: true,
-                                    });
-                                } else if (playerColor === 'black') {
-                                    var img = $('#a8').html();
-                                    $('#a8').empty();
-                                    $('#a8').droppable('enable');
-                                    $('#d8').html(img);
-                                    $('#d8').droppable('disable');
-                                    $('#d8 img').draggable({
-                                        revert: true,
-                                    });
-                                }
-                            } else if (flag === 'e') { // en passant capture
-                                if (playerColor === 'white') {
-                                    var tmp = (moving.to).split('');
-                                    var idPawnCatured = tmp[0] + (parseInt(tmp[1]) - 1);
-                                } else if (playerColor === 'black') {
-                                    var tmp = (moving.to).split('');
-                                    var idPawnCatured = tmp[0] + (parseInt(tmp[1]) + 1);
-                                }
-                                $('#' + idPawnCatured).empty();
-                            }
-
-                            if ($(droppedTo).html() !== '') {
-                                $(this).empty();
-                            }
-
-                            $(droppedTo).droppable('disable');
-                            $(droppedFrom).parent().droppable('enable');
-                            $(droppedFrom).detach().css({top: 0, left: 0}).appendTo(droppedTo);
-
-                            var movePiece = {
-                                from: idFrom,
-                                to: idTo,
-                                color: playerColor,
-                                fen: chess.fen(),
-                                flag: flag,
-                                timer: getSecondsWithTime($('#timer-player').text(), ':'),
-                            };
-                            socket.send(JSON.stringify(movePiece));
-
-                            var tmp = chess.fen().split(' ');
-                            var tmp2 = parseInt(tmp[5]);
-                            if (tmp2 === 2 && moving.color === 'b') {
-                                startTimer('opponent');
-                            } else {
-                                switchTurn();
-                            }
-
-                            $('#player-turn').text('En attente de l\'adversaire');
-
-                            if (chess.in_checkmate() === true) {
-                                if (moving.color === 'w') {
-                                    setWinner('blancs');
-                                } else if (moving.color === 'b') {
-                                    setWinner('noirs');
-                                }
-                            }
-                        }
+                        processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
                     }
-
 
                     $('.chess-table.possible-move').each(function() {
                         $(this).removeClass('possible-move');
                     });
+
+                    $('.chess-table.possible-move').off();
 
                     return;
                 });
@@ -453,203 +276,24 @@
                     'ui-droppable-hover': 'selected'
                 },
                 drop: function(ev, ui) {
-                    var droppedFrom = ui.draggable;
-                    var droppedTo = $(this);
+                    var squareIdFrom = (ui.draggable).parent().attr('id');
+                    var squareIdTo = $(this).attr('id');
 
-                    var idFrom = droppedFrom.parent().attr('id');
-                    var idTo = droppedTo.attr('id');
+                    var squareFromInfos = chess.get(squareIdFrom);
 
-                    var tmp = chess.get(idFrom);
-
-                    var tmp2 = idFrom.split('');
+                    var tmp2 = squareIdFrom.split('');
                     var idFromLine = parseInt(tmp2[1]);
 
-                    var tmp3 = idTo.split('');
+                    var tmp3 = squareIdTo.split('');
                     var idToLine = parseInt(tmp3[1]);
 
-                    var piecesPromotion = {
-                        'r': 'rook',
-                        'n': 'knight',
-                        'b': 'bishop',
-                        'q': 'queen',
-                    };
                     var promotion = null;
-                    if (tmp !== null && tmp['type'] === 'p' && ((playerColor === 'white' && tmp['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (playerColor === 'black' && tmp['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
+                    if (squareFromInfos !== null && squareFromInfos['type'] === 'p' && ((playerColor === 'white' && squareFromInfos['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (playerColor === 'black' && squareFromInfos['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
                         promotionPiece(function(promotion) {
-                            var wasInCheck = chess.in_check();
-                            var moving = chess.move({
-                                from: idFrom,
-                                to: idTo,
-                                promotion: promotion
-                            });
-
-                            if (moving !== null) {
-                                if (chess.in_check() === true) {
-                                    if (moving.color === 'w') {
-                                        var kingposition = getKingPosition(chess.fen(), 'black');
-                                        $('#' + kingposition).addClass('in-check');
-                                    } else if (moving.color === 'b') {
-                                        var kingposition = getKingPosition(chess.fen(), 'white');
-                                        $('#' + kingposition).addClass('in-check');
-                                    }
-                                }
-
-                                if (wasInCheck) {
-                                    if (moving.color === 'w') {
-                                        var kingposition = getKingPosition(chess.fen(), 'black');
-                                        $('#' + kingposition).removeClass('in-check');
-                                    } else if (moving.color === 'b') {
-                                        var kingposition = getKingPosition(chess.fen(), 'white');
-                                        $('#' + kingposition).removeClass('in-check');
-                                    }
-                                }
-
-                                if ($(droppedTo).html() !== '') {
-                                    $(this).empty();
-                                }
-
-                                $(droppedTo).droppable('disable');
-                                $(droppedFrom).parent().droppable('enable');
-                                $(droppedFrom).detach().css({top: 0, left: 0}).appendTo(droppedTo);
-                                src = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
-                                src = src.replace('chessboard', piecesPromotion[promotion]);
-                                src = src.replace('playerColor', playerColor);
-                                $(droppedTo).html('<img class="piece ' + playerColor + '" src="' + src + '" alt>');
-                                $('#' + idTo + ' img').draggable({
-                                    revert: true,
-                                });
-
-                                var movePiece = {
-                                    from: idFrom,
-                                    to: idTo,
-                                    color: playerColor,
-                                    fen: chess.fen(),
-                                    flag: moving.flags,
-                                    promotion: moving.promotion,
-                                    timer: getSecondsWithTime($('#timer-player').text(), ':'),
-                                };
-                                socket.send(JSON.stringify(movePiece));
-                                switchTurn();
-                                $('#player-turn').text('En attente de l\'adversaire');
-
-                                if (chess.in_checkmate() === true) {
-                                    if (moving.color === 'w') {
-                                        setWinner('blancs');
-                                    } else if (moving.color === 'b') {
-                                        setWinner('noirs');
-                                    }
-                                }
-                            }
+                            processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
                         });
                     } else {
-                        var wasInCheck = chess.in_check();
-                        var moving = chess.move({
-                            from: idFrom,
-                            to: idTo,
-                        });
-
-                        if (moving !== null) {
-                            if (chess.in_check() === true) {
-                                if (moving.color === 'w') {
-                                    var kingposition = getKingPosition(chess.fen(), 'black');
-                                    $('#' + kingposition).addClass('in-check');
-                                } else if (moving.color === 'b') {
-                                    var kingposition = getKingPosition(chess.fen(), 'white');
-                                    $('#' + kingposition).addClass('in-check');
-                                }
-                            }
-
-                            if (wasInCheck) {
-                                $('.in-check').removeClass('in-check');
-                            }
-                            var flag = moving.flags;
-                            if (flag === 'k') { // king side castelling
-                                if (playerColor === 'white') {
-                                    var img = $('#h1').html();
-                                    $('#h1').empty();
-                                    $('#h1').droppable('enable');
-                                    $('#f1').html(img);
-                                    $('#f1').droppable('disable');
-                                    $('#f1 img').draggable({
-                                        revert: true,
-                                    });
-                                } else if (playerColor === 'black') {
-                                    var img = $('#h8').html();
-                                    $('#h8').empty();
-                                    $('#h8').droppable('enable');
-                                    $('#f8').html(img);
-                                    $('#f8').droppable('disable');
-                                    $('#f8 img').draggable({
-                                        revert: true,
-                                    });
-                                }
-                            } else if (flag === 'q') { // queen side castelling
-                                if (playerColor === 'white') {
-                                    var img = $('#a1').html();
-                                    $('#a1').empty();
-                                    $('#a1').droppable('enable');
-                                    $('#d1').html(img);
-                                    $('#d1').droppable('disable');
-                                    $('#d1 img').draggable({
-                                        revert: true,
-                                    });
-                                } else if (playerColor === 'black') {
-                                    var img = $('#a8').html();
-                                    $('#a8').empty();
-                                    $('#a8').droppable('enable');
-                                    $('#d8').html(img);
-                                    $('#d8').droppable('disable');
-                                    $('#d8 img').draggable({
-                                        revert: true,
-                                    });
-                                }
-                            } else if (flag === 'e') { // en passant capture
-                                if (playerColor === 'white') {
-                                    var tmp = (moving.to).split('');
-                                    var idPawnCatured = tmp[0] + (parseInt(tmp[1]) - 1);
-                                } else if (playerColor === 'black') {
-                                    var tmp = (moving.to).split('');
-                                    var idPawnCatured = tmp[0] + (parseInt(tmp[1]) + 1);
-                                }
-                                $('#' + idPawnCatured).empty();
-                            }
-
-                            if ($(droppedTo).html() !== '') {
-                                $(this).empty();
-                            }
-
-                            $(droppedTo).droppable('disable');
-                            $(droppedFrom).parent().droppable('enable');
-                            $(droppedFrom).detach().css({top: 0, left: 0}).appendTo(droppedTo);
-
-                            var movePiece = {
-                                from: idFrom,
-                                to: idTo,
-                                color: playerColor,
-                                fen: chess.fen(),
-                                flag: flag,
-                                timer: getSecondsWithTime($('#timer-player').text(), ':'),
-                            };
-                            socket.send(JSON.stringify(movePiece));
-
-                            var tmp = chess.fen().split(' ');
-                            var tmp2 = parseInt(tmp[5]);
-                            if (tmp2 === 2 && moving.color === 'b') {
-                                startTimer('opponent');
-                            } else {
-                                switchTurn();
-                            }
-
-                            $('#player-turn').text('En attente de l\'adversaire');
-
-                            if (chess.in_checkmate() === true) {
-                                if (moving.color === 'w') {
-                                    setWinner('blancs');
-                                } else if (moving.color === 'b') {
-                                    setWinner('noirs');
-                                }
-                            }
-                        }
+                        processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
                     }
                 }
             });
@@ -660,6 +304,138 @@
                 }
             });
         });
+
+        function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
+            var piecesPromotion = {
+                'r': 'rook',
+                'n': 'knight',
+                'b': 'bishop',
+                'q': 'queen',
+            };
+
+            // console.log(chess);
+            var wasInCheck = chess.in_check();
+            var moving = chess.move({
+                from: squareIdFrom,
+                to: squareIdTo,
+                promotion: promotion,
+            });
+
+            if (moving !== null) {
+                if (chess.in_check() === true) {
+                    if (moving.color === 'w') {
+                        var kingposition = getKingPosition(chess.fen(), 'black');
+                        $('#' + kingposition).addClass('in-check');
+                    } else if (moving.color === 'b') {
+                        var kingposition = getKingPosition(chess.fen(), 'white');
+                        $('#' + kingposition).addClass('in-check');
+                    }
+                }
+
+                if (wasInCheck) {
+                    $('.in-check').removeClass('in-check');
+                }
+                if (moving.flags === 'k') { // king side castelling
+                    if (playerColor === 'white') {
+                        var img = $('#h1').html();
+                        $('#h1').empty();
+                        $('#h1').droppable('enable');
+                        $('#f1').html(img);
+                        $('#f1').droppable('disable');
+                        $('#f1 img').draggable({
+                            revert: true,
+                        });
+                    } else if (playerColor === 'black') {
+                        var img = $('#h8').html();
+                        $('#h8').empty();
+                        $('#h8').droppable('enable');
+                        $('#f8').html(img);
+                        $('#f8').droppable('disable');
+                        $('#f8 img').draggable({
+                            revert: true,
+                        });
+                    }
+                } else if (moving.flags === 'q') { // queen side castelling
+                    if (playerColor === 'white') {
+                        var img = $('#a1').html();
+                        $('#a1').empty();
+                        $('#a1').droppable('enable');
+                        $('#d1').html(img);
+                        $('#d1').droppable('disable');
+                        $('#d1 img').draggable({
+                            revert: true,
+                        });
+                    } else if (playerColor === 'black') {
+                        var img = $('#a8').html();
+                        $('#a8').empty();
+                        $('#a8').droppable('enable');
+                        $('#d8').html(img);
+                        $('#d8').droppable('disable');
+                        $('#d8 img').draggable({
+                            revert: true,
+                        });
+                    }
+                } else if (moving.flags === 'e') { // en passant capture
+                    if (playerColor === 'white') {
+                        var tmp = (moving.to).split('');
+                        var idPawnCatured = tmp[0] + (parseInt(tmp[1]) - 1);
+                    } else if (playerColor === 'black') {
+                        var tmp = (moving.to).split('');
+                        var idPawnCatured = tmp[0] + (parseInt(tmp[1]) + 1);
+                    }
+                    $('#' + idPawnCatured).empty();
+                }
+
+                if ($('#' + squareIdTo).html() !== '') {
+                    $('#' + squareIdTo).empty();
+                }
+
+                $('#' + squareIdTo).droppable('disable');
+                $('#' + squareIdFrom + ' img').parent().droppable('enable');
+                $('#' + squareIdFrom + ' img').detach().css({top: 0, left: 0}).appendTo('#' + squareIdTo);
+
+                if (promotion !== null) {
+                    src = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
+                    src = src.replace('chessboard', piecesPromotion[promotion]);
+                    src = src.replace('playerColor', playerColor);
+                    $('#' + squareIdTo).html('<img class="piece ' + playerColor + '" src="' + src + '" alt>');
+                    $('#' + squareIdTo + ' img').draggable({
+                        revert: true,
+                    });
+                }
+
+                var movePiece = {
+                    from: squareIdFrom,
+                    to: squareIdTo,
+                    color: playerColor,
+                    fen: chess.fen(),
+                    flag: moving.flags,
+                    promotion: moving.promotion,
+                    timer: getSecondsWithTime($('#timer-player').text(), ':'),
+                };
+                socket.send(JSON.stringify(movePiece));
+
+                var tmp = chess.fen().split(' ');
+                var tmp2 = parseInt(tmp[5]);
+                if (tmp2 === 2 && moving.color === 'b') {
+                    startTimer('opponent');
+                } else {
+                    switchTurn();
+                }
+
+                $('#player-turn').text('En attente de l\'adversaire');
+
+                if (chess.in_checkmate() === true) {
+                    if (moving.color === 'w') {
+                        setWinner('blancs');
+                    } else if (moving.color === 'b') {
+                        setWinner('noirs');
+                    }
+                }
+            }
+
+            return true;
+        }
 
         function promotionPiece(callback) {
             $('#promotion-modal').modal('show');
