@@ -179,50 +179,46 @@
                 }
             });
 
-            $('.piece.' + playerColor).off().on('click', function(event1) {
-                event1.stopPropagation();
-                var squareObjFrom = $(this).parent();
-                var pieceObjFrom = $(this);
-                var idSquare = $(squareObjFrom).attr('id');
+            $('#board').off().on('click', 'td', function() {
+                var idSquare = $(this).attr('id');
 
-                var sameSquareClicked = false;
-                if (squareObjFrom.hasClass('clicked')) {
-                    var sameSquareClicked = true;
-                }
+                // Select one of the player piece
+                if ($(this).find('.piece.' + playerColor).length === 1) {
+                    console.log('select piece');
+                    var samePieceClicked = false;
+                    if ($(this).hasClass('clicked')) {
+                        var samePieceClicked = true;
+                    }
 
-                // If another case is clicked, remove it
-                $('.chess-table.clicked').removeClass('clicked');
+                    // If another case is clicked, remove it
+                    $('.chess-table.clicked').removeClass('clicked');
+                    $('.chess-table.possible-move').each(function() {
+                        $(this).removeClass('possible-move');
+                    });
 
-                $('.chess-table.possible-move').each(function() {
-                    $(this).removeClass('possible-move');
-                });
+                    // Same square clicked, then it removes the clicked class and do nothing else
+                    if (samePieceClicked) {
+                        return;
+                    }
 
-                // Same square clicked, then it removes the clicked class and do nothing else
-                if (sameSquareClicked) {
-                    $('.chess-table.possible-move').off();
-                    return;
-                }
+                    $(this).addClass('clicked');
 
-                console.log('1er click ' + idSquare);
+                    var allPossibleMoves = chess.moves({
+                        verbose: true
+                    });
 
-               $(squareObjFrom).addClass('clicked');
-
-                var allPossibleMoves = chess.moves({
-                    verbose: true
-                });
-
-                for (var i in allPossibleMoves) {
-                    if (allPossibleMoves[i].from === idSquare) {
-                        $('#' + allPossibleMoves[i].to).addClass('possible-move');
+                    for (var i in allPossibleMoves) {
+                        if (allPossibleMoves[i].from === idSquare) {
+                            $('#' + allPossibleMoves[i].to).addClass('possible-move');
+                        }
                     }
                 }
 
-                $('.chess-table.possible-move').off().on('click', function(event2) {
-                    event2.stopPropagation();
-                    var squareIdFrom = pieceObjFrom.parent().attr('id');
-                    var squareIdTo = $(this).attr('id');
-
-                    console.log('2eme click ' + squareIdTo);
+                // Click on a square with "possible-move" class and #board has 1 element "clicked" then proceed a move
+                if ($(this).hasClass('possible-move') && $('#board').find('.clicked').length === 1) {
+                    console.log('move piece');
+                    var squareIdFrom = $('#board').find('.clicked').attr('id');
+                    var squareIdTo = idSquare;
 
                     var squareFromInfos = chess.get(squareIdFrom);
 
@@ -241,14 +237,11 @@
                         processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
                     }
 
+                    $('.chess-table.clicked').removeClass('clicked');
                     $('.chess-table.possible-move').each(function() {
                         $(this).removeClass('possible-move');
                     });
-
-                    $('.chess-table.possible-move').off();
-
-                    return;
-                });
+                }
             });
 
             $('.piece.'+playerColor).draggable({
@@ -666,7 +659,7 @@
             </div>
         </div>
         <div class="col-lg-7 col-md-8 col-sm-12 col-center">
-            <table>
+            <table id="board">
                 {% if player.color == 'white' %}
                     {% for i in 8..1 %}
                         <tr>
