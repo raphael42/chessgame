@@ -171,6 +171,13 @@
                             }
                         }
                     }
+
+                    $('.chess-table.last-move').each(function() {
+                        $(this).removeClass('last-move');
+                    });
+                    $('#' + move.from).addClass('last-move');
+                    $('#' + move.to).addClass('last-move');
+
                     if (typeof move.idGame === 'undefined') {
                         $('#player-turn').text('À votre tour !');
                     }
@@ -425,6 +432,12 @@
                         setWinner('noirs');
                     }
                 }
+
+                $('.chess-table.last-move').each(function() {
+                    $(this).removeClass('last-move');
+                });
+                $('#' + squareIdFrom).addClass('last-move');
+                $('#' + squareIdTo).addClass('last-move');
             }
 
             return true;
