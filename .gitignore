@@ -19,4 +19,10 @@
 .phpunit.result.cache
 ###< phpunit/phpunit ###
 
+###> macos file ###
 .DS_Store
+###< macos file ###
+
+###> sass command ###
+.sass-cache/
+###< sass command ###

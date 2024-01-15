@@ -15,3 +15,5 @@ Steps to install the project
 - symfony server:start
 
 - In another terminal window : php bin/console run:websocket-server
+
+- To compile css, install sass (apt install sass) and run : sass --update public/assets/css/chess.scss:public/assets/css/chess.css --style compressed
