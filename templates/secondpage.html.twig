@@ -28,6 +28,7 @@
             socket.addEventListener('message', function(e) {
                 try {
                     var move = JSON.parse(e.data);
+                    console.log(move);
 
                     if (move.flag === 'k') { // king side castelling
                         if (move.color === 'white') {
@@ -191,7 +192,6 @@
 
                 // Select one of the player piece
                 if ($(this).find('.piece.' + playerColor).length === 1) {
-                    console.log('select piece');
                     var samePieceClicked = false;
                     if ($(this).hasClass('clicked')) {
                         var samePieceClicked = true;
@@ -223,7 +223,6 @@
 
                 // Click on a square with "possible-move" class and #board has 1 element "clicked" then proceed a move
                 if ($(this).hasClass('possible-move') && $('#board').find('.clicked').length === 1) {
-                    console.log('move piece');
                     var squareIdFrom = $('#board').find('.clicked').attr('id');
                     var squareIdTo = idSquare;
 
@@ -243,32 +242,30 @@
                     } else {
                         processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
                     }
+                }
+            });
 
+            $('.piece.' + playerColor).draggable({
+                revert: true,
+                start: function(ev, ui) {
+                    $(this).parent().addClass('clicked');
+
+                    var allPossibleMoves = chess.moves({
+                        verbose: true
+                    });
+
+                    for (var i in allPossibleMoves) {
+                        if (allPossibleMoves[i].from === $(this).parent().attr('id')) {
+                            $('#' + allPossibleMoves[i].to).addClass('possible-move');
+                        }
+                    }
+                },
+                stop: function(ev, ui) {
                     $('.chess-table.clicked').removeClass('clicked');
                     $('.chess-table.possible-move').each(function() {
                         $(this).removeClass('possible-move');
                     });
                 }
-            });
-
-            $('.piece.'+playerColor).draggable({
-                // containment: 'table',
-                // revert: 'invalid',
-                revert: true,
-                // classes: {
-                //     'ui-draggable-dragging': 'selected'
-                // },
-                start: function(ev, ui) {
-                    var atom = $(this).parent().attr('id');
-                    // $(this).parent().addClass('selected')
-                },
-                // drag: function(ev, ui) {
-                //     $(this).parent().addClass('selected')
-                //     $(this).parent().removeClass('selected')
-                // },
-                // stop: function(ev, ui) {
-                //     $(this).parent().removeClass('selected')
-                // }
             });
 
             $('.chess-table').droppable({
@@ -313,7 +310,6 @@
                 'q': 'queen',
             };
 
-            // console.log(chess);
             var wasInCheck = chess.in_check();
             var moving = chess.move({
                 from: squareIdFrom,
@@ -432,6 +428,11 @@
                         setWinner('noirs');
                     }
                 }
+
+                $('.chess-table.clicked').removeClass('clicked');
+                $('.chess-table.possible-move').each(function() {
+                    $(this).removeClass('possible-move');
+                });
 
                 $('.chess-table.last-move').each(function() {
                     $(this).removeClass('last-move');
