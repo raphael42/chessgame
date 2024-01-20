@@ -9,7 +9,7 @@
     <script src="{{ asset('assets/js/ChessScript.js') }}"></script>
 
     <script>
-        $(document).ready(function() {
+        $(function() {
             const socket = new WebSocket('ws://localhost:3001');
             const chess = new ChessScript('{{ fen }}');
 
@@ -178,35 +178,67 @@
             });
 
             $('#board').off().on('click', 'td', function() {
+                const self = $(this);
                 var idSquare = $(this).attr('id');
+
+                // If all squares has the class clicked-premove-hover because a premove was made before, remove it
+                $('.chess-table').each(function() {
+                    $(this).removeClass('clicked-premove-hover');
+                });
+
+                // If 2 squares are already premoved, remove them
+                if ($('.chess-table.clicked-premove').length === 2) {
+                    $('.chess-table.clicked-premove').removeClass('clicked-premove');
+                    return;
+                }
 
                 // Select one of the player piece
                 if ($(this).find('.piece.' + playerColor).length === 1) {
-                    var samePieceClicked = false;
-                    if ($(this).hasClass('clicked')) {
-                        var samePieceClicked = true;
-                    }
+                    let playerTurn = chess.turn(); // Which player turn it is
+                    if (
+                        (playerColor === 'white' && playerTurn === 'b') ||
+                        (playerColor === 'black' && playerTurn === 'w')
+                    ) { // If not the player turn, then make a premove
+                        if ($(this).hasClass('clicked-premove')) {
+                            $('.chess-table.clicked-premove').removeClass('clicked-premove');
+                            return;
+                        }
 
-                    // If another case is clicked, remove it
-                    $('.chess-table.clicked').removeClass('clicked');
-                    $('.chess-table.possible-move').each(function() {
-                        $(this).removeClass('possible-move');
-                    });
+                        if ($('.chess-table.clicked-premove').length === 0) { // No clicked-premove square, first click
+                            $(this).addClass('clicked-premove');
+                            $('.chess-table').each(function() {
+                                $(this).addClass('clicked-premove-hover');
+                            });
+                        } else { // If another case is clicked-premove, then it is the second one
+                            $(this).addClass('clicked-premove');
+                        }
+                    } else {
+                        var samePieceClicked = false;
+                        if ($(this).hasClass('clicked')) {
+                            var samePieceClicked = true;
+                        }
 
-                    // Same square clicked, then it removes the clicked class and do nothing else
-                    if (samePieceClicked) {
-                        return;
-                    }
+                        // If another case is clicked, remove it
+                        $('.chess-table.clicked').removeClass('clicked');
+                        $('.chess-table.possible-move').each(function() {
+                            $(this).removeClass('possible-move');
+                        });
 
-                    $(this).addClass('clicked');
+                        // Same square clicked, then it removes the clicked class and do nothing else
+                        if (samePieceClicked) {
+                            return;
+                        }
 
-                    var allPossibleMoves = chess.moves({
-                        verbose: true
-                    });
+                        $(this).addClass('clicked');
 
-                    for (var i in allPossibleMoves) {
-                        if (allPossibleMoves[i].from === idSquare) {
-                            $('#' + allPossibleMoves[i].to).addClass('possible-move');
+                        var allPossibleMoves = chess.moves({
+                            verbose: true
+                        });
+
+                        for (var i in allPossibleMoves) {
+                            if (allPossibleMoves[i].from === idSquare) {
+                                $('#' + allPossibleMoves[i].to).addClass('possible-move');
+                            }
                         }
                     }
                 }
@@ -233,20 +265,35 @@
                         processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
                     }
                 }
+
+                if ($('#board').find('.clicked-premove').length === 1) {
+                    $(self).addClass('clicked-premove');
+                }
             });
 
             $('.piece.' + playerColor).draggable({
                 revert: true,
                 start: function(ev, ui) {
-                    $(this).parent().addClass('clicked');
+                    console.log('drag');
+                    $('.chess-table.clicked-premove').removeClass('clicked-premove');
+                    const self = $(this);
+                    let playerTurn = chess.turn(); // Which player turn it is
+                    if (
+                        (playerColor === 'white' && playerTurn === 'b') ||
+                        (playerColor === 'black' && playerTurn === 'w')
+                    ) { // If not the player turn, then make a premove
+                        $(self).parent().addClass('clicked-premove');
+                    } else {
+                        $(self).parent().addClass('clicked');
 
-                    var allPossibleMoves = chess.moves({
-                        verbose: true
-                    });
+                        var allPossibleMoves = chess.moves({
+                            verbose: true
+                        });
 
-                    for (var i in allPossibleMoves) {
-                        if (allPossibleMoves[i].from === $(this).parent().attr('id')) {
-                            $('#' + allPossibleMoves[i].to).addClass('possible-move');
+                        for (var i in allPossibleMoves) {
+                            if (allPossibleMoves[i].from === $(self).parent().attr('id')) {
+                                $('#' + allPossibleMoves[i].to).addClass('possible-move');
+                            }
                         }
                     }
                 },
@@ -260,24 +307,33 @@
 
             $('.chess-table').droppable({
                 drop: function(ev, ui) {
-                    var squareIdFrom = (ui.draggable).parent().attr('id');
-                    var squareIdTo = $(this).attr('id');
-
-                    var squareFromInfos = chess.get(squareIdFrom);
-
-                    var tmp2 = squareIdFrom.split('');
-                    var idFromLine = parseInt(tmp2[1]);
-
-                    var tmp3 = squareIdTo.split('');
-                    var idToLine = parseInt(tmp3[1]);
-
-                    var promotion = null;
-                    if (squareFromInfos !== null && squareFromInfos['type'] === 'p' && ((playerColor === 'white' && squareFromInfos['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (playerColor === 'black' && squareFromInfos['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
-                        promotionPiece(function(promotion) {
-                            processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
-                        });
+                    console.log('drop');
+                    let playerTurn = chess.turn(); // Which player turn it is
+                    if (
+                        (playerColor === 'white' && playerTurn === 'b') ||
+                        (playerColor === 'black' && playerTurn === 'w')
+                    ) { // If not the player turn, then make a premove
+                        $(this).addClass('clicked-premove');
                     } else {
-                        processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
+                        var squareIdFrom = (ui.draggable).parent().attr('id');
+                        var squareIdTo = $(this).attr('id');
+
+                        var squareFromInfos = chess.get(squareIdFrom);
+
+                        var tmp2 = squareIdFrom.split('');
+                        var idFromLine = parseInt(tmp2[1]);
+
+                        var tmp3 = squareIdTo.split('');
+                        var idToLine = parseInt(tmp3[1]);
+
+                        var promotion = null;
+                        if (squareFromInfos !== null && squareFromInfos['type'] === 'p' && ((playerColor === 'white' && squareFromInfos['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (playerColor === 'black' && squareFromInfos['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
+                            promotionPiece(function(promotion) {
+                                processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
+                            });
+                        } else {
+                            processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
+                        }
                     }
                 }
             });
