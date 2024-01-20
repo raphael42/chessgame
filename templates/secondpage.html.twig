@@ -34,18 +34,14 @@
                         if (move.color === 'white') {
                             var img = $('#h1').html();
                             $('#h1').empty();
-                            $('#h1').droppable('enable');
                             $('#f1').html(img);
-                            $('#f1').droppable('disable');
                             $('#f1 img').draggable({
                                 revert: true,
                             });
                         } else if (move.color === 'black') {
                             var img = $('#h8').html();
                             $('#h8').empty();
-                            $('#h8').droppable('enable');
                             $('#f8').html(img);
-                            $('#f8').droppable('disable');
                             $('#f8 img').draggable({
                                 revert: true,
                             });
@@ -54,18 +50,14 @@
                         if (move.color === 'white') {
                             var img = $('#a1').html();
                             $('#a1').empty();
-                            $('#a1').droppable('enable');
                             $('#d1').html(img);
-                            $('#d1').droppable('disable');
                             $('#d1 img').draggable({
                                 revert: true,
                             });
                         } else if (move.color === 'black') {
                             var img = $('#a8').html();
                             $('#a8').empty();
-                            $('#a8').droppable('enable');
                             $('#d8').html(img);
-                            $('#d8').droppable('disable');
                             $('#d8 img').draggable({
                                 revert: true,
                             });
@@ -94,7 +86,6 @@
                         src = src.replace('playerColor', move.color);
                         $('#' + move.from).empty();
                         $('#' + move.to).html('<img class="piece ' + move.color + '" src="' + src + '" alt>');
-                        $('#' + move.to).droppable('enable');
 
                         $('.in-check').removeClass('in-check');
 
@@ -130,7 +121,6 @@
                         var img = $('#' + move.from).html();
                         $('#' + move.from).empty();
                         $('#' + move.to).html(img);
-                        $('#' + move.to).droppable('enable');
 
                         $('.in-check').removeClass('in-check');
 
@@ -291,12 +281,6 @@
                     }
                 }
             });
-
-            $('.chess-table img').each(function() {
-                if ($(this).hasClass(playerColor)) {
-                    $(this).parent().droppable('disable');
-                }
-            });
         });
 
         function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
@@ -332,18 +316,14 @@
                     if (playerColor === 'white') {
                         var img = $('#h1').html();
                         $('#h1').empty();
-                        $('#h1').droppable('enable');
                         $('#f1').html(img);
-                        $('#f1').droppable('disable');
                         $('#f1 img').draggable({
                             revert: true,
                         });
                     } else if (playerColor === 'black') {
                         var img = $('#h8').html();
                         $('#h8').empty();
-                        $('#h8').droppable('enable');
                         $('#f8').html(img);
-                        $('#f8').droppable('disable');
                         $('#f8 img').draggable({
                             revert: true,
                         });
@@ -352,18 +332,14 @@
                     if (playerColor === 'white') {
                         var img = $('#a1').html();
                         $('#a1').empty();
-                        $('#a1').droppable('enable');
                         $('#d1').html(img);
-                        $('#d1').droppable('disable');
                         $('#d1 img').draggable({
                             revert: true,
                         });
                     } else if (playerColor === 'black') {
                         var img = $('#a8').html();
                         $('#a8').empty();
-                        $('#a8').droppable('enable');
                         $('#d8').html(img);
-                        $('#d8').droppable('disable');
                         $('#d8 img').draggable({
                             revert: true,
                         });
@@ -383,8 +359,6 @@
                     $('#' + squareIdTo).empty();
                 }
 
-                $('#' + squareIdTo).droppable('disable');
-                $('#' + squareIdFrom + ' img').parent().droppable('enable');
                 $('#' + squareIdFrom + ' img').detach().css({top: 0, left: 0}).appendTo('#' + squareIdTo);
 
                 if (promotion !== null) {
