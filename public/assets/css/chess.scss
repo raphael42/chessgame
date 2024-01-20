@@ -10,15 +10,20 @@
         background-color: #cdd26b;
     }
 
-    &.possible-move::before {
-        content: "";
-        display: block;
-        width: 20px;
-        height: 20px;
-        background-color: #646f40; /* Couleur de fond du cercle */
-        border-radius: 50%;
-        position: relative;
-        transform: translate(-50%, -50%);
+    &.possible-move {
+        &:before {
+            content: "";
+            display: block;
+            width: 20px;
+            height: 20px;
+            background-color: #8baf73; /* Couleur de fond du cercle */
+            border-radius: 50%;
+            position: relative;
+            transform: translate(-50%, -50%);
+        }
+        &:hover {
+            background-color: #8baf73;
+        }
     }
 
     &.in-check {
@@ -42,15 +47,20 @@
         background-color: #aba239;
     }
 
-    &.possible-move::before {
-        content: "";
-        display: block;
-        width: 20px;
-        height: 20px;
-        background-color: #646f40; /* Couleur de fond du cercle */
-        border-radius: 50%;
-        position: relative;
-        transform: translate(-50%, -50%);
+    &.possible-move {
+        &:before {
+            content: "";
+            display: block;
+            width: 20px;
+            height: 20px;
+            background-color: #646f40; /* Couleur de fond du cercle */
+            border-radius: 50%;
+            position: relative;
+            transform: translate(-50%, -50%);
+        }
+        &:hover {
+            background-color: #646f40;
+        }
     }
 
     &.in-check {
