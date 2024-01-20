@@ -24,6 +24,9 @@
         &:hover {
             background-color: #8baf73;
         }
+        &.ui-droppable-hover {
+            background-color: #8baf73;
+        }
     }
 
     &.in-check {
@@ -59,6 +62,9 @@
             transform: translate(-50%, -50%);
         }
         &:hover {
+            background-color: #646f40;
+        }
+        &.ui-droppable-hover {
             background-color: #646f40;
         }
     }

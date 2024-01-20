@@ -269,9 +269,6 @@
             });
 
             $('.chess-table').droppable({
-                classes: {
-                    'ui-droppable-hover': 'selected'
-                },
                 drop: function(ev, ui) {
                     var squareIdFrom = (ui.draggable).parent().attr('id');
                     var squareIdTo = $(this).attr('id');
