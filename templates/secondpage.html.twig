@@ -172,6 +172,42 @@
                     if (typeof move.idGame === 'undefined') {
                         $('#player-turn').text('À votre tour !');
                     }
+
+                    // 2 squares premove, execute the move isntantly
+                    if ($('.clicked-premove').length === 2) {
+                        let squareIdFrom = null;
+                        let squareIdTo = null;
+                        $('.clicked-premove').each(function() {
+                            // date.premove == 1 then the move start from this one, get the id of the square
+                            if ($(this).data('premove') == 1) {
+                                squareIdFrom = $(this).attr('id');
+                            }
+
+                            // date.premove == 2 then the move goes to this one, get the id of the square
+                            if ($(this).data('premove') == 2) {
+                                squareIdTo = $(this).attr('id');
+                            }
+                        });
+
+                        if (squareIdFrom !== null && squareIdTo !== null) {
+                            let squareFromInfos = chess.get(squareIdFrom);
+
+                            let tmp2 = squareIdFrom.split('');
+                            let idFromLine = parseInt(tmp2[1]);
+
+                            let tmp3 = squareIdTo.split('');
+                            let idToLine = parseInt(tmp3[1]);
+
+                            let promotion = null;
+                            if (squareFromInfos !== null && squareFromInfos['type'] === 'p' && ((playerColor === 'white' && squareFromInfos['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (playerColor === 'black' && squareFromInfos['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
+                                promotionPiece(function(promotion) {
+                                    processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
+                                });
+                            } else {
+                                processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
+                            }
+                        }
+                    }
                 } catch(error) {
                     console.log(error);
                 }
@@ -206,11 +242,13 @@
 
                         if ($('.chess-table.clicked-premove').length === 0) { // No clicked-premove square, first click
                             $(this).addClass('clicked-premove');
+                            $(this).data('premove', 1);
                             $('.chess-table').each(function() {
                                 $(this).addClass('clicked-premove-hover');
                             });
                         } else { // If another case is clicked-premove, then it is the second one
                             $(this).addClass('clicked-premove');
+                            $(this).data('premove', 2);
                         }
                     } else {
                         var samePieceClicked = false;
@@ -266,8 +304,10 @@
                     }
                 }
 
-                if ($('#board').find('.clicked-premove').length === 1) {
+                // Second click to premove in no piece square
+                if ($('#board').find('.clicked-premove').length === 1 && !$(self).hasClass('clicked-premove')) {
                     $(self).addClass('clicked-premove');
+                    $(self).data('premove', 2);
                 }
             });
 
@@ -283,6 +323,7 @@
                         (playerColor === 'black' && playerTurn === 'w')
                     ) { // If not the player turn, then make a premove
                         $(self).parent().addClass('clicked-premove');
+                        $(self).parent().data('premove', 1);
                     } else {
                         $(self).parent().addClass('clicked');
 
@@ -314,6 +355,7 @@
                         (playerColor === 'black' && playerTurn === 'w')
                     ) { // If not the player turn, then make a premove
                         $(this).addClass('clicked-premove');
+                        $(this).data('premove', 2);
                     } else {
                         var squareIdFrom = (ui.draggable).parent().attr('id');
                         var squareIdTo = $(this).attr('id');
@@ -464,11 +506,20 @@
                 $('.chess-table.last-move').each(function() {
                     $(this).removeClass('last-move');
                 });
+                $('.chess-table.clicked-premove').each(function() {
+                    $(this).removeClass('clicked-premove');
+                });
                 $('#' + squareIdFrom).addClass('last-move');
                 $('#' + squareIdTo).addClass('last-move');
+
+                return true;
             }
 
-            return true;
+            $('.chess-table.clicked-premove').each(function() {
+                $(this).removeClass('clicked-premove');
+            });
+
+            return false;
         }
 
         function promotionPiece(callback) {
