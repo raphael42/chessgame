@@ -38,11 +38,15 @@ class HomeController extends AbstractController
 
     private function createNewGame(string $url, array $data, EntityManagerInterface $entityManager) : void
     {
+        $dateTimeNow = new \DateTime();
+
         // BOF create game
         $gameEntity = new Entity\Game();
         $gameEntity->setUrl($url);
         $gameEntity->setFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
         $gameEntity->setIncrement($data['secondsIncrement']);
+        $gameEntity->setTime($data['timePerPlayer'] * 60);
+        $gameEntity->setDateInsert($dateTimeNow);
         $entityManager->persist($gameEntity);
         // EOF create game
 
