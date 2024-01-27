@@ -21,7 +21,7 @@ class HomeController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            $url = bin2hex(random_bytes(10));
+            $url = time().bin2hex(random_bytes(10));
             $this->createNewGame($url, $data, $entityManager);
 
             $session = new Session();
