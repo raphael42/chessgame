@@ -30,21 +30,32 @@
                     if (typeof socketMessage.opponent_connect !== 'undefined' && socketMessage.opponent_connect === true) {
                         $('.opponent-connect').html('OK');
 
-                        let fen = chess.fen().split(' ');
-                        let fenSplit = parseInt(fen[5]);
-
-                        if (fenSplit >= 2) { // Timer must have started
+                        let fenSplit = chess.fen().split(' ');
+                        let fenTurnNumber = parseInt(fenSplit[5]);
+                        if (fenTurnNumber >= 2 && typeof times === 'undefined') { // Timer must have started and is not started
                             if (fenSplit[1] === 'b') { // Black turn
                                 if (playerColor === 'black') {
-                                    startTimer('player');
+                                    // console.log('black timer', socketMessage);
+                                    // Set up player timer
+                                    console.log('black turn and my color is black : update my black timer');
+                                    startTimer('player', socketMessage.blackMicrotimeSpend);
                                 } else {
-                                    startTimer('opponent');
+                                    // console.log('black timer', socketMessage);
+                                    // Set up opponent timer
+                                    console.log('black turn and my color is white : update his black timer');
+                                    startTimer('opponent', null, socketMessage.blackMicrotimeSpend);
                                 }
                             } else { // White turn
                                 if (playerColor === 'white') {
-                                    startTimer('player');
+                                    // console.log('white timer', socketMessage);
+                                    // Set up player timer
+                                    console.log('white turn and my color is white : update my white timer');
+                                    startTimer('player', socketMessage.whiteMicrotimeSpend);
                                 } else {
-                                    startTimer('opponent');
+                                    // console.log('white timer', socketMessage);
+                                    // Set up opponent timer
+                                    console.log('white turn and my color is black : update his black timer');
+                                    startTimer('opponent', null, socketMessage.whiteMicrotimeSpend);
                                 }
                             }
                         }
@@ -710,12 +721,22 @@
             return;
         }
 
-        function setUpTimer() {
-            var minutesPlayer = parseInt('{{ player.timeLeft }}' / 60, 10);
-            var secondsPlayer = parseInt('{{ player.timeLeft }}' % 60, 10);
+        function setUpTimer(playerTime, opponentTime) {
+            let playerTimeToUse = '{{ player.timeLeft }}';
+            if (typeof playerTime !== 'undefined' && playerTime !== null) {
+                playerTimeToUse = playerTime;
+            }
 
-            var minutesOpponent = parseInt('{{ opponent.timeLeft }}' / 60, 10);
-            var secondsOpponent = parseInt('{{ opponent.timeLeft }}' % 60, 10);
+            let opponentTimeToUse = '{{ opponent.timeLeft }}';
+            if (typeof opponentTime !== 'undefined' && opponentTime !== null) {
+                opponentTimeToUse = opponentTime;
+            }
+
+            var minutesPlayer = parseInt(playerTimeToUse / 60, 10);
+            var secondsPlayer = parseInt(playerTimeToUse % 60, 10);
+
+            var minutesOpponent = parseInt(opponentTimeToUse / 60, 10);
+            var secondsOpponent = parseInt(opponentTimeToUse % 60, 10);
 
             $('#timer-player').text(getTime(getSeconds(minutesPlayer, secondsPlayer)));
             $('#timer-opponent').text(getTime(getSeconds(minutesOpponent, secondsOpponent)));
@@ -726,8 +747,8 @@
             };
         }
 
-        function startTimer(playerTurn) {
-            times = setUpTimer();
+        function startTimer(playerTurn, playerTime, opponentTime) {
+            times = setUpTimer(playerTime, opponentTime);
 
             turn = playerTurn;
 

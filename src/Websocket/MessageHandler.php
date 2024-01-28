@@ -43,11 +43,15 @@ class MessageHandler implements MessageComponentInterface
         }
         $this->connections->attach($conn);
 
+        $microtimeNow = microtime(true);
         foreach ($this->connections as $connection) {
+            $theoricBlackTimeSpend = $this->blackMicrotimeSpend + ($microtimeNow - $this->blackMicrotimeStart);
+            $theoricWhiteTimeSpend = $this->whiteMicrotimeSpend + ($microtimeNow - $this->whiteMicrotimeStart);
+
             $msg = json_encode([
                 'opponent_connect' => true,
-                'whiteMicrotimeSpend' => round($this->gameTimer - $this->whiteMicrotimeSpend),
-                'blackMicrotimeSpend' => round($this->gameTimer - $this->blackMicrotimeSpend),
+                'whiteMicrotimeSpend' => round($this->gameTimer - $theoricWhiteTimeSpend),
+                'blackMicrotimeSpend' => round($this->gameTimer - $theoricBlackTimeSpend),
             ]);
             $connection->send($msg);
         }
