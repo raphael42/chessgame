@@ -129,6 +129,19 @@ class MessageHandler implements MessageComponentInterface
                 $this->em->persist($this->playerBlackEntity);
             }
 
+            // $movesEntity = new Entity\Moves();
+            // $movesEntity->setPlayer('');
+            // $movesEntity->setGame('');
+            // $movesEntity->setFenBefore('');
+            // $movesEntity->setFenAfter('');
+            // $movesEntity->setPiece('');
+            // $movesEntity->setSquareFrom('');
+            // $movesEntity->setSquareTo('');
+            // $movesEntity->setSan('');
+            // $movesEntity->setLan('');
+            // $movesEntity->setFlags('');
+            // $this->em->persist($movesEntity);
+
             $this->em->flush();
 
             // echo 'this->gameIncrement : ';

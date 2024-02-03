@@ -514,6 +514,7 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
 
         let historyVerbose = chess.history({verbose: true});
         let lastMoveHistory = historyVerbose[historyVerbose.length - 1];
+        lastMoveHistory['idGame'] = IDGAME;
         console.log(lastMoveHistory);
 
         var movePiece = {
