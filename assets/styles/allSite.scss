@@ -1,4 +1,4 @@
-// sass --update public/assets/css/chess.scss:public/assets/css/chess.css --style compressed
+@import "~bootstrap/scss/bootstrap";
 
 .case-white {
     background-color: #f7dfc5;
@@ -120,7 +120,7 @@
     float: none;
 }
 
-.tchat {
+.history {
     border: 1px solid black;
     height: 100%;
 }
