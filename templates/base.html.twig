@@ -12,8 +12,8 @@
 
         {# {% include './favicons.html.twig' %} #}
 
-        <link rel="stylesheet" href="{{ asset('assets/css/chess.css') }}">
         {% block stylesheets %}{% endblock %}
+        {{ encore_entry_link_tags('allSite') }}
     </head>
 
     <body class="{% block body_class %}{% endblock %}">
@@ -22,5 +22,6 @@
         </div>
 
         {% block javascripts %}{% endblock %}
+        {{ encore_entry_script_tags('allSite') }}
     </body>
 </html>
