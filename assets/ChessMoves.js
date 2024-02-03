@@ -1,7 +1,8 @@
 import $ from 'jquery';
 import 'jquery-ui/ui/widgets/draggable';
 import 'jquery-ui/ui/widgets/droppable';
-import { Chess } from 'chess.js'
+import { Chess } from 'chess.js';
+require('bootstrap');
 
 $(function() {
     const socket = new WebSocket('ws://localhost:3001');
@@ -106,7 +107,7 @@ $(function() {
                 'q': 'queen',
             };
 
-            src = PIECESIMGURL;
+            let src = PIECESIMGURL;
             src = src.replace('chessboard', piecesPromotion[socketMessage.promotion]);
             src = src.replace('playerColor', socketMessage.color);
             $('#' + socketMessage.from).empty();
@@ -502,7 +503,7 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
         $('#' + squareIdFrom + ' img').detach().css({top: 0, left: 0}).appendTo('#' + squareIdTo);
 
         if (promotion !== null) {
-            src = PIECESIMGURL;
+            let src = PIECESIMGURL;
             src = src.replace('chessboard', piecesPromotion[promotion]);
             src = src.replace('playerColor', PLAYERCOLOR);
             $('#' + squareIdTo).html('<img class="piece ' + PLAYERCOLOR + '" src="' + src + '" alt>');
@@ -511,8 +512,9 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
             });
         }
 
-        let history = chess.history({verbose: true});
-        console.log(history);
+        let historyVerbose = chess.history({verbose: true});
+        let lastMoveHistory = historyVerbose[historyVerbose.length - 1];
+        console.log(lastMoveHistory);
 
         var movePiece = {
             idGame: IDGAME,
@@ -524,6 +526,7 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
             promotion: moving.promotion,
             // timer: getSecondsWithTime($('#timer-player').text(), ':'),
         };
+        console.log(movePiece);
         try {
             socket.send(JSON.stringify(movePiece));
         } catch (error) {
@@ -677,7 +680,7 @@ function placePieces() {
         line--;
     }
 
-    var src = null;
+    let src = null;
     var color = null;
     for (var k in chessboard) {
         src = PIECESIMGURL;
