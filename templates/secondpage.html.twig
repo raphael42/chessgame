@@ -2,6 +2,24 @@
 
 {% block title %}TODO{% endblock %}
 
+{% block javascripts %}
+    <script>
+        var FEN = '{{ fen }}';
+        var INCREMENT = '{{ increment }}';
+        var PLAYERCOLOR = '{{ player.color }}';
+        var PLAYERTIMELEFT = '{{ player.timeLeft }}';
+        var OPPONENTTIMELEFT = '{{ opponent.timeLeft }}';
+        var IDGAME = '{{ idGame }}';
+        var PIECESIMGURL = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
+    </script>
+
+    {{ encore_entry_link_tags('gameJs') }}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ encore_entry_script_tags('gameJs') }}
+{% endblock %}
+
 {% block body %}
     <div class="row">
         <div class="col-lg-2 col-md-4 col-sm-12">
