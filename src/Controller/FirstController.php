@@ -33,6 +33,12 @@ class FirstController extends AbstractController
             'game' => $idGame,
         ]);
 
+        // $moves = $entityManager->getRepository(Entity\Moves::class)->findBy([
+        //     'game' => $idGame,
+        // ]);
+
+        // echo '<pre><br><br><br><br><br><br><br><br>';var_dump($moves);echo '</pre>';
+
         return $this->render('secondpage.html.twig', [
             'idGame' => $idGame,
             'player' => $player,
