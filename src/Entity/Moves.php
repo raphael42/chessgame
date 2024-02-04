@@ -48,6 +48,9 @@ class Moves
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $promotion = null;
 
+    #[ORM\Column]
+    private ?int $move_number = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -181,6 +184,18 @@ class Moves
     public function setPromotion(?string $promotion): static
     {
         $this->promotion = $promotion;
+
+        return $this;
+    }
+
+    public function getMoveNumber(): ?int
+    {
+        return $this->move_number;
+    }
+
+    public function setMoveNumber(int $move_number): static
+    {
+        $this->move_number = $move_number;
 
         return $this;
     }

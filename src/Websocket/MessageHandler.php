@@ -145,6 +145,7 @@ class MessageHandler implements MessageComponentInterface
             $movesEntity->setSan($msgArray['san']);
             $movesEntity->setLan($msgArray['lan']);
             $movesEntity->setFlags($msgArray['flags']);
+            $movesEntity->setMoveNumber($msgArray['moveNumber']);
             if (isset($msgArray['promotion'])) {
                 $movesEntity->setPromotion($msgArray['promotion']);
             }
