@@ -45,6 +45,9 @@ class Moves
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $flags = null;
 
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $promotion = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -166,6 +169,18 @@ class Moves
     public function setFlags(?string $flags): static
     {
         $this->flags = $flags;
+
+        return $this;
+    }
+
+    public function getPromotion(): ?string
+    {
+        return $this->promotion;
+    }
+
+    public function setPromotion(?string $promotion): static
+    {
+        $this->promotion = $promotion;
 
         return $this;
     }
