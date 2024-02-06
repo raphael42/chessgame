@@ -12,8 +12,10 @@ Steps to install the project
 
 - php bin/console doctrine:migrations:migrate
 
+- npm install
+
 - symfony server:start
 
 - In another terminal window : php bin/console run:websocket-server
 
-- To compile css, install sass (apt install sass) and run : sass --update public/assets/css/chess.scss:public/assets/css/chess.css --style compressed
+- In another terminal window : npm run watch
