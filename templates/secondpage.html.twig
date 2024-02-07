@@ -88,8 +88,14 @@
         </div>
         <div class="col-lg-3 col-md-12 col-sm-12">
             <div class="history">
+                <div class="row text-center">
+                    <div class="col-3 btn" id="history-start"><i class="bi bi-chevron-double-left"></i></div>
+                    <div class="col-3 btn" id="history-forward"><i class="bi bi-chevron-left"></i></div>
+                    <div class="col-3 btn" id="history-backward"><i class="bi bi-chevron-right"></i></div>
+                    <div class="col-3 btn" id="history-end"><i class="bi bi-chevron-double-right"></i></div>
+                </div>
                 {% for moveNumber, oneMove in arrMovesForHtml %}
-                    <div class="row move-{{ moveNumber }}">
+                    <div class="row move-{{ moveNumber }} text-center">
                         <div class="col-4">{{ moveNumber }}</div>
                         <div class="col-4 move-san-white-{{ moveNumber }}">{{ oneMove.san_white is defined ? oneMove.san_white }}</div>
                         <div class="col-4 move-san-black-{{ moveNumber }}">{{ oneMove.san_black is defined ? oneMove.san_black }}</div>
