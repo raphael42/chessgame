@@ -11,6 +11,7 @@
         var OPPONENTTIMELEFT = '{{ opponent.timeLeft }}';
         var IDGAME = '{{ idGame }}';
         var PIECESIMGURL = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
+        var MOVES = {{ arrMoves|json_encode|raw }};
     </script>
 
     {{ encore_entry_link_tags('gameJs') }}

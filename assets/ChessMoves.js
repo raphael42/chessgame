@@ -701,6 +701,12 @@ function placePieces() {
         }
         $('#' + k).html('<img class="piece ' + color + '" src="' + src + '" alt>');
     }
+
+    let lastMoveHistory = MOVES[MOVES.length - 1];
+    if (typeof lastMoveHistory !== 'undefined') {
+        $('#' + lastMoveHistory.square_from).addClass('last-move');
+        $('#' + lastMoveHistory.square_to).addClass('last-move');
+    }
 }
 
 // timer functions

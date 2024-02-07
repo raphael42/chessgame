@@ -33,16 +33,33 @@ class FirstController extends AbstractController
             'game' => $idGame,
         ]);
 
-        // $moves = $entityManager->getRepository(Entity\Moves::class)->findBy([
-        //     'game' => $idGame,
-        // ]);
+        $moves = $entityManager->getRepository(Entity\Moves::class)->findBy([
+            'game' => $idGame,
+        ]);
 
-        // echo '<pre><br><br><br><br><br><br><br><br>';var_dump($moves);echo '</pre>';
+        $arrMoves = [];
+        foreach ($moves as $oneMove) {
+            $arrMoves[] = [
+                'fen_before' => $oneMove->getFenBefore(),
+                'fen_after' => $oneMove->getFenAfter(),
+                'piece' => $oneMove->getPiece(),
+                'square_from' => $oneMove->getSquareFrom(),
+                'square_to' => $oneMove->getSquareTo(),
+                'san' => $oneMove->getSan(),
+                'lan' => $oneMove->getLan(),
+                'flags' => $oneMove->getFlags(),
+                'promotion' => $oneMove->getPromotion(),
+                'move_number' => $oneMove->getMoveNumber(),
+                'player_color' => $oneMove->getPlayer()->getColor(),
+                'player_id' => $oneMove->getPlayer()->getId(),
+            ];
+        }
 
         return $this->render('secondpage.html.twig', [
             'idGame' => $idGame,
             'player' => $player,
             'opponent' => $opponent,
+            'arrMoves' => $arrMoves,
             'fen' => $game->getFen(),
             'increment' => $game->getIncrement(),
         ]);
