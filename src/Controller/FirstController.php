@@ -38,6 +38,7 @@ class FirstController extends AbstractController
         ]);
 
         $arrMoves = [];
+        $arrMovesForHtml = [];
         foreach ($moves as $oneMove) {
             $arrMoves[] = [
                 'fen_before' => $oneMove->getFenBefore(),
@@ -53,6 +54,14 @@ class FirstController extends AbstractController
                 'player_color' => $oneMove->getPlayer()->getColor(),
                 'player_id' => $oneMove->getPlayer()->getId(),
             ];
+
+            if ($oneMove->getPlayer()->getColor() === 'white') {
+                $arrMovesForHtml[$oneMove->getMoveNumber()]['san_white'] = $oneMove->getSan();
+            }
+
+            if ($oneMove->getPlayer()->getColor() === 'black') {
+                $arrMovesForHtml[$oneMove->getMoveNumber()]['san_black'] = $oneMove->getSan();
+            }
         }
 
         return $this->render('secondpage.html.twig', [
@@ -60,6 +69,7 @@ class FirstController extends AbstractController
             'player' => $player,
             'opponent' => $opponent,
             'arrMoves' => $arrMoves,
+            'arrMovesForHtml' => $arrMovesForHtml,
             'fen' => $game->getFen(),
             'increment' => $game->getIncrement(),
         ]);
