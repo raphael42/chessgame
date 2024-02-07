@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -27,6 +29,14 @@ class Game
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date_insert = null;
+
+    #[ORM\OneToMany(mappedBy: 'game', targetEntity: Moves::class, orphanRemoval: true)]
+    private Collection $moves;
+
+    public function __construct()
+    {
+        $this->moves = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -89,6 +99,36 @@ class Game
     public function setDateInsert(\DateTimeInterface $date_insert): static
     {
         $this->date_insert = $date_insert;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Moves>
+     */
+    public function getMoves(): Collection
+    {
+        return $this->moves;
+    }
+
+    public function addMove(Moves $move): static
+    {
+        if (!$this->moves->contains($move)) {
+            $this->moves->add($move);
+            $move->setGame($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMove(Moves $move): static
+    {
+        if ($this->moves->removeElement($move)) {
+            // set the owning side to null (unless already changed)
+            if ($move->getGame() === $this) {
+                $move->setGame(null);
+            }
+        }
 
         return $this;
     }

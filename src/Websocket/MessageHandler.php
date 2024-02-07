@@ -87,23 +87,23 @@ class MessageHandler implements MessageComponentInterface
         }
 
         $microtimeNow = microtime(true);
-        if (isset($msgArray['fen'])) {
+        if (isset($msgArray['after'])) {
             $msgArray['timer'] = round($this->gameTimer);
-            $fenSplit = explode(' ', $msgArray['fen']);
+            $fenSplit = explode(' ', $msgArray['after']);
             // Second move and color black, start white timer
-            if ((int) $fenSplit[5] === 2 && $msgArray['color'] === 'black') {
+            if ((int) $fenSplit[5] === 2 && $msgArray['color'] === 'b') {
                 $this->whiteMicrotimeStart = $microtimeNow;
             }
 
             // Timers has started and black played, update his timer
-            if ((int) $fenSplit[5] > 2 && $msgArray['color'] === 'black') {
+            if ((int) $fenSplit[5] > 2 && $msgArray['color'] === 'b') {
                 $this->blackMicrotimeSpend += $microtimeNow - $this->blackMicrotimeStart - $this->gameIncrement;
                 $this->whiteMicrotimeStart = $microtimeNow;
                 $msgArray['timer'] = round($this->gameTimer - $this->blackMicrotimeSpend);
             }
 
             // Timers has started and white played, update his timer
-            if ((int) $fenSplit[5] >= 2 && $msgArray['color'] === 'white') {
+            if ((int) $fenSplit[5] >= 2 && $msgArray['color'] === 'w') {
                 $this->whiteMicrotimeSpend += $microtimeNow - $this->whiteMicrotimeStart - $this->gameIncrement;
                 $this->blackMicrotimeStart = $microtimeNow;
                 $msgArray['timer'] = round($this->gameTimer - $this->whiteMicrotimeSpend);
@@ -117,17 +117,39 @@ class MessageHandler implements MessageComponentInterface
             }
 
             // Save the new fen
-            $this->gameEntity->setFen($msgArray['fen']);
+            $this->gameEntity->setFen($msgArray['after']);
             $this->em->persist($this->gameEntity);
 
             // Update player turn timer
-            if ($msgArray['color'] === 'white') {
+            if ($msgArray['color'] === 'w') {
                 $this->playerWhiteEntity->setTimeLeft($this->gameTimer - $this->whiteMicrotimeSpend);
                 $this->em->persist($this->playerWhiteEntity);
             } else {
                 $this->playerBlackEntity->setTimeLeft($this->gameTimer - $this->blackMicrotimeSpend);
                 $this->em->persist($this->playerBlackEntity);
             }
+
+            // Save the move
+            $movesEntity = new Entity\Moves();
+            if ($msgArray['color'] === 'w') {
+                $movesEntity->setPlayer($this->playerWhiteEntity);
+            } else {
+                $movesEntity->setPlayer($this->playerBlackEntity);
+            }
+            $movesEntity->setGame($this->gameEntity);
+            $movesEntity->setFenBefore($msgArray['before']);
+            $movesEntity->setFenAfter($msgArray['after']);
+            $movesEntity->setPiece($msgArray['piece']);
+            $movesEntity->setSquareFrom($msgArray['from']);
+            $movesEntity->setSquareTo($msgArray['to']);
+            $movesEntity->setSan($msgArray['san']);
+            $movesEntity->setLan($msgArray['lan']);
+            $movesEntity->setFlags($msgArray['flags']);
+            $movesEntity->setMoveNumber($msgArray['moveNumber']);
+            if (isset($msgArray['promotion'])) {
+                $movesEntity->setPromotion($msgArray['promotion']);
+            }
+            $this->em->persist($movesEntity);
 
             $this->em->flush();
 

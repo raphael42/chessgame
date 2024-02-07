@@ -13,7 +13,6 @@ $(function() {
     });
 
     socket.addEventListener('message', function(e) {
-        console.log('message', e);
         var socketMessage = JSON.parse(e.data);
 
         if (typeof socketMessage.opponent_disconnect !== 'undefined' && socketMessage.opponent_disconnect === true) {
@@ -29,26 +28,18 @@ $(function() {
             if (fenTurnNumber >= 2 && typeof times === 'undefined') { // Timer must have started and is not started
                 if (fenSplit[1] === 'b') { // Black turn
                     if (PLAYERCOLOR === 'black') {
-                        // console.log('black timer', socketMessage);
                         // Set up player timer
-                        console.log('black turn and my color is black : update my black timer');
                         startTimer('player', socketMessage.blackMicrotimeSpend);
                     } else {
-                        // console.log('black timer', socketMessage);
                         // Set up opponent timer
-                        console.log('black turn and my color is white : update his black timer');
                         startTimer('opponent', null, socketMessage.blackMicrotimeSpend);
                     }
                 } else { // White turn
                     if (PLAYERCOLOR === 'white') {
-                        // console.log('white timer', socketMessage);
                         // Set up player timer
-                        console.log('white turn and my color is white : update my white timer');
                         startTimer('player', socketMessage.whiteMicrotimeSpend);
                     } else {
-                        // console.log('white timer', socketMessage);
                         // Set up opponent timer
-                        console.log('white turn and my color is black : update his black timer');
                         startTimer('opponent', null, socketMessage.whiteMicrotimeSpend);
                     }
                 }
@@ -195,6 +186,19 @@ $(function() {
                     switchTurn();
                 }
             }
+        }
+
+        if (socketMessage.color === 'w') { // White play, make a new line
+            let htmlMoveRow = '' +
+            '<div class="row move-' + socketMessage.moveNumber + '">' +
+                '<div class="col-4">' + socketMessage.moveNumber + '</div>' +
+                '<div class="col-4 move-san-white-' + socketMessage.moveNumber + '">' + socketMessage.san + '</div>' +
+                '<div class="col-4 move-san-black-' + socketMessage.moveNumber + '"></div>' +
+            '</div>';
+
+            $('.history').append(htmlMoveRow);
+        } else { // Black play, complete the line
+            $('.history').find('.move-san-black-' + socketMessage.moveNumber).html(socketMessage.san);
         }
 
         $('.chess-table.last-move').each(function() {
@@ -429,6 +433,8 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
     var wasInCheck = chess.inCheck();
     var moving = null;
 
+    var moveNumber = chess.moveNumber();
+
     try {
         moving = chess.move({
             from: squareIdFrom,
@@ -514,21 +520,24 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
 
         let historyVerbose = chess.history({verbose: true});
         let lastMoveHistory = historyVerbose[historyVerbose.length - 1];
-        console.log(lastMoveHistory);
+        lastMoveHistory['idGame'] = IDGAME;
+        lastMoveHistory['moveNumber'] = moveNumber;
 
-        var movePiece = {
-            idGame: IDGAME,
-            from: squareIdFrom,
-            to: squareIdTo,
-            color: PLAYERCOLOR,
-            fen: chess.fen(),
-            flag: moving.flags,
-            promotion: moving.promotion,
-            // timer: getSecondsWithTime($('#timer-player').text(), ':'),
-        };
-        console.log(movePiece);
+        if (moving.color === 'w') { // White play, make a new line
+            let htmlMoveRow = '' +
+            '<div class="row move-' + lastMoveHistory.moveNumber + '">' +
+                '<div class="col-4">' + lastMoveHistory.moveNumber + '</div>' +
+                '<div class="col-4 move-san-white-' + lastMoveHistory.moveNumber + '">' + lastMoveHistory.san + '</div>' +
+                '<div class="col-4 move-san-black-' + lastMoveHistory.moveNumber + '"></div>' +
+            '</div>';
+
+            $('.history').append(htmlMoveRow);
+        } else { // Black play, complete the line
+            $('.history').find('.move-san-black-' + lastMoveHistory.moveNumber).html(lastMoveHistory.san);
+        }
+
         try {
-            socket.send(JSON.stringify(movePiece));
+            socket.send(JSON.stringify(lastMoveHistory));
         } catch (error) {
             console.log('Socket error', error);
         }
@@ -692,6 +701,12 @@ function placePieces() {
         }
         $('#' + k).html('<img class="piece ' + color + '" src="' + src + '" alt>');
     }
+
+    let lastMoveHistory = MOVES[MOVES.length - 1];
+    if (typeof lastMoveHistory !== 'undefined') {
+        $('#' + lastMoveHistory.square_from).addClass('last-move');
+        $('#' + lastMoveHistory.square_to).addClass('last-move');
+    }
 }
 
 // timer functions
@@ -719,7 +734,6 @@ function switchTurn() {
     if (typeof times !== 'undefined') { // undefined the first moves, when the timer is not started yet
         times[turn] += parseInt(INCREMENT);
     }
-    console.log(times);
     if (turn === 'player') {
         turn = 'opponent';
     } else {
@@ -728,7 +742,6 @@ function switchTurn() {
 }
 
 function updateTime(playerTurn, time) {
-    console.log(playerTurn, time);
     $('#timer-' + playerTurn).text(getTime(time));
 
     return;

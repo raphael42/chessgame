@@ -27,6 +27,14 @@ class Player
     #[ORM\Column(type: "integer", nullable: true)]
     private $time_left;
 
+    #[ORM\OneToMany(mappedBy: 'player', targetEntity: Moves::class, orphanRemoval: true)]
+    private Collection $moves;
+
+    public function __construct()
+    {
+        $this->moves = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -93,6 +101,36 @@ class Player
     public function setGame(?game $game): static
     {
         $this->game = $game;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Moves>
+     */
+    public function getMoves(): Collection
+    {
+        return $this->moves;
+    }
+
+    public function addMove(Moves $move): static
+    {
+        if (!$this->moves->contains($move)) {
+            $this->moves->add($move);
+            $move->setPlayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMove(Moves $move): static
+    {
+        if ($this->moves->removeElement($move)) {
+            // set the owning side to null (unless already changed)
+            if ($move->getPlayer() === $this) {
+                $move->setPlayer(null);
+            }
+        }
 
         return $this;
     }

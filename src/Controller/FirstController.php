@@ -33,10 +33,43 @@ class FirstController extends AbstractController
             'game' => $idGame,
         ]);
 
+        $moves = $entityManager->getRepository(Entity\Moves::class)->findBy([
+            'game' => $idGame,
+        ]);
+
+        $arrMoves = [];
+        $arrMovesForHtml = [];
+        foreach ($moves as $oneMove) {
+            $arrMoves[] = [
+                'fen_before' => $oneMove->getFenBefore(),
+                'fen_after' => $oneMove->getFenAfter(),
+                'piece' => $oneMove->getPiece(),
+                'square_from' => $oneMove->getSquareFrom(),
+                'square_to' => $oneMove->getSquareTo(),
+                'san' => $oneMove->getSan(),
+                'lan' => $oneMove->getLan(),
+                'flags' => $oneMove->getFlags(),
+                'promotion' => $oneMove->getPromotion(),
+                'move_number' => $oneMove->getMoveNumber(),
+                'player_color' => $oneMove->getPlayer()->getColor(),
+                'player_id' => $oneMove->getPlayer()->getId(),
+            ];
+
+            if ($oneMove->getPlayer()->getColor() === 'white') {
+                $arrMovesForHtml[$oneMove->getMoveNumber()]['san_white'] = $oneMove->getSan();
+            }
+
+            if ($oneMove->getPlayer()->getColor() === 'black') {
+                $arrMovesForHtml[$oneMove->getMoveNumber()]['san_black'] = $oneMove->getSan();
+            }
+        }
+
         return $this->render('secondpage.html.twig', [
             'idGame' => $idGame,
             'player' => $player,
             'opponent' => $opponent,
+            'arrMoves' => $arrMoves,
+            'arrMovesForHtml' => $arrMovesForHtml,
             'fen' => $game->getFen(),
             'increment' => $game->getIncrement(),
         ]);
