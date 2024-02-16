@@ -8,6 +8,8 @@ $(function() {
     const socket = new WebSocket('ws://localhost:3001');
     const chess = new Chess(FEN);
 
+    var HISTORYINDEX = null;
+
     socket.addEventListener('open', function(e) {
         console.log('open', e);
     });
@@ -188,17 +190,19 @@ $(function() {
             }
         }
 
+        $('.history').find('.last-history-move').removeClass('last-history-move');
         if (socketMessage.color === 'w') { // White play, make a new line
             let htmlMoveRow = '' +
             '<div class="row move-' + socketMessage.moveNumber + '">' +
                 '<div class="col-4">' + socketMessage.moveNumber + '</div>' +
-                '<div class="col-4 move-san-white-' + socketMessage.moveNumber + '">' + socketMessage.san + '</div>' +
+                '<div class="col-4 move-san-white-' + socketMessage.moveNumber + ' last-history-move">' + socketMessage.san + '</div>' +
                 '<div class="col-4 move-san-black-' + socketMessage.moveNumber + '"></div>' +
             '</div>';
 
             $('.history').append(htmlMoveRow);
         } else { // Black play, complete the line
             $('.history').find('.move-san-black-' + socketMessage.moveNumber).html(socketMessage.san);
+            $('.history').find('.move-san-black-' + socketMessage.moveNumber).addClass('last-history-move');
         }
 
         $('.chess-table.last-move').each(function() {
@@ -452,17 +456,44 @@ $(function() {
             });
         }
 
+        console.log(allHistory);
+
         if ($(this).attr('id') === 'history-start') {
             placePieces(allHistory[0].before);
         } else if ($(this).attr('id') === 'history-end') {
             placePieces(allHistory[allHistory.length - 1].after);
         } else if ($(this).attr('id') === 'history-backward') {
-            // TODO
-        } else if ($(this).attr('id') === 'history-frontward') {
-            // TODO
-        }
+            if (HISTORYINDEX === null) {
+                HISTORYINDEX = allHistory.length - 1;
+            } else if (HISTORYINDEX > 0) {
+                HISTORYINDEX--;
+            }
+            console.log(HISTORYINDEX);
+            console.log(allHistory[HISTORYINDEX].before);
+            console.log(allHistory[HISTORYINDEX].after);
 
-        console.log(allHistory);
+            if (typeof allHistory[HISTORYINDEX] === 'undefined') {
+                return;
+            }
+
+            placePieces(allHistory[HISTORYINDEX].before);
+        } else if ($(this).attr('id') === 'history-forward') {
+            if (HISTORYINDEX === null) {
+                HISTORYINDEX = allHistory.length - 1;
+            // } else if (allHistory.length - 1 <= HISTORYINDEX) {
+            } else {
+                HISTORYINDEX++;
+            }
+            console.log(HISTORYINDEX);
+            console.log(allHistory[HISTORYINDEX].before);
+            console.log(allHistory[HISTORYINDEX].after);
+
+            if (typeof allHistory[HISTORYINDEX] === 'undefined') {
+                return;
+            }
+
+            placePieces(allHistory[HISTORYINDEX].after);
+        }
     });
 });
 
@@ -472,6 +503,8 @@ placePieces(FEN);
 setUpTimer();
 
 function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
+    HISTORYINDEX = null;
+
     var piecesPromotion = {
         'r': 'rook',
         'n': 'knight',
@@ -572,17 +605,19 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
         lastMoveHistory['idGame'] = IDGAME;
         lastMoveHistory['moveNumber'] = moveNumber;
 
+        $('.history').find('.last-history-move').removeClass('last-history-move');
         if (moving.color === 'w') { // White play, make a new line
             let htmlMoveRow = '' +
             '<div class="row move-' + lastMoveHistory.moveNumber + ' text-center">' +
                 '<div class="col-4">' + lastMoveHistory.moveNumber + '</div>' +
-                '<div class="col-4 move-san-white-' + lastMoveHistory.moveNumber + '">' + lastMoveHistory.san + '</div>' +
+                '<div class="col-4 move-san-white-' + lastMoveHistory.moveNumber + ' last-history-move">' + lastMoveHistory.san + '</div>' +
                 '<div class="col-4 move-san-black-' + lastMoveHistory.moveNumber + '"></div>' +
             '</div>';
 
             $('.history').append(htmlMoveRow);
         } else { // Black play, complete the line
             $('.history').find('.move-san-black-' + lastMoveHistory.moveNumber).html(lastMoveHistory.san);
+            $('.history').find('.move-san-black-' + lastMoveHistory.moveNumber).addClass('last-history-move');
         }
 
         try {
@@ -828,9 +863,9 @@ function startTimer(playerTurn, playerTime, opponentTime) {
             clearInterval(timer);
             timer = false;
 
-            if ((turn === 'player' && playerColor === 'white') || (turn === 'opponent' && playerColor === 'black')) {
+            if ((turn === 'player' && PLAYERCOLOR === 'white') || (turn === 'opponent' && PLAYERCOLOR === 'black')) {
                 setWinner('noirs');
-            } else if ((turn === 'player' && playerColor === 'black') || (turn === 'opponent' && playerColor === 'white')) {
+            } else if ((turn === 'player' && PLAYERCOLOR === 'black') || (turn === 'opponent' && PLAYERCOLOR === 'white')) {
                 setWinner('blancs');
             }
         }
