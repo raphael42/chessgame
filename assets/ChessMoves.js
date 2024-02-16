@@ -420,7 +420,56 @@ $(function() {
             }
         }
     });
+
+    $('.history-button').on('click', function() {
+        let allHistory = [];
+        for (let i in MOVES) {
+            allHistory.push({
+                'after': MOVES[i].fen_after,
+                'before': MOVES[i].fen_before,
+                'color': MOVES[i].player_color,
+                'flags': MOVES[i].flags,
+                'from': MOVES[i].square_from,
+                'lan': MOVES[i].lan,
+                'piece': MOVES[i].piece,
+                'san': MOVES[i].san,
+                'to': MOVES[i].square_to,
+            });
+        }
+
+        let chessHistory = chess.history({verbose: true});
+        for (let i in chessHistory) {
+            allHistory.push({
+                'after': chessHistory[i].after,
+                'before': chessHistory[i].before,
+                'color': chessHistory[i].color,
+                'flags': chessHistory[i].flags,
+                'from': chessHistory[i].from,
+                'lan': chessHistory[i].lan,
+                'piece': chessHistory[i].piece,
+                'san': chessHistory[i].san,
+                'to': chessHistory[i].to,
+            });
+        }
+
+        if ($(this).attr('id') === 'history-start') {
+            placePieces(allHistory[0].before);
+        } else if ($(this).attr('id') === 'history-end') {
+            placePieces(allHistory[allHistory.length - 1].after);
+        } else if ($(this).attr('id') === 'history-backward') {
+            // TODO
+        } else if ($(this).attr('id') === 'history-frontward') {
+            // TODO
+        }
+
+        console.log(allHistory);
+    });
 });
+
+var turn = null;
+var times, timer;
+placePieces(FEN);
+setUpTimer();
 
 function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
     var piecesPromotion = {
@@ -525,7 +574,7 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
 
         if (moving.color === 'w') { // White play, make a new line
             let htmlMoveRow = '' +
-            '<div class="row move-' + lastMoveHistory.moveNumber + '">' +
+            '<div class="row move-' + lastMoveHistory.moveNumber + ' text-center">' +
                 '<div class="col-4">' + lastMoveHistory.moveNumber + '</div>' +
                 '<div class="col-4 move-san-white-' + lastMoveHistory.moveNumber + '">' + lastMoveHistory.san + '</div>' +
                 '<div class="col-4 move-san-black-' + lastMoveHistory.moveNumber + '"></div>' +
@@ -596,39 +645,22 @@ function promotionPiece(callback) {
 function getKingPosition(fen, color) {
     var tmp = fen.split(' ');
     var tmp2 = tmp[0].split('/');
-
-    var piecesLabel = {
-        'r': 'black-rook',
-        'n': 'black-knight',
-        'b': 'black-bishop',
-        'q': 'black-queen',
-        'k': 'black-king',
-        'p': 'black-pawn',
-        'R': 'white-rook',
-        'N': 'white-knight',
-        'B': 'white-bishop',
-        'Q': 'white-queen',
-        'K': 'white-king',
-        'P': 'white-pawn',
-    };
-
     var column = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     var columnKey = 0;
     var line = 8;
-    var chessboard = [];
-    var atom = '';
+    var count = '';
 
     for (var i in tmp2) {
-        atom = tmp2[i].split('');
+        count = tmp2[i].split('');
         columnKey = 0;
-        for (var j in atom) {
-            if ($.inArray(atom[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) {
-                if ((color === 'white' && atom[j] === 'K') || (color === 'black' && atom[j] === 'k')) {
+        for (var j in count) {
+            if ($.inArray(count[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) {
+                if ((color === 'white' && count[j] === 'K') || (color === 'black' && count[j] === 'k')) {
                     return column[columnKey] + line;
                 }
                 columnKey += 1;
             } else {
-                columnKey += parseInt(atom[j]);
+                columnKey += parseInt(count[j]);
             }
         }
         line--;
@@ -637,8 +669,15 @@ function getKingPosition(fen, color) {
     return null;
 }
 
-function placePieces() {
-    var tmp = FEN.split(' ');
+function placePieces(fen) {
+    // First remove all pieces if there is some
+    $('.chess-table').each(function() {
+        if ($(this).html() !== '') {
+            $(this).empty();
+        }
+    });
+
+    var tmp = fen.split(' ');
     var tmp2 = tmp[0].split('/');
 
     if (PLAYERCOLOR === 'white') {
@@ -674,16 +713,16 @@ function placePieces() {
     var columnKey = 0;
     var line = 8;
     var chessboard = [];
-    var atom = '';
+    var count = '';
     for (var i in tmp2) {
-        atom = tmp2[i].split('');
+        count = tmp2[i].split('');
         columnKey = 0;
-        for (var j in atom) {
-            if ($.inArray(atom[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) {
-                chessboard[column[columnKey] + line] = piecesLabel[atom[j]];
+        for (var j in count) {
+            if ($.inArray(count[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) {
+                chessboard[column[columnKey] + line] = piecesLabel[count[j]];
                 columnKey += 1;
             } else {
-                columnKey += parseInt(atom[j]);
+                columnKey += parseInt(count[j]);
             }
         }
         line--;
@@ -809,7 +848,4 @@ function setWinner(playerColor) {
     $('#player-turn').text('Victoire des '+ playerColor +' !');
 }
 
-var turn = null;
-var times, timer;
-placePieces();
-setUpTimer();
+// history functions

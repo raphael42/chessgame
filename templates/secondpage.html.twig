@@ -11,7 +11,7 @@
         var OPPONENTTIMELEFT = '{{ opponent.timeLeft }}';
         var IDGAME = '{{ idGame }}';
         var PIECESIMGURL = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
-        var MOVES = {{ arrMoves|json_encode|raw }};
+        var MOVES = {{ arrMovesForJS|json_encode|raw }};
     </script>
 
     {{ encore_entry_link_tags('gameJs') }}
@@ -89,10 +89,10 @@
         <div class="col-lg-3 col-md-12 col-sm-12">
             <div class="history">
                 <div class="row text-center">
-                    <div class="col-3 btn" id="history-start"><i class="bi bi-chevron-double-left"></i></div>
-                    <div class="col-3 btn" id="history-forward"><i class="bi bi-chevron-left"></i></div>
-                    <div class="col-3 btn" id="history-backward"><i class="bi bi-chevron-right"></i></div>
-                    <div class="col-3 btn" id="history-end"><i class="bi bi-chevron-double-right"></i></div>
+                    <div class="col-3 btn history-button" id="history-start"><i class="bi bi-chevron-double-left"></i></div>
+                    <div class="col-3 btn history-button" id="history-backward"><i class="bi bi-chevron-left"></i></div>
+                    <div class="col-3 btn history-button" id="history-forward"><i class="bi bi-chevron-right"></i></div>
+                    <div class="col-3 btn history-button" id="history-end"><i class="bi bi-chevron-double-right"></i></div>
                 </div>
                 {% for moveNumber, oneMove in arrMovesForHtml %}
                     <div class="row move-{{ moveNumber }} text-center">
