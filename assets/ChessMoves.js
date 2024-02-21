@@ -194,14 +194,14 @@ $(function() {
             let htmlMoveRow = '' +
             '<div class="row move-' + socketMessage.moveNumber + ' text-center">' +
                 '<div class="col-4">' + socketMessage.moveNumber + '</div>' +
-                '<div class="col-4 move-san-white-' + socketMessage.moveNumber + ' last-history-move">' + socketMessage.san + '</div>' +
-                '<div class="col-4 move-san-black-' + socketMessage.moveNumber + '"></div>' +
+                '<div class="col-4 move-san-w-' + socketMessage.moveNumber + ' last-history-move">' + socketMessage.san + '</div>' +
+                '<div class="col-4 move-san-b-' + socketMessage.moveNumber + '"></div>' +
             '</div>';
 
             $('.history').append(htmlMoveRow);
         } else { // Black play, complete the line
-            $('.history').find('.move-san-black-' + socketMessage.moveNumber).html(socketMessage.san);
-            $('.history').find('.move-san-black-' + socketMessage.moveNumber).addClass('last-history-move');
+            $('.history').find('.move-san-b-' + socketMessage.moveNumber).html(socketMessage.san);
+            $('.history').find('.move-san-b-' + socketMessage.moveNumber).addClass('last-history-move');
         }
 
         $('.chess-table.last-move').each(function() {
@@ -432,6 +432,8 @@ $(function() {
             $(this).removeClass('last-move');
         });
 
+        $('.last-history-move').removeClass('last-history-move');
+
         for (let i in MOVES) {
             allHistory.push({
                 'after': MOVES[i].fen_after,
@@ -470,6 +472,11 @@ $(function() {
 
             $('#' + allHistory[allHistory.length - 1].from).addClass('last-move');
             $('#' + allHistory[allHistory.length - 1].to).addClass('last-move');
+
+            // We need to use the before for this one
+            let fenSplit = (allHistory[allHistory.length - 1].before).split(' ');
+            // fenSplit[1] is color and fenSplit[5] is the move number
+            $('.move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
         } else if (self.attr('id') === 'history-backward') { // 1 step backward
             if (HISTORYINDEX === null) {
                 HISTORYINDEX = allHistory.length - 2;
@@ -488,6 +495,11 @@ $(function() {
                 fen = allHistory[HISTORYINDEX].after
                 $('#' + allHistory[HISTORYINDEX].from).addClass('last-move');
                 $('#' + allHistory[HISTORYINDEX].to).addClass('last-move');
+
+                // We need to use the before for this one
+                let fenSplit = (allHistory[HISTORYINDEX].before).split(' ');
+                // fenSplit[1] is color and fenSplit[5] is the move number
+                $('.move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
             }
 
             placePieces(fen, true);
@@ -505,7 +517,10 @@ $(function() {
             $('#' + allHistory[HISTORYINDEX].from).addClass('last-move');
             $('#' + allHistory[HISTORYINDEX].to).addClass('last-move');
 
-            // TODO : change the last-history-move class to the correct place
+            // We need to use the before for this one
+            let fenSplit = (allHistory[HISTORYINDEX].before).split(' ');
+            // fenSplit[1] is color and fenSplit[5] is the move number
+            $('.move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
 
             placePieces(allHistory[HISTORYINDEX].after, true);
         }
@@ -625,14 +640,14 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
             let htmlMoveRow = '' +
             '<div class="row move-' + lastMoveHistory.moveNumber + ' text-center">' +
                 '<div class="col-4">' + lastMoveHistory.moveNumber + '</div>' +
-                '<div class="col-4 move-san-white-' + lastMoveHistory.moveNumber + ' last-history-move">' + lastMoveHistory.san + '</div>' +
-                '<div class="col-4 move-san-black-' + lastMoveHistory.moveNumber + '"></div>' +
+                '<div class="col-4 move-san-w-' + lastMoveHistory.moveNumber + ' last-history-move">' + lastMoveHistory.san + '</div>' +
+                '<div class="col-4 move-san-b-' + lastMoveHistory.moveNumber + '"></div>' +
             '</div>';
 
             $('.history').append(htmlMoveRow);
         } else { // Black play, complete the line
-            $('.history').find('.move-san-black-' + lastMoveHistory.moveNumber).html(lastMoveHistory.san);
-            $('.history').find('.move-san-black-' + lastMoveHistory.moveNumber).addClass('last-history-move');
+            $('.history').find('.move-san-b-' + lastMoveHistory.moveNumber).html(lastMoveHistory.san);
+            $('.history').find('.move-san-b-' + lastMoveHistory.moveNumber).addClass('last-history-move');
         }
 
         try {
