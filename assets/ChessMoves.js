@@ -5,6 +5,7 @@ import { Chess } from 'chess.js';
 require('bootstrap');
 
 var HISTORYINDEX = null;
+var HISTORYINVIEW = false;
 $(function() {
     const socket = new WebSocket('ws://localhost:3001');
     const chess = new Chess(FEN);
@@ -464,9 +465,11 @@ $(function() {
         }
 
         if (self.attr('id') === 'history-start') { // Go to the begening of the game
+            HISTORYINVIEW = true;
             HISTORYINDEX = -1;
             placePieces(allHistory[0].before, true);
         } else if (self.attr('id') === 'history-end') { // Go to the end of the game
+            HISTORYINVIEW = false;
             HISTORYINDEX = allHistory.length - 1;
             placePieces(allHistory[allHistory.length - 1].after, true);
 
@@ -478,6 +481,7 @@ $(function() {
             // fenSplit[1] is color and fenSplit[5] is the move number
             $('.move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
         } else if (self.attr('id') === 'history-backward') { // 1 step backward
+            HISTORYINVIEW = true;
             if (HISTORYINDEX === null) {
                 HISTORYINDEX = allHistory.length - 2;
             } else if (HISTORYINDEX > -1) {
@@ -504,6 +508,7 @@ $(function() {
 
             placePieces(fen, true);
         } else if (self.attr('id') === 'history-forward') { // 1 step forward
+            HISTORYINVIEW = true;
             if (HISTORYINDEX === null) {
                 HISTORYINDEX = allHistory.length - 1;
             } else if (typeof allHistory[HISTORYINDEX + 1] !== 'undefined') {
@@ -512,6 +517,11 @@ $(function() {
 
             if (typeof allHistory[HISTORYINDEX] === 'undefined') {
                 return;
+            }
+
+            // Last move, history not in view
+            if (HISTORYINDEX === allHistory.length - 1) {
+                HISTORYINVIEW = false;
             }
 
             $('#' + allHistory[HISTORYINDEX].from).addClass('last-move');
