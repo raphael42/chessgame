@@ -49,47 +49,50 @@ $(function() {
             return;
         }
 
-        if (socketMessage.flag === 'k') { // king side castelling
-            if (socketMessage.color === 'white') {
-                var img = $('#h1').html();
-                $('#h1').empty();
-                $('#f1').html(img);
-                $('#f1 img').draggable({
-                    revert: true,
-                });
-            } else if (socketMessage.color === 'black') {
-                var img = $('#h8').html();
-                $('#h8').empty();
-                $('#f8').html(img);
-                $('#f8 img').draggable({
-                    revert: true,
-                });
+        // Display the move only if the player is not watching the history
+        if (!HISTORYINVIEW) {
+            if (socketMessage.flag === 'k') { // king side castelling
+                if (socketMessage.color === 'w') {
+                    var img = $('#h1').html();
+                    $('#h1').empty();
+                    $('#f1').html(img);
+                    $('#f1 img').draggable({
+                        revert: true,
+                    });
+                } else if (socketMessage.color === 'b') {
+                    var img = $('#h8').html();
+                    $('#h8').empty();
+                    $('#f8').html(img);
+                    $('#f8 img').draggable({
+                        revert: true,
+                    });
+                }
+            } else if (socketMessage.flag === 'q') { // queen side castelling
+                if (socketMessage.color === 'w') {
+                    var img = $('#a1').html();
+                    $('#a1').empty();
+                    $('#d1').html(img);
+                    $('#d1 img').draggable({
+                        revert: true,
+                    });
+                } else if (socketMessage.color === 'b') {
+                    var img = $('#a8').html();
+                    $('#a8').empty();
+                    $('#d8').html(img);
+                    $('#d8 img').draggable({
+                        revert: true,
+                    });
+                }
+            } else if (socketMessage.flag === 'e') { // en passant capture
+                if (socketMessage.color === 'w') {
+                    var tmp = (socketMessage.to).split('');
+                    var idPawnCatured = tmp[0] + (parseInt(tmp[1]) - 1);
+                } else if (socketMessage.color === 'b') {
+                    var tmp = (socketMessage.to).split('');
+                    var idPawnCatured = tmp[0] + (parseInt(tmp[1]) + 1);
+                }
+                $('#' + idPawnCatured).empty();
             }
-        } else if (socketMessage.flag === 'q') { // queen side castelling
-            if (socketMessage.color === 'white') {
-                var img = $('#a1').html();
-                $('#a1').empty();
-                $('#d1').html(img);
-                $('#d1 img').draggable({
-                    revert: true,
-                });
-            } else if (socketMessage.color === 'black') {
-                var img = $('#a8').html();
-                $('#a8').empty();
-                $('#d8').html(img);
-                $('#d8 img').draggable({
-                    revert: true,
-                });
-            }
-        } else if (socketMessage.flag === 'e') { // en passant capture
-            if (socketMessage.color === 'white') {
-                var tmp = (socketMessage.to).split('');
-                var idPawnCatured = tmp[0] + (parseInt(tmp[1]) - 1);
-            } else if (socketMessage.color === 'black') {
-                var tmp = (socketMessage.to).split('');
-                var idPawnCatured = tmp[0] + (parseInt(tmp[1]) + 1);
-            }
-            $('#' + idPawnCatured).empty();
         }
 
         if (typeof socketMessage.promotion !== 'undefined' && socketMessage.promotion !== null) { // promotion
@@ -100,11 +103,15 @@ $(function() {
                 'q': 'queen',
             };
 
-            let src = PIECESIMGURL;
-            src = src.replace('chessboard', piecesPromotion[socketMessage.promotion]);
-            src = src.replace('playerColor', socketMessage.color);
-            $('#' + socketMessage.from).empty();
-            $('#' + socketMessage.to).html('<img class="piece ' + socketMessage.color + '" src="' + src + '" alt>');
+            // Display the move only if the player is not watching the history
+            if (!HISTORYINVIEW) {
+                let src = PIECESIMGURL;
+                src = src.replace('chessboard', piecesPromotion[socketMessage.promotion]);
+                let tmpColor = socketMessage.color === 'w' ? 'white' : 'black';
+                src = src.replace('playerColor', tmpColor);
+                $('#' + socketMessage.from).empty();
+                $('#' + socketMessage.to).html('<img class="piece ' + tmpColor + '" src="' + src + '" alt>');
+            }
 
             $('.in-check').removeClass('in-check');
 
@@ -131,19 +138,22 @@ $(function() {
             }
 
             if (chess.inCheck() === true) {
-                if (socketMessage.color === 'white') {
-                    var kingposition = getKingPosition(socketMessage.fen, 'black');
+                if (socketMessage.color === 'w') {
+                    var kingposition = getKingPosition(socketMessage.after, 'black');
                     $('#' + kingposition).addClass('in-check');
-                } else if (socketMessage.color === 'black') {
-                    var kingposition = getKingPosition(socketMessage.fen, 'white');
+                } else if (socketMessage.color === 'b') {
+                    var kingposition = getKingPosition(socketMessage.after, 'white');
                     $('#' + kingposition).addClass('in-check');
                 }
             }
             switchTurn();
         } else {
-            var img = $('#' + socketMessage.from).html();
-            $('#' + socketMessage.from).empty();
-            $('#' + socketMessage.to).html(img);
+            // Display the move only if the player is not watching the history
+            if (!HISTORYINVIEW) {
+                var img = $('#' + socketMessage.from).html();
+                $('#' + socketMessage.from).empty();
+                $('#' + socketMessage.to).html(img);
+            }
 
             $('.in-check').removeClass('in-check');
 
@@ -161,27 +171,30 @@ $(function() {
             }
 
             if (chess.isCheckmate() === true) {
-                if (socketMessage.color === 'white') {
+                if (socketMessage.color === 'w') {
                     setWinner('blancs');
-                } else if (socketMessage.color === 'black') {
+                } else if (socketMessage.color === 'b') {
                     setWinner('noirs');
                 }
             }
 
-            if (chess.inCheck() === true) {
-                if (socketMessage.color === 'white') {
-                    var kingposition = getKingPosition(socketMessage.fen, 'black');
-                    $('#' + kingposition).addClass('in-check');
-                } else if (socketMessage.color === 'black') {
-                    var kingposition = getKingPosition(socketMessage.fen, 'white');
-                    $('#' + kingposition).addClass('in-check');
+            console.log(socketMessage);
+            if (!HISTORYINVIEW) {
+                if (chess.inCheck() === true) {
+                    if (socketMessage.color === 'w') {
+                        var kingposition = getKingPosition(socketMessage.after, 'black');
+                        $('#' + kingposition).addClass('in-check');
+                    } else if (socketMessage.color === 'b') {
+                        var kingposition = getKingPosition(socketMessage.after, 'white');
+                        $('#' + kingposition).addClass('in-check');
+                    }
                 }
             }
 
-            if (typeof socketMessage.fen !== 'undefined') {
-                var tmp = socketMessage.fen.split(' ');
+            if (typeof socketMessage.after !== 'undefined') {
+                var tmp = socketMessage.after.split(' ');
                 var tmp2 = parseInt(tmp[5]);
-                if (tmp2 === 2 && socketMessage.color === 'black') {
+                if (tmp2 === 2 && socketMessage.color === 'b') {
                     startTimer('player');
                 } else {
                     updateTime('opponent', socketMessage.timer); // update time because of lantency
@@ -205,17 +218,20 @@ $(function() {
             $('.history').find('.move-san-b-' + socketMessage.moveNumber).addClass('last-history-move');
         }
 
-        $('.chess-table.last-move').each(function() {
-            $(this).removeClass('last-move');
-        });
-        $('#' + socketMessage.from).addClass('last-move');
-        $('#' + socketMessage.to).addClass('last-move');
+        if (!HISTORYINVIEW) {
+            $('.chess-table.last-move').each(function() {
+                $(this).removeClass('last-move');
+            });
+
+            $('#' + socketMessage.from).addClass('last-move');
+            $('#' + socketMessage.to).addClass('last-move');
+        }
 
         if (typeof socketMessage.idGame === 'undefined') {
             $('#player-turn').text('À votre tour !');
         }
 
-        // 2 squares premove, execute the move isntantly
+        // 2 squares premove, execute the move instantly
         if ($('.clicked-premove').length === 2) {
             let squareIdFrom = null;
             let squareIdTo = null;
@@ -261,6 +277,11 @@ $(function() {
     });
 
     $('#board').off().on('click', 'td', function() {
+        // If player is watching history, disable the possibility to move
+        if (HISTORYINVIEW) {
+            return;
+        }
+
         const self = $(this);
         var idSquare = $(this).attr('id');
 
@@ -361,6 +382,12 @@ $(function() {
     $('.piece.' + PLAYERCOLOR).draggable({
         revert: true,
         start: function(ev, ui) {
+            console.log('drag');
+            // If player is watching history, disable the possibility to move
+            if (HISTORYINVIEW) {
+                return;
+            }
+
             $('.chess-table.clicked-premove').removeClass('clicked-premove');
             const self = $(this);
             let playerTurn = chess.turn(); // Which player turn it is
@@ -394,6 +421,12 @@ $(function() {
 
     $('.chess-table').droppable({
         drop: function(ev, ui) {
+            console.log('drop');
+            // If player is watching history, disable the possibility to move
+            if (HISTORYINVIEW) {
+                return;
+            }
+
             let playerTurn = chess.turn(); // Which player turn it is
             if (
                 (PLAYERCOLOR === 'white' && playerTurn === 'b') ||
