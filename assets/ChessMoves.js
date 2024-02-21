@@ -4,11 +4,10 @@ import 'jquery-ui/ui/widgets/droppable';
 import { Chess } from 'chess.js';
 require('bootstrap');
 
+var HISTORYINDEX = null;
 $(function() {
     const socket = new WebSocket('ws://localhost:3001');
     const chess = new Chess(FEN);
-
-    var HISTORYINDEX = null;
 
     socket.addEventListener('open', function(e) {
         console.log('open', e);
@@ -193,7 +192,7 @@ $(function() {
         $('.history').find('.last-history-move').removeClass('last-history-move');
         if (socketMessage.color === 'w') { // White play, make a new line
             let htmlMoveRow = '' +
-            '<div class="row move-' + socketMessage.moveNumber + '">' +
+            '<div class="row move-' + socketMessage.moveNumber + ' text-center">' +
                 '<div class="col-4">' + socketMessage.moveNumber + '</div>' +
                 '<div class="col-4 move-san-white-' + socketMessage.moveNumber + ' last-history-move">' + socketMessage.san + '</div>' +
                 '<div class="col-4 move-san-black-' + socketMessage.moveNumber + '"></div>' +
@@ -426,7 +425,13 @@ $(function() {
     });
 
     $('.history-button').on('click', function() {
+        let self = $(this);
         let allHistory = [];
+
+        $('.chess-table.last-move').each(function() {
+            $(this).removeClass('last-move');
+        });
+
         for (let i in MOVES) {
             allHistory.push({
                 'after': MOVES[i].fen_after,
@@ -456,43 +461,53 @@ $(function() {
             });
         }
 
-        console.log(allHistory);
+        if (self.attr('id') === 'history-start') { // Go to the begening of the game
+            HISTORYINDEX = -1;
+            placePieces(allHistory[0].before, true);
+        } else if (self.attr('id') === 'history-end') { // Go to the end of the game
+            HISTORYINDEX = allHistory.length - 1;
+            placePieces(allHistory[allHistory.length - 1].after, true);
 
-        if ($(this).attr('id') === 'history-start') {
-            placePieces(allHistory[0].before);
-        } else if ($(this).attr('id') === 'history-end') {
-            placePieces(allHistory[allHistory.length - 1].after);
-        } else if ($(this).attr('id') === 'history-backward') {
+            $('#' + allHistory[allHistory.length - 1].from).addClass('last-move');
+            $('#' + allHistory[allHistory.length - 1].to).addClass('last-move');
+        } else if (self.attr('id') === 'history-backward') { // 1 step backward
             if (HISTORYINDEX === null) {
-                HISTORYINDEX = allHistory.length - 1;
-            } else if (HISTORYINDEX > 0) {
+                HISTORYINDEX = allHistory.length - 2;
+            } else if (HISTORYINDEX > -1) {
                 HISTORYINDEX--;
             }
-            console.log(HISTORYINDEX);
-            console.log(allHistory[HISTORYINDEX].before);
-            console.log(allHistory[HISTORYINDEX].after);
 
-            if (typeof allHistory[HISTORYINDEX] === 'undefined') {
+            if (typeof allHistory[HISTORYINDEX] === 'undefined' && HISTORYINDEX !== -1) {
                 return;
             }
 
-            placePieces(allHistory[HISTORYINDEX].before);
-        } else if ($(this).attr('id') === 'history-forward') {
+            let fen = null;
+            if (HISTORYINDEX === -1) {
+                fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+            } else {
+                fen = allHistory[HISTORYINDEX].after
+                $('#' + allHistory[HISTORYINDEX].from).addClass('last-move');
+                $('#' + allHistory[HISTORYINDEX].to).addClass('last-move');
+            }
+
+            placePieces(fen, true);
+        } else if (self.attr('id') === 'history-forward') { // 1 step forward
             if (HISTORYINDEX === null) {
                 HISTORYINDEX = allHistory.length - 1;
-            // } else if (allHistory.length - 1 <= HISTORYINDEX) {
-            } else {
+            } else if (typeof allHistory[HISTORYINDEX + 1] !== 'undefined') {
                 HISTORYINDEX++;
             }
-            console.log(HISTORYINDEX);
-            console.log(allHistory[HISTORYINDEX].before);
-            console.log(allHistory[HISTORYINDEX].after);
 
             if (typeof allHistory[HISTORYINDEX] === 'undefined') {
                 return;
             }
 
-            placePieces(allHistory[HISTORYINDEX].after);
+            $('#' + allHistory[HISTORYINDEX].from).addClass('last-move');
+            $('#' + allHistory[HISTORYINDEX].to).addClass('last-move');
+
+            // TODO : change the last-history-move class to the correct place
+
+            placePieces(allHistory[HISTORYINDEX].after, true);
         }
     });
 });
@@ -704,7 +719,7 @@ function getKingPosition(fen, color) {
     return null;
 }
 
-function placePieces(fen) {
+function placePieces(fen, noLastMove) {
     // First remove all pieces if there is some
     $('.chess-table').each(function() {
         if ($(this).html() !== '') {
@@ -776,10 +791,12 @@ function placePieces(fen) {
         $('#' + k).html('<img class="piece ' + color + '" src="' + src + '" alt>');
     }
 
-    let lastMoveHistory = MOVES[MOVES.length - 1];
-    if (typeof lastMoveHistory !== 'undefined') {
-        $('#' + lastMoveHistory.square_from).addClass('last-move');
-        $('#' + lastMoveHistory.square_to).addClass('last-move');
+    if (typeof noLastMove === 'undefined' || noLastMove !== true) {
+        let lastMoveHistory = MOVES[MOVES.length - 1];
+        if (typeof lastMoveHistory !== 'undefined') {
+            $('#' + lastMoveHistory.square_from).addClass('last-move');
+            $('#' + lastMoveHistory.square_to).addClass('last-move');
+        }
     }
 }
 

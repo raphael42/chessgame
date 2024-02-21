@@ -127,4 +127,8 @@
 .history {
     border: 1px solid black;
     height: 100%;
+
+    .last-history-move {
+        background-color: #a3d6a3;
+    }
 }
