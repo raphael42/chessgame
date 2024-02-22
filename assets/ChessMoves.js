@@ -56,32 +56,24 @@ $(function() {
                     var img = $('#h1').html();
                     $('#h1').empty();
                     $('#f1').html(img);
-                    $('#f1 img').draggable({
-                        revert: true,
-                    });
+                    setupDraggable(chess, '#f1 img');
                 } else if (socketMessage.color === 'b') {
                     var img = $('#h8').html();
                     $('#h8').empty();
                     $('#f8').html(img);
-                    $('#f8 img').draggable({
-                        revert: true,
-                    });
+                    setupDraggable(chess, '#f8 img');
                 }
             } else if (socketMessage.flag === 'q') { // queen side castelling
                 if (socketMessage.color === 'w') {
                     var img = $('#a1').html();
                     $('#a1').empty();
                     $('#d1').html(img);
-                    $('#d1 img').draggable({
-                        revert: true,
-                    });
+                    setupDraggable(chess, '#d1 img');
                 } else if (socketMessage.color === 'b') {
                     var img = $('#a8').html();
                     $('#a8').empty();
                     $('#d8').html(img);
-                    $('#d8 img').draggable({
-                        revert: true,
-                    });
+                    setupDraggable(chess, '#d8 img');
                 }
             } else if (socketMessage.flag === 'e') { // en passant capture
                 if (socketMessage.color === 'w') {
@@ -378,45 +370,7 @@ $(function() {
         }
     });
 
-    $('.piece.' + PLAYERCOLOR).draggable({
-        revert: true,
-        start: function(ev, ui) {
-            console.log('drag');
-            // If player is watching history, disable the possibility to move
-            if (HISTORYINVIEW) {
-                return;
-            }
-
-            $('.chess-table.clicked-premove').removeClass('clicked-premove');
-            const self = $(this);
-            let playerTurn = chess.turn(); // Which player turn it is
-            if (
-                (PLAYERCOLOR === 'white' && playerTurn === 'b') ||
-                (PLAYERCOLOR === 'black' && playerTurn === 'w')
-            ) { // If not the player turn, then make a premove
-                $(self).parent().addClass('clicked-premove');
-                $(self).parent().data('premove', 1);
-            } else {
-                $(self).parent().addClass('clicked');
-
-                var allPossibleMoves = chess.moves({
-                    verbose: true
-                });
-
-                for (var i in allPossibleMoves) {
-                    if (allPossibleMoves[i].from === $(self).parent().attr('id')) {
-                        $('#' + allPossibleMoves[i].to).addClass('possible-move');
-                    }
-                }
-            }
-        },
-        stop: function(ev, ui) {
-            $('.chess-table.clicked').removeClass('clicked');
-            $('.chess-table.possible-move').each(function() {
-                $(this).removeClass('possible-move');
-            });
-        }
-    });
+    setupDraggable(chess);
 
     $('.chess-table').droppable({
         drop: function(ev, ui) {
@@ -497,19 +451,11 @@ $(function() {
         }
 
         if (self.attr('id') === 'history-start') { // Go to the begening of the game
-            console.log('start');
             HISTORYINVIEW = true;
             HISTORYINDEX = -1;
             placePieces(allHistory[0].before, true);
         } else if (self.attr('id') === 'history-end') { // Go to the end of the game
             HISTORYINVIEW = false;
-
-            console.log('end');
-
-            // Set draggable back on all player color pieces
-            $('.piece.' + PLAYERCOLOR).draggable({
-                revert: true,
-            });
 
             HISTORYINDEX = allHistory.length - 1;
             placePieces(allHistory[allHistory.length - 1].after, true);
@@ -521,8 +467,10 @@ $(function() {
             let fenSplit = (allHistory[allHistory.length - 1].before).split(' ');
             // fenSplit[1] is color and fenSplit[5] is the move number
             $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
+
+            // Set draggable back on all player color pieces
+            setupDraggable(chess);
         } else if (self.attr('id') === 'history-backward') { // 1 step backward
-            console.log('backward');
             HISTORYINVIEW = true;
             if (HISTORYINDEX === null) {
                 HISTORYINDEX = allHistory.length - 2;
@@ -550,7 +498,6 @@ $(function() {
 
             placePieces(fen, true);
         } else if (self.attr('id') === 'history-forward') { // 1 step forward
-            console.log('forward');
             HISTORYINVIEW = true;
             if (HISTORYINDEX === null) {
                 HISTORYINDEX = allHistory.length - 1;
@@ -562,17 +509,9 @@ $(function() {
                 return;
             }
 
-            console.log(HISTORYINDEX);
-            console.log(allHistory.length - 1);
             // Last move, history not in view
             if (HISTORYINDEX === allHistory.length - 1) {
-                console.log('cccc');
                 HISTORYINVIEW = false;
-
-                // Set draggable back on all player color pieces
-                $('#b1 img').draggable({
-                    revert: true,
-                });
             }
 
             $('#' + allHistory[HISTORYINDEX].from).addClass('last-move');
@@ -584,6 +523,11 @@ $(function() {
             $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
 
             placePieces(allHistory[HISTORYINDEX].after, true);
+
+            // Set draggable back on all player color pieces if we set the last move
+            if (HISTORYINDEX === allHistory.length - 1) {
+                setupDraggable(chess);
+            }
         }
     });
 
@@ -597,6 +541,53 @@ var turn = null;
 var times, timer;
 placePieces(FEN);
 setUpTimer();
+
+function setupDraggable(chess, jQueryElement) {
+    let elementToDraggable = '.piece.' + PLAYERCOLOR;
+    if (typeof jQueryElement !== 'undefined') {
+        elementToDraggable = jQueryElement;
+    }
+
+    $(elementToDraggable).draggable({
+        revert: true,
+        start: function(ev, ui) {
+            console.log('drag');
+            // If player is watching history, disable the possibility to move
+            if (HISTORYINVIEW) {
+                return;
+            }
+
+            $('.chess-table.clicked-premove').removeClass('clicked-premove');
+            const self = $(this);
+            let playerTurn = chess.turn(); // Which player turn it is
+            if (
+                (PLAYERCOLOR === 'white' && playerTurn === 'b') ||
+                (PLAYERCOLOR === 'black' && playerTurn === 'w')
+            ) { // If not the player turn, then make a premove
+                $(self).parent().addClass('clicked-premove');
+                $(self).parent().data('premove', 1);
+            } else {
+                $(self).parent().addClass('clicked');
+
+                var allPossibleMoves = chess.moves({
+                    verbose: true
+                });
+
+                for (var i in allPossibleMoves) {
+                    if (allPossibleMoves[i].from === $(self).parent().attr('id')) {
+                        $('#' + allPossibleMoves[i].to).addClass('possible-move');
+                    }
+                }
+            }
+        },
+        stop: function(ev, ui) {
+            $('.chess-table.clicked').removeClass('clicked');
+            $('.chess-table.possible-move').each(function() {
+                $(this).removeClass('possible-move');
+            });
+        }
+    });
+}
 
 function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
     HISTORYINDEX = null;
@@ -642,32 +633,24 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
                 var img = $('#h1').html();
                 $('#h1').empty();
                 $('#f1').html(img);
-                $('#f1 img').draggable({
-                    revert: true,
-                });
+                setupDraggable(chess, '#f1 img');
             } else if (PLAYERCOLOR === 'black') {
                 var img = $('#h8').html();
                 $('#h8').empty();
                 $('#f8').html(img);
-                $('#f8 img').draggable({
-                    revert: true,
-                });
+                setupDraggable(chess, '#f8 img');
             }
         } else if (moving.flags === 'q') { // queen side castelling
             if (PLAYERCOLOR === 'white') {
                 var img = $('#a1').html();
                 $('#a1').empty();
                 $('#d1').html(img);
-                $('#d1 img').draggable({
-                    revert: true,
-                });
+                setupDraggable(chess, '#d1 img');
             } else if (PLAYERCOLOR === 'black') {
                 var img = $('#a8').html();
                 $('#a8').empty();
                 $('#d8').html(img);
-                $('#d8 img').draggable({
-                    revert: true,
-                });
+                setupDraggable(chess, '#d8 img');
             }
         } else if (moving.flags === 'e') { // en passant capture
             if (PLAYERCOLOR === 'white') {
@@ -691,9 +674,7 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
             src = src.replace('chessboard', piecesPromotion[promotion]);
             src = src.replace('playerColor', PLAYERCOLOR);
             $('#' + squareIdTo).html('<img class="piece ' + PLAYERCOLOR + '" src="' + src + '" alt>');
-            $('#' + squareIdTo + ' img').draggable({
-                revert: true,
-            });
+            setupDraggable(chess, '#' + squareIdTo + ' img');
         }
 
         let historyVerbose = chess.history({verbose: true});
