@@ -178,7 +178,6 @@ $(function() {
                 }
             }
 
-            console.log(socketMessage);
             if (!HISTORYINVIEW) {
                 if (chess.inCheck() === true) {
                     if (socketMessage.color === 'w') {
@@ -208,14 +207,14 @@ $(function() {
             let htmlMoveRow = '' +
             '<div class="row move-' + socketMessage.moveNumber + ' text-center">' +
                 '<div class="col-4">' + socketMessage.moveNumber + '</div>' +
-                '<div class="col-4 move-san-w-' + socketMessage.moveNumber + ' last-history-move">' + socketMessage.san + '</div>' +
-                '<div class="col-4 move-san-b-' + socketMessage.moveNumber + '"></div>' +
+                '<div id="move-san-w-' + socketMessage.moveNumber + '" class="col-4 one-move-san last-history-move">' + socketMessage.san + '</div>' +
+                '<div id="move-san-b-' + socketMessage.moveNumber + '" class="col-4 one-move-san"></div>' +
             '</div>';
 
             $('.history').append(htmlMoveRow);
         } else { // Black play, complete the line
-            $('.history').find('.move-san-b-' + socketMessage.moveNumber).html(socketMessage.san);
-            $('.history').find('.move-san-b-' + socketMessage.moveNumber).addClass('last-history-move');
+            $('.history').find('#move-san-b-' + socketMessage.moveNumber).html(socketMessage.san);
+            $('.history').find('#move-san-b-' + socketMessage.moveNumber).addClass('last-history-move');
         }
 
         if (!HISTORYINVIEW) {
@@ -498,11 +497,20 @@ $(function() {
         }
 
         if (self.attr('id') === 'history-start') { // Go to the begening of the game
+            console.log('start');
             HISTORYINVIEW = true;
             HISTORYINDEX = -1;
             placePieces(allHistory[0].before, true);
         } else if (self.attr('id') === 'history-end') { // Go to the end of the game
             HISTORYINVIEW = false;
+
+            console.log('end');
+
+            // Set draggable back on all player color pieces
+            $('.piece.' + PLAYERCOLOR).draggable({
+                revert: true,
+            });
+
             HISTORYINDEX = allHistory.length - 1;
             placePieces(allHistory[allHistory.length - 1].after, true);
 
@@ -512,8 +520,9 @@ $(function() {
             // We need to use the before for this one
             let fenSplit = (allHistory[allHistory.length - 1].before).split(' ');
             // fenSplit[1] is color and fenSplit[5] is the move number
-            $('.move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
+            $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
         } else if (self.attr('id') === 'history-backward') { // 1 step backward
+            console.log('backward');
             HISTORYINVIEW = true;
             if (HISTORYINDEX === null) {
                 HISTORYINDEX = allHistory.length - 2;
@@ -536,11 +545,12 @@ $(function() {
                 // We need to use the before for this one
                 let fenSplit = (allHistory[HISTORYINDEX].before).split(' ');
                 // fenSplit[1] is color and fenSplit[5] is the move number
-                $('.move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
+                $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
             }
 
             placePieces(fen, true);
         } else if (self.attr('id') === 'history-forward') { // 1 step forward
+            console.log('forward');
             HISTORYINVIEW = true;
             if (HISTORYINDEX === null) {
                 HISTORYINDEX = allHistory.length - 1;
@@ -552,9 +562,17 @@ $(function() {
                 return;
             }
 
+            console.log(HISTORYINDEX);
+            console.log(allHistory.length - 1);
             // Last move, history not in view
             if (HISTORYINDEX === allHistory.length - 1) {
+                console.log('cccc');
                 HISTORYINVIEW = false;
+
+                // Set draggable back on all player color pieces
+                $('#b1 img').draggable({
+                    revert: true,
+                });
             }
 
             $('#' + allHistory[HISTORYINDEX].from).addClass('last-move');
@@ -563,11 +581,16 @@ $(function() {
             // We need to use the before for this one
             let fenSplit = (allHistory[HISTORYINDEX].before).split(' ');
             // fenSplit[1] is color and fenSplit[5] is the move number
-            $('.move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
+            $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
 
             placePieces(allHistory[HISTORYINDEX].after, true);
         }
     });
+
+    $('.one-move-san').on('click', function() {
+        console.log($(this).attr('id'));
+
+    })
 });
 
 var turn = null;
@@ -683,14 +706,14 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
             let htmlMoveRow = '' +
             '<div class="row move-' + lastMoveHistory.moveNumber + ' text-center">' +
                 '<div class="col-4">' + lastMoveHistory.moveNumber + '</div>' +
-                '<div class="col-4 move-san-w-' + lastMoveHistory.moveNumber + ' last-history-move">' + lastMoveHistory.san + '</div>' +
-                '<div class="col-4 move-san-b-' + lastMoveHistory.moveNumber + '"></div>' +
+                '<div id="move-san-w-' + lastMoveHistory.moveNumber + '" class="col-4 one-move-san last-history-move">' + lastMoveHistory.san + '</div>' +
+                '<div id="move-san-b-' + lastMoveHistory.moveNumber + '" class="col-4 one-move-san"></div>' +
             '</div>';
 
             $('.history').append(htmlMoveRow);
         } else { // Black play, complete the line
-            $('.history').find('.move-san-b-' + lastMoveHistory.moveNumber).html(lastMoveHistory.san);
-            $('.history').find('.move-san-b-' + lastMoveHistory.moveNumber).addClass('last-history-move');
+            $('.history').find('#move-san-b-' + lastMoveHistory.moveNumber).html(lastMoveHistory.san);
+            $('.history').find('#move-san-b-' + lastMoveHistory.moveNumber).addClass('last-history-move');
         }
 
         try {
