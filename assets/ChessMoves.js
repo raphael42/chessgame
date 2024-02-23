@@ -482,11 +482,10 @@ $(function() {
                 return;
             }
 
-            let fen = null;
+            let fen = allHistory[HISTORYINDEX].after;
             if (HISTORYINDEX === -1) {
                 fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
             } else {
-                fen = allHistory[HISTORYINDEX].after
                 $('#' + allHistory[HISTORYINDEX].from).addClass('last-move');
                 $('#' + allHistory[HISTORYINDEX].to).addClass('last-move');
 
@@ -532,8 +531,80 @@ $(function() {
     });
 
     $('.one-move-san').on('click', function() {
-        console.log($(this).attr('id'));
+        $('.chess-table.last-move').each(function() {
+            $(this).removeClass('last-move');
+        });
 
+        $('.last-history-move').removeClass('last-history-move');
+
+        let allHistory = [];
+        for (let i in MOVES) {
+            allHistory.push({
+                'after': MOVES[i].fen_after,
+                'before': MOVES[i].fen_before,
+                'color': MOVES[i].player_color,
+                'flags': MOVES[i].flags,
+                'from': MOVES[i].square_from,
+                'lan': MOVES[i].lan,
+                'piece': MOVES[i].piece,
+                'san': MOVES[i].san,
+                'to': MOVES[i].square_to,
+            });
+        }
+
+        let chessHistory = chess.history({verbose: true});
+        for (let i in chessHistory) {
+            allHistory.push({
+                'after': chessHistory[i].after,
+                'before': chessHistory[i].before,
+                'color': chessHistory[i].color,
+                'flags': chessHistory[i].flags,
+                'from': chessHistory[i].from,
+                'lan': chessHistory[i].lan,
+                'piece': chessHistory[i].piece,
+                'san': chessHistory[i].san,
+                'to': chessHistory[i].to,
+            });
+        }
+
+        let elementId = $(this).attr('id');
+        let elementIdSplit = elementId.split('-');
+        let elementColorTurn = elementIdSplit[2];
+        let elementMoveNumber = elementIdSplit[3];
+
+        for (let i in allHistory) {
+            i = parseInt(i); // variable i is string, so parse it
+
+            let historyFenSplit = (allHistory[i].before).split(' ');
+            let hisotryColorTurn = historyFenSplit[1];
+            let historyMoveNumber = historyFenSplit[5];
+
+
+            if (hisotryColorTurn === elementColorTurn && elementMoveNumber === historyMoveNumber) {
+                HISTORYINDEX = i;
+
+                // Click on the last history, it's the last move
+                if (HISTORYINDEX === allHistory.length - 1) {
+                    HISTORYINVIEW = false;
+                } else {
+                    HISTORYINVIEW = true;
+                }
+
+                $('#' + allHistory[i].from).addClass('last-move');
+                $('#' + allHistory[i].to).addClass('last-move');
+
+                // We need to use the before for this one
+                let fenSplit = (allHistory[i].before).split(' ');
+                // fenSplit[1] is color and fenSplit[5] is the move number
+                $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
+
+                placePieces(allHistory[i].after, true);
+
+                if (HISTORYINDEX === allHistory.length - 1) {
+                    setupDraggable(chess);
+                }
+            }
+        }
     })
 });
 
