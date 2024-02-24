@@ -6,9 +6,25 @@ require('bootstrap');
 
 var HISTORYINDEX = null;
 var HISTORYINVIEW = false;
+const chess = new Chess(FEN);
+
+var turn = null;
+var times, timer;
+placePieces(FEN);
+setUpTimer();
+
+if (chess.inCheck() === true) {
+    let kingposition = null;
+    if (PLAYERCOLOR === 'white') {
+        kingposition = getKingPosition(FEN, 'black');
+    } else if (PLAYERCOLOR === 'black') {
+        kingposition = getKingPosition(FEN, 'white');
+    }
+    $('#' + kingposition).addClass('in-check');
+}
+
 $(function() {
     const socket = new WebSocket('ws://localhost:3001');
-    const chess = new Chess(FEN);
 
     socket.addEventListener('open', function(e) {
         console.log('open', e);
@@ -421,6 +437,9 @@ $(function() {
 
         $('.last-history-move').removeClass('last-history-move');
 
+        // in-check class will be recalculate for each history except the start button
+        $('.in-check').removeClass('in-check');
+
         for (let i in MOVES) {
             allHistory.push({
                 'after': MOVES[i].fen_after,
@@ -468,6 +487,17 @@ $(function() {
             // fenSplit[1] is color and fenSplit[5] is the move number
             $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
 
+            // if san ends with '+', then the other color player is in check, display the class
+            if ((allHistory[allHistory.length - 1].san).endsWith('+')) {
+                let kingposition = null;
+                if (allHistory[allHistory.length - 1].color === 'white' || allHistory[allHistory.length - 1].color === 'w') {
+                    kingposition = getKingPosition(allHistory[allHistory.length - 1].after, 'black');
+                } else if (allHistory[allHistory.length - 1].color === 'black' || allHistory[allHistory.length - 1].color === 'b') {
+                    kingposition = getKingPosition(allHistory[allHistory.length - 1].after, 'white');
+                }
+                $('#' + kingposition).addClass('in-check');
+            }
+
             // Set draggable back on all player color pieces
             setupDraggable(chess);
         } else if (self.attr('id') === 'history-backward') { // 1 step backward
@@ -482,10 +512,11 @@ $(function() {
                 return;
             }
 
-            let fen = allHistory[HISTORYINDEX].after;
+            let fen = null;
             if (HISTORYINDEX === -1) {
                 fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
             } else {
+                fen = allHistory[HISTORYINDEX].after;
                 $('#' + allHistory[HISTORYINDEX].from).addClass('last-move');
                 $('#' + allHistory[HISTORYINDEX].to).addClass('last-move');
 
@@ -493,6 +524,17 @@ $(function() {
                 let fenSplit = (allHistory[HISTORYINDEX].before).split(' ');
                 // fenSplit[1] is color and fenSplit[5] is the move number
                 $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
+
+                // if san ends with '+', then the other color player is in check, display the class
+                if ((allHistory[HISTORYINDEX].san).endsWith('+')) {
+                    let kingposition = null;
+                    if (allHistory[HISTORYINDEX].color === 'white' || allHistory[HISTORYINDEX].color === 'w') {
+                        kingposition = getKingPosition(fen, 'black');
+                    } else if (allHistory[HISTORYINDEX].color === 'black' || allHistory[HISTORYINDEX].color === 'b') {
+                        kingposition = getKingPosition(fen, 'white');
+                    }
+                    $('#' + kingposition).addClass('in-check');
+                }
             }
 
             placePieces(fen, true);
@@ -521,6 +563,17 @@ $(function() {
             // fenSplit[1] is color and fenSplit[5] is the move number
             $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
 
+            // if san ends with '+', then the other color player is in check, display the class
+            if ((allHistory[HISTORYINDEX].san).endsWith('+')) {
+                let kingposition = null;
+                if (allHistory[HISTORYINDEX].color === 'white' || allHistory[HISTORYINDEX].color === 'w') {
+                    kingposition = getKingPosition(allHistory[HISTORYINDEX].after, 'black');
+                } else if (allHistory[HISTORYINDEX].color === 'black' || allHistory[HISTORYINDEX].color === 'b') {
+                    kingposition = getKingPosition(allHistory[HISTORYINDEX].after, 'white');
+                }
+                $('#' + kingposition).addClass('in-check');
+            }
+
             placePieces(allHistory[HISTORYINDEX].after, true);
 
             // Set draggable back on all player color pieces if we set the last move
@@ -531,6 +584,11 @@ $(function() {
     });
 
     $('.one-move-san').on('click', function() {
+        // Empty history line, just return
+        if ($(this).html() === '') {
+            return;
+        }
+
         $('.chess-table.last-move').each(function() {
             $(this).removeClass('last-move');
         });
@@ -598,6 +656,17 @@ $(function() {
                 // fenSplit[1] is color and fenSplit[5] is the move number
                 $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
 
+                // if san ends with '+', then the other color player is in check, display the class
+                if ((allHistory[i].san).endsWith('+')) {
+                    let kingposition = null;
+                    if (allHistory[i].color === 'white' || allHistory[i].color === 'w') {
+                        kingposition = getKingPosition(allHistory[i].after, 'black');
+                    } else if (allHistory[i].color === 'black' || allHistory[i].color === 'b') {
+                        kingposition = getKingPosition(allHistory[i].after, 'white');
+                    }
+                    $('#' + kingposition).addClass('in-check');
+                }
+
                 placePieces(allHistory[i].after, true);
 
                 if (HISTORYINDEX === allHistory.length - 1) {
@@ -605,13 +674,8 @@ $(function() {
                 }
             }
         }
-    })
+    });
 });
-
-var turn = null;
-var times, timer;
-placePieces(FEN);
-setUpTimer();
 
 function setupDraggable(chess, jQueryElement) {
     let elementToDraggable = '.piece.' + PLAYERCOLOR;
