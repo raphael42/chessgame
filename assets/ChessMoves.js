@@ -28,6 +28,15 @@ $(function() {
 
     socket.addEventListener('open', function(e) {
         console.log('open', e);
+
+        try {
+            socket.send(JSON.stringify({
+                'method': 'connection',
+                'idGame': IDGAME,
+            }));
+        } catch (error) {
+            console.log('Socket error', error);
+        }
     });
 
     socket.addEventListener('message', function(e) {
@@ -35,13 +44,13 @@ $(function() {
         console.log(socketMessage);
 
         // Disconnect
-        if (typeof socketMessage.opponent_disconnect !== 'undefined' && socketMessage.opponent_disconnect === true) {
+        if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'opponent_disconnect') {
             $('.opponent-connect').html('KO');
             return;
         }
 
         // Connect
-        if (typeof socketMessage.opponent_connect !== 'undefined' && socketMessage.opponent_connect === true) {
+        if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'opponent_connect') {
             $('.opponent-connect').html('OK');
 
             let fenSplit = chess.fen().split(' ');
@@ -69,7 +78,7 @@ $(function() {
         }
 
         // Resign
-        if (typeof socketMessage.resign !== 'undefined' && socketMessage.resign === true) {
+        if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'resign') {
             if (PLAYERCOLOR === 'white') {
                 setWinner('blancs');
             } else {
@@ -698,6 +707,7 @@ $(function() {
 
         try {
             socket.send(JSON.stringify({
+                'method': 'resign',
                 'resign': true
             }));
         } catch (error) {
@@ -844,6 +854,7 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
         let historyVerbose = chess.history({verbose: true});
         let lastMoveHistory = historyVerbose[historyVerbose.length - 1];
         lastMoveHistory['idGame'] = IDGAME;
+        lastMoveHistory['method'] = 'move';
         lastMoveHistory['moveNumber'] = moveNumber;
 
         $('.history').find('.last-history-move').removeClass('last-history-move');
