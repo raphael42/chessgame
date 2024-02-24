@@ -64,6 +64,16 @@ class MessageHandler implements MessageComponentInterface
         }
 
         $msgArray = json_decode($msg, true);
+
+        // One player resign, send info to the other
+        if (isset($msgArray['resign']) && $msgArray['resign'] === true) {
+            foreach ($this->connections as $connection) {
+                if ($connection !== $from) {
+                    $connection->send($msg);
+                }
+            }
+        }
+
         // Game saved in class not the same as the one send in wbsocket, get the new one
         if (isset($msgArray['idGame'])) {
             if (is_null($this->gameEntity) || $this->gameEntity->getId() !== (int) $msgArray['idGame']) {

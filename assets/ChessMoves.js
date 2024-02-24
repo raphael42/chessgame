@@ -32,12 +32,15 @@ $(function() {
 
     socket.addEventListener('message', function(e) {
         var socketMessage = JSON.parse(e.data);
+        console.log(socketMessage);
 
+        // Disconnect
         if (typeof socketMessage.opponent_disconnect !== 'undefined' && socketMessage.opponent_disconnect === true) {
             $('.opponent-connect').html('KO');
             return;
         }
 
+        // Connect
         if (typeof socketMessage.opponent_connect !== 'undefined' && socketMessage.opponent_connect === true) {
             $('.opponent-connect').html('OK');
 
@@ -65,6 +68,17 @@ $(function() {
             return;
         }
 
+        // Resign
+        if (typeof socketMessage.resign !== 'undefined' && socketMessage.resign === true) {
+            if (PLAYERCOLOR === 'white') {
+                setWinner('blancs');
+            } else {
+                setWinner('noirs');
+            }
+            return;
+        }
+
+        // Move
         // Display the move only if the player is not watching the history
         if (!HISTORYINVIEW) {
             if (socketMessage.flag === 'k') { // king side castelling
@@ -673,6 +687,21 @@ $(function() {
                     setupDraggable(chess);
                 }
             }
+        }
+    });
+
+    $('#resign').on('click', function() {
+        let isConfirmed = confirm('Vous êtes sur le point d\'abandonner. Voulez-vous confirmer ?');
+        if (!isConfirmed) {
+            return;
+        }
+
+        try {
+            socket.send(JSON.stringify({
+                'resign': true
+            }));
+        } catch (error) {
+            console.log('Socket error', error);
         }
     });
 });

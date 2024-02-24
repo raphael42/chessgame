@@ -24,13 +24,32 @@
 {% block body %}
     <div class="row">
         <div class="col-lg-2 col-md-4 col-sm-12">
-            <div class="bg-grey">
+            <div class="bg-grey mb-3">
                 <div>Votre temps : <span id="timer-player"></span></div>
                 <div><span id="player-turn"></span></div>
                 <div>Temps de l'adversaire : <span id="timer-opponent"></span></div>
             </div>
-            <div>
+            <div class="mb-3">
                 Statut de connection de l'adversaire : <span class="opponent-connect"></span>
+            </div>
+            <div class="row mb-3">
+                <div class="col-4">
+                    <button id="ask-revert" class="btn btn-primary">
+                        <i class="bi bi-skip-backward" title="Annuler le dernier déplacement"></i>
+                    </button>
+                </div>
+
+                <div class="col-4">
+                    <button id="offer-draw" class="btn btn-warning" title="Proposer une égalité">
+                        ½
+                    </button>
+                </div>
+
+                <div class="col-4">
+                    <button id="resign" class="btn btn-danger" title="Abandonner">
+                        <i class="bi bi-flag"></i>
+                    </button>
+                </div>
             </div>
         </div>
         <div class="col-lg-7 col-md-8 col-sm-12 col-center">
@@ -95,9 +114,6 @@
                     <div class="col-3 btn history-button" id="history-end"><i class="bi bi-chevron-double-right"></i></div>
                 </div>
                 {% for moveNumber, oneMove in arrMovesForHtml %}
-                {# <pre>
-                    {{ dump(oneMove) }}
-                </pre> #}
                     <div class="row move-{{ moveNumber }} text-center">
                         <div class="col-4">{{ moveNumber }}</div>
                         <div id="move-san-w-{{ moveNumber }}" class="col-4 one-move-san {{ loop.last and oneMove.san_black is not defined ? 'last-history-move' }}">{{ oneMove.san_white is defined ? oneMove.san_white }}</div>
