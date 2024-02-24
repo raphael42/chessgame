@@ -37,10 +37,10 @@ class FirstController extends AbstractController
             'game' => $idGame,
         ]);
 
-        $arrMoves = [];
-        $arrMovesForHtml = [];
+        $arrMovesForJS = []; // array moves for JS file
+        $arrMovesForHtml = []; // array moves for html rebuilt
         foreach ($moves as $oneMove) {
-            $arrMoves[] = [
+            $arrMovesForJS[] = [
                 'fen_before' => $oneMove->getFenBefore(),
                 'fen_after' => $oneMove->getFenAfter(),
                 'piece' => $oneMove->getPiece(),
@@ -68,7 +68,7 @@ class FirstController extends AbstractController
             'idGame' => $idGame,
             'player' => $player,
             'opponent' => $opponent,
-            'arrMoves' => $arrMoves,
+            'arrMovesForJS' => $arrMovesForJS,
             'arrMovesForHtml' => $arrMovesForHtml,
             'fen' => $game->getFen(),
             'increment' => $game->getIncrement(),

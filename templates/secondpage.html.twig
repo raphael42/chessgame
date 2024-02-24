@@ -11,7 +11,7 @@
         var OPPONENTTIMELEFT = '{{ opponent.timeLeft }}';
         var IDGAME = '{{ idGame }}';
         var PIECESIMGURL = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
-        var MOVES = {{ arrMoves|json_encode|raw }};
+        var MOVES = {{ arrMovesForJS|json_encode|raw }};
     </script>
 
     {{ encore_entry_link_tags('gameJs') }}
@@ -89,16 +89,19 @@
         <div class="col-lg-3 col-md-12 col-sm-12">
             <div class="history">
                 <div class="row text-center">
-                    <div class="col-3 btn" id="history-start"><i class="bi bi-chevron-double-left"></i></div>
-                    <div class="col-3 btn" id="history-forward"><i class="bi bi-chevron-left"></i></div>
-                    <div class="col-3 btn" id="history-backward"><i class="bi bi-chevron-right"></i></div>
-                    <div class="col-3 btn" id="history-end"><i class="bi bi-chevron-double-right"></i></div>
+                    <div class="col-3 btn history-button" id="history-start"><i class="bi bi-chevron-double-left"></i></div>
+                    <div class="col-3 btn history-button" id="history-backward"><i class="bi bi-chevron-left"></i></div>
+                    <div class="col-3 btn history-button" id="history-forward"><i class="bi bi-chevron-right"></i></div>
+                    <div class="col-3 btn history-button" id="history-end"><i class="bi bi-chevron-double-right"></i></div>
                 </div>
                 {% for moveNumber, oneMove in arrMovesForHtml %}
+                {# <pre>
+                    {{ dump(oneMove) }}
+                </pre> #}
                     <div class="row move-{{ moveNumber }} text-center">
                         <div class="col-4">{{ moveNumber }}</div>
-                        <div class="col-4 move-san-white-{{ moveNumber }}">{{ oneMove.san_white is defined ? oneMove.san_white }}</div>
-                        <div class="col-4 move-san-black-{{ moveNumber }}">{{ oneMove.san_black is defined ? oneMove.san_black }}</div>
+                        <div id="move-san-w-{{ moveNumber }}" class="col-4 one-move-san {{ loop.last and oneMove.san_black is not defined ? 'last-history-move' }}">{{ oneMove.san_white is defined ? oneMove.san_white }}</div>
+                        <div id="move-san-b-{{ moveNumber }}" class="col-4 one-move-san {{ loop.last and oneMove.san_black is defined ? 'last-history-move' }}">{{ oneMove.san_black is defined ? oneMove.san_black }}</div>
                     </div>
                 {% endfor %}
             </div>

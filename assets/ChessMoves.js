@@ -4,9 +4,27 @@ import 'jquery-ui/ui/widgets/droppable';
 import { Chess } from 'chess.js';
 require('bootstrap');
 
+var HISTORYINDEX = null;
+var HISTORYINVIEW = false;
+const chess = new Chess(FEN);
+
+var turn = null;
+var times, timer;
+placePieces(FEN);
+setUpTimer();
+
+if (chess.inCheck() === true) {
+    let kingposition = null;
+    if (PLAYERCOLOR === 'white') {
+        kingposition = getKingPosition(FEN, 'black');
+    } else if (PLAYERCOLOR === 'black') {
+        kingposition = getKingPosition(FEN, 'white');
+    }
+    $('#' + kingposition).addClass('in-check');
+}
+
 $(function() {
     const socket = new WebSocket('ws://localhost:3001');
-    const chess = new Chess(FEN);
 
     socket.addEventListener('open', function(e) {
         console.log('open', e);
@@ -47,47 +65,42 @@ $(function() {
             return;
         }
 
-        if (socketMessage.flag === 'k') { // king side castelling
-            if (socketMessage.color === 'white') {
-                var img = $('#h1').html();
-                $('#h1').empty();
-                $('#f1').html(img);
-                $('#f1 img').draggable({
-                    revert: true,
-                });
-            } else if (socketMessage.color === 'black') {
-                var img = $('#h8').html();
-                $('#h8').empty();
-                $('#f8').html(img);
-                $('#f8 img').draggable({
-                    revert: true,
-                });
+        // Display the move only if the player is not watching the history
+        if (!HISTORYINVIEW) {
+            if (socketMessage.flag === 'k') { // king side castelling
+                if (socketMessage.color === 'w') {
+                    var img = $('#h1').html();
+                    $('#h1').empty();
+                    $('#f1').html(img);
+                    setupDraggable(chess, '#f1 img');
+                } else if (socketMessage.color === 'b') {
+                    var img = $('#h8').html();
+                    $('#h8').empty();
+                    $('#f8').html(img);
+                    setupDraggable(chess, '#f8 img');
+                }
+            } else if (socketMessage.flag === 'q') { // queen side castelling
+                if (socketMessage.color === 'w') {
+                    var img = $('#a1').html();
+                    $('#a1').empty();
+                    $('#d1').html(img);
+                    setupDraggable(chess, '#d1 img');
+                } else if (socketMessage.color === 'b') {
+                    var img = $('#a8').html();
+                    $('#a8').empty();
+                    $('#d8').html(img);
+                    setupDraggable(chess, '#d8 img');
+                }
+            } else if (socketMessage.flag === 'e') { // en passant capture
+                if (socketMessage.color === 'w') {
+                    var tmp = (socketMessage.to).split('');
+                    var idPawnCatured = tmp[0] + (parseInt(tmp[1]) - 1);
+                } else if (socketMessage.color === 'b') {
+                    var tmp = (socketMessage.to).split('');
+                    var idPawnCatured = tmp[0] + (parseInt(tmp[1]) + 1);
+                }
+                $('#' + idPawnCatured).empty();
             }
-        } else if (socketMessage.flag === 'q') { // queen side castelling
-            if (socketMessage.color === 'white') {
-                var img = $('#a1').html();
-                $('#a1').empty();
-                $('#d1').html(img);
-                $('#d1 img').draggable({
-                    revert: true,
-                });
-            } else if (socketMessage.color === 'black') {
-                var img = $('#a8').html();
-                $('#a8').empty();
-                $('#d8').html(img);
-                $('#d8 img').draggable({
-                    revert: true,
-                });
-            }
-        } else if (socketMessage.flag === 'e') { // en passant capture
-            if (socketMessage.color === 'white') {
-                var tmp = (socketMessage.to).split('');
-                var idPawnCatured = tmp[0] + (parseInt(tmp[1]) - 1);
-            } else if (socketMessage.color === 'black') {
-                var tmp = (socketMessage.to).split('');
-                var idPawnCatured = tmp[0] + (parseInt(tmp[1]) + 1);
-            }
-            $('#' + idPawnCatured).empty();
         }
 
         if (typeof socketMessage.promotion !== 'undefined' && socketMessage.promotion !== null) { // promotion
@@ -98,11 +111,15 @@ $(function() {
                 'q': 'queen',
             };
 
-            let src = PIECESIMGURL;
-            src = src.replace('chessboard', piecesPromotion[socketMessage.promotion]);
-            src = src.replace('playerColor', socketMessage.color);
-            $('#' + socketMessage.from).empty();
-            $('#' + socketMessage.to).html('<img class="piece ' + socketMessage.color + '" src="' + src + '" alt>');
+            // Display the move only if the player is not watching the history
+            if (!HISTORYINVIEW) {
+                let src = PIECESIMGURL;
+                src = src.replace('chessboard', piecesPromotion[socketMessage.promotion]);
+                let tmpColor = socketMessage.color === 'w' ? 'white' : 'black';
+                src = src.replace('playerColor', tmpColor);
+                $('#' + socketMessage.from).empty();
+                $('#' + socketMessage.to).html('<img class="piece ' + tmpColor + '" src="' + src + '" alt>');
+            }
 
             $('.in-check').removeClass('in-check');
 
@@ -129,19 +146,22 @@ $(function() {
             }
 
             if (chess.inCheck() === true) {
-                if (socketMessage.color === 'white') {
-                    var kingposition = getKingPosition(socketMessage.fen, 'black');
+                if (socketMessage.color === 'w') {
+                    var kingposition = getKingPosition(socketMessage.after, 'black');
                     $('#' + kingposition).addClass('in-check');
-                } else if (socketMessage.color === 'black') {
-                    var kingposition = getKingPosition(socketMessage.fen, 'white');
+                } else if (socketMessage.color === 'b') {
+                    var kingposition = getKingPosition(socketMessage.after, 'white');
                     $('#' + kingposition).addClass('in-check');
                 }
             }
             switchTurn();
         } else {
-            var img = $('#' + socketMessage.from).html();
-            $('#' + socketMessage.from).empty();
-            $('#' + socketMessage.to).html(img);
+            // Display the move only if the player is not watching the history
+            if (!HISTORYINVIEW) {
+                var img = $('#' + socketMessage.from).html();
+                $('#' + socketMessage.from).empty();
+                $('#' + socketMessage.to).html(img);
+            }
 
             $('.in-check').removeClass('in-check');
 
@@ -159,27 +179,29 @@ $(function() {
             }
 
             if (chess.isCheckmate() === true) {
-                if (socketMessage.color === 'white') {
+                if (socketMessage.color === 'w') {
                     setWinner('blancs');
-                } else if (socketMessage.color === 'black') {
+                } else if (socketMessage.color === 'b') {
                     setWinner('noirs');
                 }
             }
 
-            if (chess.inCheck() === true) {
-                if (socketMessage.color === 'white') {
-                    var kingposition = getKingPosition(socketMessage.fen, 'black');
-                    $('#' + kingposition).addClass('in-check');
-                } else if (socketMessage.color === 'black') {
-                    var kingposition = getKingPosition(socketMessage.fen, 'white');
-                    $('#' + kingposition).addClass('in-check');
+            if (!HISTORYINVIEW) {
+                if (chess.inCheck() === true) {
+                    if (socketMessage.color === 'w') {
+                        var kingposition = getKingPosition(socketMessage.after, 'black');
+                        $('#' + kingposition).addClass('in-check');
+                    } else if (socketMessage.color === 'b') {
+                        var kingposition = getKingPosition(socketMessage.after, 'white');
+                        $('#' + kingposition).addClass('in-check');
+                    }
                 }
             }
 
-            if (typeof socketMessage.fen !== 'undefined') {
-                var tmp = socketMessage.fen.split(' ');
+            if (typeof socketMessage.after !== 'undefined') {
+                var tmp = socketMessage.after.split(' ');
                 var tmp2 = parseInt(tmp[5]);
-                if (tmp2 === 2 && socketMessage.color === 'black') {
+                if (tmp2 === 2 && socketMessage.color === 'b') {
                     startTimer('player');
                 } else {
                     updateTime('opponent', socketMessage.timer); // update time because of lantency
@@ -188,30 +210,35 @@ $(function() {
             }
         }
 
+        $('.history').find('.last-history-move').removeClass('last-history-move');
         if (socketMessage.color === 'w') { // White play, make a new line
             let htmlMoveRow = '' +
-            '<div class="row move-' + socketMessage.moveNumber + '">' +
+            '<div class="row move-' + socketMessage.moveNumber + ' text-center">' +
                 '<div class="col-4">' + socketMessage.moveNumber + '</div>' +
-                '<div class="col-4 move-san-white-' + socketMessage.moveNumber + '">' + socketMessage.san + '</div>' +
-                '<div class="col-4 move-san-black-' + socketMessage.moveNumber + '"></div>' +
+                '<div id="move-san-w-' + socketMessage.moveNumber + '" class="col-4 one-move-san last-history-move">' + socketMessage.san + '</div>' +
+                '<div id="move-san-b-' + socketMessage.moveNumber + '" class="col-4 one-move-san"></div>' +
             '</div>';
 
             $('.history').append(htmlMoveRow);
         } else { // Black play, complete the line
-            $('.history').find('.move-san-black-' + socketMessage.moveNumber).html(socketMessage.san);
+            $('.history').find('#move-san-b-' + socketMessage.moveNumber).html(socketMessage.san);
+            $('.history').find('#move-san-b-' + socketMessage.moveNumber).addClass('last-history-move');
         }
 
-        $('.chess-table.last-move').each(function() {
-            $(this).removeClass('last-move');
-        });
-        $('#' + socketMessage.from).addClass('last-move');
-        $('#' + socketMessage.to).addClass('last-move');
+        if (!HISTORYINVIEW) {
+            $('.chess-table.last-move').each(function() {
+                $(this).removeClass('last-move');
+            });
+
+            $('#' + socketMessage.from).addClass('last-move');
+            $('#' + socketMessage.to).addClass('last-move');
+        }
 
         if (typeof socketMessage.idGame === 'undefined') {
             $('#player-turn').text('À votre tour !');
         }
 
-        // 2 squares premove, execute the move isntantly
+        // 2 squares premove, execute the move instantly
         if ($('.clicked-premove').length === 2) {
             let squareIdFrom = null;
             let squareIdTo = null;
@@ -257,6 +284,11 @@ $(function() {
     });
 
     $('#board').off().on('click', 'td', function() {
+        // If player is watching history, disable the possibility to move
+        if (HISTORYINVIEW) {
+            return;
+        }
+
         const self = $(this);
         var idSquare = $(this).attr('id');
 
@@ -354,42 +386,16 @@ $(function() {
         }
     });
 
-    $('.piece.' + PLAYERCOLOR).draggable({
-        revert: true,
-        start: function(ev, ui) {
-            $('.chess-table.clicked-premove').removeClass('clicked-premove');
-            const self = $(this);
-            let playerTurn = chess.turn(); // Which player turn it is
-            if (
-                (PLAYERCOLOR === 'white' && playerTurn === 'b') ||
-                (PLAYERCOLOR === 'black' && playerTurn === 'w')
-            ) { // If not the player turn, then make a premove
-                $(self).parent().addClass('clicked-premove');
-                $(self).parent().data('premove', 1);
-            } else {
-                $(self).parent().addClass('clicked');
-
-                var allPossibleMoves = chess.moves({
-                    verbose: true
-                });
-
-                for (var i in allPossibleMoves) {
-                    if (allPossibleMoves[i].from === $(self).parent().attr('id')) {
-                        $('#' + allPossibleMoves[i].to).addClass('possible-move');
-                    }
-                }
-            }
-        },
-        stop: function(ev, ui) {
-            $('.chess-table.clicked').removeClass('clicked');
-            $('.chess-table.possible-move').each(function() {
-                $(this).removeClass('possible-move');
-            });
-        }
-    });
+    setupDraggable(chess);
 
     $('.chess-table').droppable({
         drop: function(ev, ui) {
+            console.log('drop');
+            // If player is watching history, disable the possibility to move
+            if (HISTORYINVIEW) {
+                return;
+            }
+
             let playerTurn = chess.turn(); // Which player turn it is
             if (
                 (PLAYERCOLOR === 'white' && playerTurn === 'b') ||
@@ -420,9 +426,307 @@ $(function() {
             }
         }
     });
+
+    $('.history-button').on('click', function() {
+        let self = $(this);
+        let allHistory = [];
+
+        $('.chess-table.last-move').each(function() {
+            $(this).removeClass('last-move');
+        });
+
+        $('.last-history-move').removeClass('last-history-move');
+
+        // in-check class will be recalculate for each history except the start button
+        $('.in-check').removeClass('in-check');
+
+        for (let i in MOVES) {
+            allHistory.push({
+                'after': MOVES[i].fen_after,
+                'before': MOVES[i].fen_before,
+                'color': MOVES[i].player_color,
+                'flags': MOVES[i].flags,
+                'from': MOVES[i].square_from,
+                'lan': MOVES[i].lan,
+                'piece': MOVES[i].piece,
+                'san': MOVES[i].san,
+                'to': MOVES[i].square_to,
+            });
+        }
+
+        let chessHistory = chess.history({verbose: true});
+        for (let i in chessHistory) {
+            allHistory.push({
+                'after': chessHistory[i].after,
+                'before': chessHistory[i].before,
+                'color': chessHistory[i].color,
+                'flags': chessHistory[i].flags,
+                'from': chessHistory[i].from,
+                'lan': chessHistory[i].lan,
+                'piece': chessHistory[i].piece,
+                'san': chessHistory[i].san,
+                'to': chessHistory[i].to,
+            });
+        }
+
+        if (self.attr('id') === 'history-start') { // Go to the begening of the game
+            HISTORYINVIEW = true;
+            HISTORYINDEX = -1;
+            placePieces(allHistory[0].before, true);
+        } else if (self.attr('id') === 'history-end') { // Go to the end of the game
+            HISTORYINVIEW = false;
+
+            HISTORYINDEX = allHistory.length - 1;
+            placePieces(allHistory[allHistory.length - 1].after, true);
+
+            $('#' + allHistory[allHistory.length - 1].from).addClass('last-move');
+            $('#' + allHistory[allHistory.length - 1].to).addClass('last-move');
+
+            // We need to use the before for this one
+            let fenSplit = (allHistory[allHistory.length - 1].before).split(' ');
+            // fenSplit[1] is color and fenSplit[5] is the move number
+            $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
+
+            // if san ends with '+', then the other color player is in check, display the class
+            if ((allHistory[allHistory.length - 1].san).endsWith('+')) {
+                let kingposition = null;
+                if (allHistory[allHistory.length - 1].color === 'white' || allHistory[allHistory.length - 1].color === 'w') {
+                    kingposition = getKingPosition(allHistory[allHistory.length - 1].after, 'black');
+                } else if (allHistory[allHistory.length - 1].color === 'black' || allHistory[allHistory.length - 1].color === 'b') {
+                    kingposition = getKingPosition(allHistory[allHistory.length - 1].after, 'white');
+                }
+                $('#' + kingposition).addClass('in-check');
+            }
+
+            // Set draggable back on all player color pieces
+            setupDraggable(chess);
+        } else if (self.attr('id') === 'history-backward') { // 1 step backward
+            HISTORYINVIEW = true;
+            if (HISTORYINDEX === null) {
+                HISTORYINDEX = allHistory.length - 2;
+            } else if (HISTORYINDEX > -1) {
+                HISTORYINDEX--;
+            }
+
+            if (typeof allHistory[HISTORYINDEX] === 'undefined' && HISTORYINDEX !== -1) {
+                return;
+            }
+
+            let fen = null;
+            if (HISTORYINDEX === -1) {
+                fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+            } else {
+                fen = allHistory[HISTORYINDEX].after;
+                $('#' + allHistory[HISTORYINDEX].from).addClass('last-move');
+                $('#' + allHistory[HISTORYINDEX].to).addClass('last-move');
+
+                // We need to use the before for this one
+                let fenSplit = (allHistory[HISTORYINDEX].before).split(' ');
+                // fenSplit[1] is color and fenSplit[5] is the move number
+                $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
+
+                // if san ends with '+', then the other color player is in check, display the class
+                if ((allHistory[HISTORYINDEX].san).endsWith('+')) {
+                    let kingposition = null;
+                    if (allHistory[HISTORYINDEX].color === 'white' || allHistory[HISTORYINDEX].color === 'w') {
+                        kingposition = getKingPosition(fen, 'black');
+                    } else if (allHistory[HISTORYINDEX].color === 'black' || allHistory[HISTORYINDEX].color === 'b') {
+                        kingposition = getKingPosition(fen, 'white');
+                    }
+                    $('#' + kingposition).addClass('in-check');
+                }
+            }
+
+            placePieces(fen, true);
+        } else if (self.attr('id') === 'history-forward') { // 1 step forward
+            HISTORYINVIEW = true;
+            if (HISTORYINDEX === null) {
+                HISTORYINDEX = allHistory.length - 1;
+            } else if (typeof allHistory[HISTORYINDEX + 1] !== 'undefined') {
+                HISTORYINDEX++;
+            }
+
+            if (typeof allHistory[HISTORYINDEX] === 'undefined') {
+                return;
+            }
+
+            // Last move, history not in view
+            if (HISTORYINDEX === allHistory.length - 1) {
+                HISTORYINVIEW = false;
+            }
+
+            $('#' + allHistory[HISTORYINDEX].from).addClass('last-move');
+            $('#' + allHistory[HISTORYINDEX].to).addClass('last-move');
+
+            // We need to use the before for this one
+            let fenSplit = (allHistory[HISTORYINDEX].before).split(' ');
+            // fenSplit[1] is color and fenSplit[5] is the move number
+            $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
+
+            // if san ends with '+', then the other color player is in check, display the class
+            if ((allHistory[HISTORYINDEX].san).endsWith('+')) {
+                let kingposition = null;
+                if (allHistory[HISTORYINDEX].color === 'white' || allHistory[HISTORYINDEX].color === 'w') {
+                    kingposition = getKingPosition(allHistory[HISTORYINDEX].after, 'black');
+                } else if (allHistory[HISTORYINDEX].color === 'black' || allHistory[HISTORYINDEX].color === 'b') {
+                    kingposition = getKingPosition(allHistory[HISTORYINDEX].after, 'white');
+                }
+                $('#' + kingposition).addClass('in-check');
+            }
+
+            placePieces(allHistory[HISTORYINDEX].after, true);
+
+            // Set draggable back on all player color pieces if we set the last move
+            if (HISTORYINDEX === allHistory.length - 1) {
+                setupDraggable(chess);
+            }
+        }
+    });
+
+    $('.one-move-san').on('click', function() {
+        // Empty history line, just return
+        if ($(this).html() === '') {
+            return;
+        }
+
+        $('.chess-table.last-move').each(function() {
+            $(this).removeClass('last-move');
+        });
+
+        $('.last-history-move').removeClass('last-history-move');
+
+        let allHistory = [];
+        for (let i in MOVES) {
+            allHistory.push({
+                'after': MOVES[i].fen_after,
+                'before': MOVES[i].fen_before,
+                'color': MOVES[i].player_color,
+                'flags': MOVES[i].flags,
+                'from': MOVES[i].square_from,
+                'lan': MOVES[i].lan,
+                'piece': MOVES[i].piece,
+                'san': MOVES[i].san,
+                'to': MOVES[i].square_to,
+            });
+        }
+
+        let chessHistory = chess.history({verbose: true});
+        for (let i in chessHistory) {
+            allHistory.push({
+                'after': chessHistory[i].after,
+                'before': chessHistory[i].before,
+                'color': chessHistory[i].color,
+                'flags': chessHistory[i].flags,
+                'from': chessHistory[i].from,
+                'lan': chessHistory[i].lan,
+                'piece': chessHistory[i].piece,
+                'san': chessHistory[i].san,
+                'to': chessHistory[i].to,
+            });
+        }
+
+        let elementId = $(this).attr('id');
+        let elementIdSplit = elementId.split('-');
+        let elementColorTurn = elementIdSplit[2];
+        let elementMoveNumber = elementIdSplit[3];
+
+        for (let i in allHistory) {
+            i = parseInt(i); // variable i is string, so parse it
+
+            let historyFenSplit = (allHistory[i].before).split(' ');
+            let hisotryColorTurn = historyFenSplit[1];
+            let historyMoveNumber = historyFenSplit[5];
+
+
+            if (hisotryColorTurn === elementColorTurn && elementMoveNumber === historyMoveNumber) {
+                HISTORYINDEX = i;
+
+                // Click on the last history, it's the last move
+                if (HISTORYINDEX === allHistory.length - 1) {
+                    HISTORYINVIEW = false;
+                } else {
+                    HISTORYINVIEW = true;
+                }
+
+                $('#' + allHistory[i].from).addClass('last-move');
+                $('#' + allHistory[i].to).addClass('last-move');
+
+                // We need to use the before for this one
+                let fenSplit = (allHistory[i].before).split(' ');
+                // fenSplit[1] is color and fenSplit[5] is the move number
+                $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
+
+                // if san ends with '+', then the other color player is in check, display the class
+                if ((allHistory[i].san).endsWith('+')) {
+                    let kingposition = null;
+                    if (allHistory[i].color === 'white' || allHistory[i].color === 'w') {
+                        kingposition = getKingPosition(allHistory[i].after, 'black');
+                    } else if (allHistory[i].color === 'black' || allHistory[i].color === 'b') {
+                        kingposition = getKingPosition(allHistory[i].after, 'white');
+                    }
+                    $('#' + kingposition).addClass('in-check');
+                }
+
+                placePieces(allHistory[i].after, true);
+
+                if (HISTORYINDEX === allHistory.length - 1) {
+                    setupDraggable(chess);
+                }
+            }
+        }
+    });
 });
 
+function setupDraggable(chess, jQueryElement) {
+    let elementToDraggable = '.piece.' + PLAYERCOLOR;
+    if (typeof jQueryElement !== 'undefined') {
+        elementToDraggable = jQueryElement;
+    }
+
+    $(elementToDraggable).draggable({
+        revert: true,
+        start: function(ev, ui) {
+            console.log('drag');
+            // If player is watching history, disable the possibility to move
+            if (HISTORYINVIEW) {
+                return;
+            }
+
+            $('.chess-table.clicked-premove').removeClass('clicked-premove');
+            const self = $(this);
+            let playerTurn = chess.turn(); // Which player turn it is
+            if (
+                (PLAYERCOLOR === 'white' && playerTurn === 'b') ||
+                (PLAYERCOLOR === 'black' && playerTurn === 'w')
+            ) { // If not the player turn, then make a premove
+                $(self).parent().addClass('clicked-premove');
+                $(self).parent().data('premove', 1);
+            } else {
+                $(self).parent().addClass('clicked');
+
+                var allPossibleMoves = chess.moves({
+                    verbose: true
+                });
+
+                for (var i in allPossibleMoves) {
+                    if (allPossibleMoves[i].from === $(self).parent().attr('id')) {
+                        $('#' + allPossibleMoves[i].to).addClass('possible-move');
+                    }
+                }
+            }
+        },
+        stop: function(ev, ui) {
+            $('.chess-table.clicked').removeClass('clicked');
+            $('.chess-table.possible-move').each(function() {
+                $(this).removeClass('possible-move');
+            });
+        }
+    });
+}
+
 function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
+    HISTORYINDEX = null;
+
     var piecesPromotion = {
         'r': 'rook',
         'n': 'knight',
@@ -464,32 +768,24 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
                 var img = $('#h1').html();
                 $('#h1').empty();
                 $('#f1').html(img);
-                $('#f1 img').draggable({
-                    revert: true,
-                });
+                setupDraggable(chess, '#f1 img');
             } else if (PLAYERCOLOR === 'black') {
                 var img = $('#h8').html();
                 $('#h8').empty();
                 $('#f8').html(img);
-                $('#f8 img').draggable({
-                    revert: true,
-                });
+                setupDraggable(chess, '#f8 img');
             }
         } else if (moving.flags === 'q') { // queen side castelling
             if (PLAYERCOLOR === 'white') {
                 var img = $('#a1').html();
                 $('#a1').empty();
                 $('#d1').html(img);
-                $('#d1 img').draggable({
-                    revert: true,
-                });
+                setupDraggable(chess, '#d1 img');
             } else if (PLAYERCOLOR === 'black') {
                 var img = $('#a8').html();
                 $('#a8').empty();
                 $('#d8').html(img);
-                $('#d8 img').draggable({
-                    revert: true,
-                });
+                setupDraggable(chess, '#d8 img');
             }
         } else if (moving.flags === 'e') { // en passant capture
             if (PLAYERCOLOR === 'white') {
@@ -513,9 +809,7 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
             src = src.replace('chessboard', piecesPromotion[promotion]);
             src = src.replace('playerColor', PLAYERCOLOR);
             $('#' + squareIdTo).html('<img class="piece ' + PLAYERCOLOR + '" src="' + src + '" alt>');
-            $('#' + squareIdTo + ' img').draggable({
-                revert: true,
-            });
+            setupDraggable(chess, '#' + squareIdTo + ' img');
         }
 
         let historyVerbose = chess.history({verbose: true});
@@ -523,17 +817,19 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
         lastMoveHistory['idGame'] = IDGAME;
         lastMoveHistory['moveNumber'] = moveNumber;
 
+        $('.history').find('.last-history-move').removeClass('last-history-move');
         if (moving.color === 'w') { // White play, make a new line
             let htmlMoveRow = '' +
-            '<div class="row move-' + lastMoveHistory.moveNumber + '">' +
+            '<div class="row move-' + lastMoveHistory.moveNumber + ' text-center">' +
                 '<div class="col-4">' + lastMoveHistory.moveNumber + '</div>' +
-                '<div class="col-4 move-san-white-' + lastMoveHistory.moveNumber + '">' + lastMoveHistory.san + '</div>' +
-                '<div class="col-4 move-san-black-' + lastMoveHistory.moveNumber + '"></div>' +
+                '<div id="move-san-w-' + lastMoveHistory.moveNumber + '" class="col-4 one-move-san last-history-move">' + lastMoveHistory.san + '</div>' +
+                '<div id="move-san-b-' + lastMoveHistory.moveNumber + '" class="col-4 one-move-san"></div>' +
             '</div>';
 
             $('.history').append(htmlMoveRow);
         } else { // Black play, complete the line
-            $('.history').find('.move-san-black-' + lastMoveHistory.moveNumber).html(lastMoveHistory.san);
+            $('.history').find('#move-san-b-' + lastMoveHistory.moveNumber).html(lastMoveHistory.san);
+            $('.history').find('#move-san-b-' + lastMoveHistory.moveNumber).addClass('last-history-move');
         }
 
         try {
@@ -596,39 +892,22 @@ function promotionPiece(callback) {
 function getKingPosition(fen, color) {
     var tmp = fen.split(' ');
     var tmp2 = tmp[0].split('/');
-
-    var piecesLabel = {
-        'r': 'black-rook',
-        'n': 'black-knight',
-        'b': 'black-bishop',
-        'q': 'black-queen',
-        'k': 'black-king',
-        'p': 'black-pawn',
-        'R': 'white-rook',
-        'N': 'white-knight',
-        'B': 'white-bishop',
-        'Q': 'white-queen',
-        'K': 'white-king',
-        'P': 'white-pawn',
-    };
-
     var column = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     var columnKey = 0;
     var line = 8;
-    var chessboard = [];
-    var atom = '';
+    var count = '';
 
     for (var i in tmp2) {
-        atom = tmp2[i].split('');
+        count = tmp2[i].split('');
         columnKey = 0;
-        for (var j in atom) {
-            if ($.inArray(atom[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) {
-                if ((color === 'white' && atom[j] === 'K') || (color === 'black' && atom[j] === 'k')) {
+        for (var j in count) {
+            if ($.inArray(count[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) {
+                if ((color === 'white' && count[j] === 'K') || (color === 'black' && count[j] === 'k')) {
                     return column[columnKey] + line;
                 }
                 columnKey += 1;
             } else {
-                columnKey += parseInt(atom[j]);
+                columnKey += parseInt(count[j]);
             }
         }
         line--;
@@ -637,8 +916,15 @@ function getKingPosition(fen, color) {
     return null;
 }
 
-function placePieces() {
-    var tmp = FEN.split(' ');
+function placePieces(fen, noLastMove) {
+    // First remove all pieces if there is some
+    $('.chess-table').each(function() {
+        if ($(this).html() !== '') {
+            $(this).empty();
+        }
+    });
+
+    var tmp = fen.split(' ');
     var tmp2 = tmp[0].split('/');
 
     if (PLAYERCOLOR === 'white') {
@@ -674,16 +960,16 @@ function placePieces() {
     var columnKey = 0;
     var line = 8;
     var chessboard = [];
-    var atom = '';
+    var count = '';
     for (var i in tmp2) {
-        atom = tmp2[i].split('');
+        count = tmp2[i].split('');
         columnKey = 0;
-        for (var j in atom) {
-            if ($.inArray(atom[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) {
-                chessboard[column[columnKey] + line] = piecesLabel[atom[j]];
+        for (var j in count) {
+            if ($.inArray(count[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) {
+                chessboard[column[columnKey] + line] = piecesLabel[count[j]];
                 columnKey += 1;
             } else {
-                columnKey += parseInt(atom[j]);
+                columnKey += parseInt(count[j]);
             }
         }
         line--;
@@ -702,10 +988,12 @@ function placePieces() {
         $('#' + k).html('<img class="piece ' + color + '" src="' + src + '" alt>');
     }
 
-    let lastMoveHistory = MOVES[MOVES.length - 1];
-    if (typeof lastMoveHistory !== 'undefined') {
-        $('#' + lastMoveHistory.square_from).addClass('last-move');
-        $('#' + lastMoveHistory.square_to).addClass('last-move');
+    if (typeof noLastMove === 'undefined' || noLastMove !== true) {
+        let lastMoveHistory = MOVES[MOVES.length - 1];
+        if (typeof lastMoveHistory !== 'undefined') {
+            $('#' + lastMoveHistory.square_from).addClass('last-move');
+            $('#' + lastMoveHistory.square_to).addClass('last-move');
+        }
     }
 }
 
@@ -789,9 +1077,9 @@ function startTimer(playerTurn, playerTime, opponentTime) {
             clearInterval(timer);
             timer = false;
 
-            if ((turn === 'player' && playerColor === 'white') || (turn === 'opponent' && playerColor === 'black')) {
+            if ((turn === 'player' && PLAYERCOLOR === 'white') || (turn === 'opponent' && PLAYERCOLOR === 'black')) {
                 setWinner('noirs');
-            } else if ((turn === 'player' && playerColor === 'black') || (turn === 'opponent' && playerColor === 'white')) {
+            } else if ((turn === 'player' && PLAYERCOLOR === 'black') || (turn === 'opponent' && PLAYERCOLOR === 'white')) {
                 setWinner('blancs');
             }
         }
@@ -809,7 +1097,4 @@ function setWinner(playerColor) {
     $('#player-turn').text('Victoire des '+ playerColor +' !');
 }
 
-var turn = null;
-var times, timer;
-placePieces();
-setUpTimer();
+// history functions
