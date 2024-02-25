@@ -57,7 +57,6 @@ class MessageHandler implements MessageComponentInterface
 
         // idGame missing, there is a problem ...
         if (!isset($msgArray['idGame'])) {
-            dump($msgArray);
             $from->close();
             return false;
         }
@@ -67,11 +66,28 @@ class MessageHandler implements MessageComponentInterface
 
         // One player resign, send info to the other
         if (isset($msgArray['method']) && $msgArray['method'] === 'resign') {
+            $resignColor = null;
             foreach ($this->connections as $connection) {
-                if ($connection !== $from && ($connection->resourceId === $this->playerWhiteResourceId[$idGame] || $connection->resourceId === $this->playerBlackResourceId[$idGame])) {
-                    $connection->send($msg);
+                if ($connection !== $from) {
+                    if ($connection->resourceId === $this->playerWhiteResourceId[$idGame]) {
+                        $resignColor = 'w';
+                        $connection->send($msg);
+                    }
+
+                    if ($connection->resourceId === $this->playerBlackResourceId[$idGame]) {
+                        $resignColor = 'b';
+                        $connection->send($msg);
+                    }
                 }
             }
+
+            $this->gameEntity[$idGame]->setStatus('finished');
+            $this->gameEntity[$idGame]->setWinner($resignColor);
+            $this->gameEntity[$idGame]->setEndReason('resign');
+
+
+            $this->em->persist($this->gameEntity[$idGame]);
+            $this->em->flush();
 
             return;
         }
@@ -110,9 +126,6 @@ class MessageHandler implements MessageComponentInterface
                 $this->playerBlackResourceId[$idGame] = $from->resourceId;
             }
 
-            dump($this->playerWhiteResourceId);
-            dump($this->playerBlackResourceId);
-
             $microtimeNow = microtime(true);
             foreach ($this->connections as $connection) {
                 if (
@@ -131,6 +144,27 @@ class MessageHandler implements MessageComponentInterface
                 }
             }
             return;
+        }
+
+        // Game is finished
+        if (isset($msgArray['gameStatus'], $msgArray['gameReason'])) {
+            $this->gameEntity[$idGame]->setStatus('finished');
+
+            switch ($msgArray['gameStatus']) {
+                case 'checkmate':
+                    $this->gameEntity[$idGame]->setWinner($msgArray['color']);
+                    $this->gameEntity[$idGame]->setEndReason($msgArray['gameReason']);
+                    break;
+                case 'draw':
+                    $this->gameEntity[$idGame]->setWinner('d');
+                    $this->gameEntity[$idGame]->setEndReason($msgArray['gameReason']);
+                    break;
+                default:
+                    break;
+            }
+
+            $this->em->persist($this->gameEntity[$idGame]);
+            $this->em->flush();
         }
 
         // At this point, we need to have a move method. If not, there is a problem ...
@@ -172,6 +206,10 @@ class MessageHandler implements MessageComponentInterface
 
             // Save the new fen
             $this->gameEntity[$idGame]->setFen($msgArray['after']);
+            // Game still in begining status, update it
+            if ($this->gameEntity[$idGame]->getStatus() === 'begining') {
+                $this->gameEntity[$idGame]->setStatus('inplay');
+            }
             $this->em->persist($this->gameEntity[$idGame]);
 
             // Update player turn timer

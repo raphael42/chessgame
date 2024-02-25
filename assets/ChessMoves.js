@@ -874,6 +874,23 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
             $('.history').find('#move-san-b-' + lastMoveHistory.moveNumber).addClass('last-history-move');
         }
 
+        if (chess.isGameOver()) {
+            if (chess.isCheckmate() === true) {
+                lastMoveHistory['gameStatus'] = 'checkmate';
+                lastMoveHistory['gameReason'] = 'checkmate';
+            } else if (chess.isDraw()) {
+                lastMoveHistory['gameStatus'] = 'draw';
+                lastMoveHistory['gameReason'] = 'fiftyMoves';
+                if (chess.isStalemate()) {
+                    lastMoveHistory['gameReason'] = 'stalemate';
+                } else if (chess.isThreefoldRepetition()) {
+                    lastMoveHistory['gameReason'] = 'threefoldRepetition';
+                } else if (chess.isInsufficientMaterial()) {
+                    lastMoveHistory['gameReason'] = 'insufficientMaterial';
+                }
+            }
+        }
+
         try {
             socket.send(JSON.stringify(lastMoveHistory));
         } catch (error) {

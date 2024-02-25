@@ -33,6 +33,15 @@ class Game
     #[ORM\OneToMany(mappedBy: 'game', targetEntity: Moves::class, orphanRemoval: true)]
     private Collection $moves;
 
+    #[ORM\Column(length: 50)]
+    private ?string $status = null;
+
+    #[ORM\Column(length: 5, nullable: true)]
+    private ?string $winner = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $end_reason = null;
+
     public function __construct()
     {
         $this->moves = new ArrayCollection();
@@ -129,6 +138,42 @@ class Game
                 $move->setGame(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getWinner(): ?string
+    {
+        return $this->winner;
+    }
+
+    public function setWinner(?string $winner): static
+    {
+        $this->winner = $winner;
+
+        return $this;
+    }
+
+    public function getEndReason(): ?string
+    {
+        return $this->end_reason;
+    }
+
+    public function setEndReason(?string $end_reason): static
+    {
+        $this->end_reason = $end_reason;
 
         return $this;
     }
