@@ -33,6 +33,7 @@ $(function() {
             socket.send(JSON.stringify({
                 'method': 'connection',
                 'idGame': IDGAME,
+                'color': (PLAYERCOLOR === 'white') ? 'w' : 'b',
             }));
         } catch (error) {
             console.log('Socket error', error);
@@ -708,6 +709,7 @@ $(function() {
         try {
             socket.send(JSON.stringify({
                 'method': 'resign',
+                'idGame': IDGAME,
                 'resign': true
             }));
         } catch (error) {
