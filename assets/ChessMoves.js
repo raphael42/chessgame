@@ -78,13 +78,42 @@ $(function() {
             return;
         }
 
-        // Resign
+        // Opponent resign
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'resign') {
             if (PLAYERCOLOR === 'white') {
                 setWinner('blancs');
             } else {
                 setWinner('noirs');
             }
+            return;
+        }
+
+        // Opponent propose a draw
+        if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'offer-draw') {
+            $('#offer-draw-opponent-response').removeClass('d-none');
+            if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
+                $('.tchat').append('<div><p>Black offers draw</p></div>');
+            } else {
+                $('.tchat').append('<div><p>White offers draw</p></div>');
+            }
+            return;
+        }
+
+        // Opponent refuse the draw
+        if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'offer-draw-no') {
+            $('#offer-draw-display').addClass('d-none');
+            if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
+                $('.tchat').append('<div><p>Black declines draw</p></div>');
+            } else {
+                $('.tchat').append('<div><p>White declines draw</p></div>');
+            }
+            return;
+        }
+
+        // Opponent accept the draw
+        if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'offer-draw-yes') {
+            $('#offer-draw-display').addClass('d-none');
+            $('.tchat').append('<div><p>Draw offer accepted</p></div>');
             return;
         }
 
@@ -711,6 +740,61 @@ $(function() {
                 'method': 'resign',
                 'idGame': IDGAME,
                 'resign': true
+            }));
+        } catch (error) {
+            console.log('Socket error', error);
+        }
+    });
+
+    $('#offer-draw').on('click', function() {
+        let isConfirmed = confirm('Voulez-vous proposer un match nul à votre adversaire ?');
+        if (!isConfirmed) {
+            return;
+        }
+
+        $('#offer-draw-display').removeClass('d-none');
+
+        if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
+            $('.tchat').append('<div><p>White offers draw</p></div>');
+        } else {
+            $('.tchat').append('<div><p>Black offers draw</p></div>');
+        }
+
+        try {
+            socket.send(JSON.stringify({
+                'method': 'offer-draw',
+                'idGame': IDGAME,
+            }));
+        } catch (error) {
+            console.log('Socket error', error);
+        }
+    });
+
+    $('#offer-draw-yes').on('click', function() {
+        $('#offer-draw-opponent-response').addClass('d-none');
+        $('.tchat').append('<div><p>Draw offer accepted</p></div>');
+
+        try {
+            socket.send(JSON.stringify({
+                'method': 'offer-draw-yes',
+                'idGame': IDGAME,
+            }));
+        } catch (error) {
+            console.log('Socket error', error);
+        }
+    });
+    $('#offer-draw-no').on('click', function() {
+        $('#offer-draw-opponent-response').addClass('d-none');
+        if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
+            $('.tchat').append('<div><p>White declines draw</p></div>');
+        } else {
+            $('.tchat').append('<div><p>Black declines draw</p></div>');
+        }
+
+        try {
+            socket.send(JSON.stringify({
+                'method': 'offer-draw-no',
+                'idGame': IDGAME,
             }));
         } catch (error) {
             console.log('Socket error', error);

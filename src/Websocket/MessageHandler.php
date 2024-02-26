@@ -92,6 +92,47 @@ class MessageHandler implements MessageComponentInterface
             return;
         }
 
+        // Send a draw offer to the opponent
+        if (isset($msgArray['method']) && $msgArray['method'] === 'offer-draw') {
+            foreach ($this->connections as $connection) {
+                if ($connection !== $from && in_array($connection->resourceId, [$this->playerWhiteResourceId[$idGame], $this->playerBlackResourceId[$idGame]])) {
+                    $connection->send($msg);
+                }
+            }
+
+            return;
+        }
+
+        // Draw confirm, save the new game status
+        if (isset($msgArray['method']) && $msgArray['method'] === 'offer-draw-yes') {
+            foreach ($this->connections as $connection) {
+                if ($connection !== $from && in_array($connection->resourceId, [$this->playerWhiteResourceId[$idGame], $this->playerBlackResourceId[$idGame]])) {
+                    $connection->send($msg);
+                }
+            }
+
+            $this->gameEntity[$idGame]->setStatus('finished');
+            $this->gameEntity[$idGame]->setWinner('d'); // d for draw
+            $this->gameEntity[$idGame]->setEndReason('playersAgreement');
+
+
+            $this->em->persist($this->gameEntity[$idGame]);
+            $this->em->flush();
+
+            return;
+        }
+
+        // Draw reject, only send the message
+        if (isset($msgArray['method']) && $msgArray['method'] === 'offer-draw-no') {
+            foreach ($this->connections as $connection) {
+                if ($connection !== $from && in_array($connection->resourceId, [$this->playerWhiteResourceId[$idGame], $this->playerBlackResourceId[$idGame]])) {
+                    $connection->send($msg);
+                }
+            }
+
+            return;
+        }
+
         // Game not saved in the websocket yet, save it
         if (!isset($this->gameEntity[$idGame])) {
             // Get the game entity
