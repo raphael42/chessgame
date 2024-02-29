@@ -7,6 +7,7 @@ require('bootstrap');
 var HISTORYINDEX = null;
 var HISTORYINVIEW = false;
 const chess = new Chess(FEN);
+const socket = new WebSocket('ws://localhost:3001');
 
 var turn = null;
 var times, timer;
@@ -24,8 +25,6 @@ if (chess.inCheck() === true) {
 }
 
 $(function() {
-    const socket = new WebSocket('ws://localhost:3001');
-
     socket.addEventListener('open', function(e) {
         console.log('open', e);
 
@@ -79,8 +78,6 @@ $(function() {
 
         // Opponent resign
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'resign') {
-            GAMESTATUS = 'finished';
-
             if (PLAYERCOLOR === 'white') {
                 gameIsOver('win', PLAYERCOLOR, 'White win ! Black resign');
             } else {
@@ -113,16 +110,13 @@ $(function() {
 
         // Opponent accept the draw
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'offer-draw-yes') {
-            GAMESTATUS = 'finished';
             $('#offer-draw-display').addClass('d-none');
-            $('.tchat').append('<div><p>Draw offer accepted</p></div>');
+            gameIsOver('d', PLAYERCOLOR, 'Draw offer accepted');
             return;
         }
 
         // Opponent timer is over
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'timeout') {
-            GAMESTATUS = 'finished';
-
             if (PLAYERCOLOR === 'white') {
                 gameIsOver('win', PLAYERCOLOR, 'White win ! Black timer is over');
             } else {
@@ -140,24 +134,24 @@ $(function() {
                     var img = $('#h1').html();
                     $('#h1').empty();
                     $('#f1').html(img);
-                    setupDraggable(chess, '#f1 img');
+                    setupDraggable('#f1 img');
                 } else if (socketMessage.color === 'b') {
                     var img = $('#h8').html();
                     $('#h8').empty();
                     $('#f8').html(img);
-                    setupDraggable(chess, '#f8 img');
+                    setupDraggable('#f8 img');
                 }
             } else if (socketMessage.flag === 'q') { // queen side castelling
                 if (socketMessage.color === 'w') {
                     var img = $('#a1').html();
                     $('#a1').empty();
                     $('#d1').html(img);
-                    setupDraggable(chess, '#d1 img');
+                    setupDraggable('#d1 img');
                 } else if (socketMessage.color === 'b') {
                     var img = $('#a8').html();
                     $('#a8').empty();
                     $('#d8').html(img);
-                    setupDraggable(chess, '#d8 img');
+                    setupDraggable('#d8 img');
                 }
             } else if (socketMessage.flag === 'e') { // en passant capture
                 if (socketMessage.color === 'w') {
@@ -202,8 +196,6 @@ $(function() {
             }
 
             if (chess.isGameOver()) {
-                GAMESTATUS = 'finished';
-
                 let colorToUse = 'black';
                 if (socketMessage.color === 'w') {
                     colorToUse = 'white';
@@ -216,13 +208,13 @@ $(function() {
                     }
                 } else if (chess.isDraw()) {
                     if (chess.isStalemate()) {
-                        gameIsOver('d', colorToUse, 'Game is stalemated');
+                        gameIsOver('d', colorToUse, 'Draw ! Game is stalemated');
                     } else if (chess.isThreefoldRepetition()) {
-                        gameIsOver('d', colorToUse, 'Threefold repetition');
+                        gameIsOver('d', colorToUse, 'Draw ! Threefold repetition');
                     } else if (chess.isInsufficientMaterial()) {
-                        gameIsOver('d', colorToUse, 'Insufficient material');
+                        gameIsOver('d', colorToUse, 'Draw ! Insufficient material');
                     } else {
-                        gameIsOver('d', colorToUse, 'Fifty moves without progressions');
+                        gameIsOver('d', colorToUse, 'Draw ! Fifty moves without progressions');
                     }
                 }
             }
@@ -257,8 +249,6 @@ $(function() {
             }
 
             if (chess.isGameOver()) {
-                GAMESTATUS = 'finished';
-
                 let colorToUse = 'black';
                 if (socketMessage.color === 'w') {
                     colorToUse = 'white';
@@ -271,13 +261,13 @@ $(function() {
                     }
                 } else if (chess.isDraw()) {
                     if (chess.isStalemate()) {
-                        gameIsOver('d', colorToUse, 'Game is stalemated');
+                        gameIsOver('d', colorToUse, 'Draw ! Game is stalemated');
                     } else if (chess.isThreefoldRepetition()) {
-                        gameIsOver('d', colorToUse, 'Threefold repetition');
+                        gameIsOver('d', colorToUse, 'Draw ! Threefold repetition');
                     } else if (chess.isInsufficientMaterial()) {
-                        gameIsOver('d', colorToUse, 'Insufficient material');
+                        gameIsOver('d', colorToUse, 'Draw ! Insufficient material');
                     } else {
-                        gameIsOver('d', colorToUse, 'Fifty moves without progressions');
+                        gameIsOver('d', colorToUse, 'Draw ! Fifty moves without progressions');
                     }
                 }
             }
@@ -306,7 +296,7 @@ $(function() {
             }
         }
 
-        $('.history').find('.last-history-move').removeClass('last-history-move');
+        $('.history-section').find('.last-history-move').removeClass('last-history-move');
         if (socketMessage.color === 'w') { // White play, make a new line
             let htmlMoveRow = '' +
             '<div class="row move-' + socketMessage.moveNumber + ' text-center">' +
@@ -315,10 +305,10 @@ $(function() {
                 '<div id="move-san-b-' + socketMessage.moveNumber + '" class="col-4 one-move-san"></div>' +
             '</div>';
 
-            $('.history').append(htmlMoveRow);
+            $('.history-section').append(htmlMoveRow);
         } else { // Black play, complete the line
-            $('.history').find('#move-san-b-' + socketMessage.moveNumber).html(socketMessage.san);
-            $('.history').find('#move-san-b-' + socketMessage.moveNumber).addClass('last-history-move');
+            $('.history-section').find('#move-san-b-' + socketMessage.moveNumber).html(socketMessage.san);
+            $('.history-section').find('#move-san-b-' + socketMessage.moveNumber).addClass('last-history-move');
         }
 
         if (!HISTORYINVIEW) {
@@ -362,10 +352,10 @@ $(function() {
                 let promotion = null;
                 if (squareFromInfos !== null && squareFromInfos['type'] === 'p' && ((PLAYERCOLOR === 'white' && squareFromInfos['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (PLAYERCOLOR === 'black' && squareFromInfos['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
                     promotionPiece(function(promotion) {
-                        processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
+                        processMove(squareIdFrom, squareIdTo, promotion);
                     });
                 } else {
-                    processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
+                    processMove(squareIdFrom, squareIdTo, promotion);
                 }
             }
         }
@@ -473,10 +463,10 @@ $(function() {
             var promotion = null;
             if (squareFromInfos !== null && squareFromInfos['type'] === 'p' && ((PLAYERCOLOR === 'white' && squareFromInfos['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (PLAYERCOLOR === 'black' && squareFromInfos['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
                 promotionPiece(function(promotion) {
-                    processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
+                    processMove(squareIdFrom, squareIdTo, promotion);
                 });
             } else {
-                processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
+                processMove(squareIdFrom, squareIdTo, promotion);
             }
         }
 
@@ -487,7 +477,7 @@ $(function() {
         }
     });
 
-    setupDraggable(chess);
+    setupDraggable();
 
     $('.chess-table').droppable({
         drop: function(ev, ui) {
@@ -523,10 +513,10 @@ $(function() {
                 var promotion = null;
                 if (squareFromInfos !== null && squareFromInfos['type'] === 'p' && ((PLAYERCOLOR === 'white' && squareFromInfos['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (PLAYERCOLOR === 'black' && squareFromInfos['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
                     promotionPiece(function(promotion) {
-                        processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
+                        processMove(squareIdFrom, squareIdTo, promotion);
                     });
                 } else {
-                    processMove(chess, socket, squareIdFrom, squareIdTo, promotion);
+                    processMove(squareIdFrom, squareIdTo, promotion);
                 }
             }
         }
@@ -604,7 +594,7 @@ $(function() {
             }
 
             // Set draggable back on all player color pieces
-            setupDraggable(chess);
+            setupDraggable();
         } else if (self.attr('id') === 'history-backward') { // 1 step backward
             HISTORYINVIEW = true;
             if (HISTORYINDEX === null) {
@@ -683,10 +673,16 @@ $(function() {
 
             // Set draggable back on all player color pieces if we set the last move
             if (HISTORYINDEX === allHistory.length - 1) {
-                setupDraggable(chess);
+                setupDraggable();
             }
         }
     });
+
+    // Transfert one-move-san here
+    $('.history-section').on('click', function() {
+        console.log('click on history section');
+    });
+
 
     $('.one-move-san').on('click', function() {
         // Empty history line, just return
@@ -775,7 +771,7 @@ $(function() {
                 placePieces(allHistory[i].after, true);
 
                 if (HISTORYINDEX === allHistory.length - 1) {
-                    setupDraggable(chess);
+                    setupDraggable();
                 }
             }
         }
@@ -790,6 +786,12 @@ $(function() {
         let isConfirmed = confirm('Vous êtes sur le point d\'abandonner. Voulez-vous confirmer ?');
         if (!isConfirmed) {
             return;
+        }
+
+        if (PLAYERCOLOR === 'white') {
+            gameIsOver('win', PLAYERCOLOR, 'Black win ! White resign');
+        } else {
+            gameIsOver('win', PLAYERCOLOR, 'White win ! Black resign');
         }
 
         try {
@@ -838,7 +840,7 @@ $(function() {
         $('#offer-draw-opponent-response').addClass('d-none');
 
         let message = 'Draw offer accepted';
-        $('.tchat').append('<div><p>' + message + '</p></div>');
+        gameIsOver('win', PLAYERCOLOR, message);
 
         try {
             socket.send(JSON.stringify({
@@ -872,7 +874,7 @@ $(function() {
     });
 });
 
-function setupDraggable(chess, jQueryElement) {
+function setupDraggable(jQueryElement) {
     let elementToDraggable = '.piece.' + PLAYERCOLOR;
     if (typeof jQueryElement !== 'undefined') {
         elementToDraggable = jQueryElement;
@@ -883,6 +885,10 @@ function setupDraggable(chess, jQueryElement) {
         start: function(ev, ui) {
             // If player is watching history, disable the possibility to move
             if (HISTORYINVIEW) {
+                return;
+            }
+
+            if (GAMESTATUS === 'finished') {
                 return;
             }
 
@@ -918,7 +924,7 @@ function setupDraggable(chess, jQueryElement) {
     });
 }
 
-function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
+function processMove(squareIdFrom, squareIdTo, promotion) {
     HISTORYINDEX = null;
 
     var piecesPromotion = {
@@ -962,24 +968,24 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
                 var img = $('#h1').html();
                 $('#h1').empty();
                 $('#f1').html(img);
-                setupDraggable(chess, '#f1 img');
+                setupDraggable('#f1 img');
             } else if (PLAYERCOLOR === 'black') {
                 var img = $('#h8').html();
                 $('#h8').empty();
                 $('#f8').html(img);
-                setupDraggable(chess, '#f8 img');
+                setupDraggable('#f8 img');
             }
         } else if (moving.flags === 'q') { // queen side castelling
             if (PLAYERCOLOR === 'white') {
                 var img = $('#a1').html();
                 $('#a1').empty();
                 $('#d1').html(img);
-                setupDraggable(chess, '#d1 img');
+                setupDraggable('#d1 img');
             } else if (PLAYERCOLOR === 'black') {
                 var img = $('#a8').html();
                 $('#a8').empty();
                 $('#d8').html(img);
-                setupDraggable(chess, '#d8 img');
+                setupDraggable('#d8 img');
             }
         } else if (moving.flags === 'e') { // en passant capture
             if (PLAYERCOLOR === 'white') {
@@ -1003,7 +1009,7 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
             src = src.replace('chessboard', piecesPromotion[promotion]);
             src = src.replace('playerColor', PLAYERCOLOR);
             $('#' + squareIdTo).html('<img class="piece ' + PLAYERCOLOR + '" src="' + src + '" alt>');
-            setupDraggable(chess, '#' + squareIdTo + ' img');
+            setupDraggable('#' + squareIdTo + ' img');
         }
 
         let historyVerbose = chess.history({verbose: true});
@@ -1012,7 +1018,7 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
         lastMoveHistory['method'] = 'move';
         lastMoveHistory['moveNumber'] = moveNumber;
 
-        $('.history').find('.last-history-move').removeClass('last-history-move');
+        $('.history-section').find('.last-history-move').removeClass('last-history-move');
         if (moving.color === 'w') { // White play, make a new line
             let htmlMoveRow = '' +
             '<div class="row move-' + lastMoveHistory.moveNumber + ' text-center">' +
@@ -1021,15 +1027,13 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
                 '<div id="move-san-b-' + lastMoveHistory.moveNumber + '" class="col-4 one-move-san"></div>' +
             '</div>';
 
-            $('.history').append(htmlMoveRow);
+            $('.history-section').append(htmlMoveRow);
         } else { // Black play, complete the line
-            $('.history').find('#move-san-b-' + lastMoveHistory.moveNumber).html(lastMoveHistory.san);
-            $('.history').find('#move-san-b-' + lastMoveHistory.moveNumber).addClass('last-history-move');
+            $('.history-section').find('#move-san-b-' + lastMoveHistory.moveNumber).html(lastMoveHistory.san);
+            $('.history-section').find('#move-san-b-' + lastMoveHistory.moveNumber).addClass('last-history-move');
         }
 
         if (chess.isGameOver()) {
-            GAMESTATUS = 'finished';
-
             if (chess.isCheckmate() === true) {
                 lastMoveHistory['gameStatus'] = 'checkmate';
                 lastMoveHistory['gameReason'] = 'checkmate';
@@ -1043,16 +1047,16 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
                 lastMoveHistory['gameStatus'] = 'draw';
                 if (chess.isStalemate()) {
                     lastMoveHistory['gameReason'] = 'stalemate';
-                    lastMoveHistory['message'] = 'Game is stalemated';
+                    lastMoveHistory['message'] = 'Draw ! Game is stalemated';
                 } else if (chess.isThreefoldRepetition()) {
                     lastMoveHistory['gameReason'] = 'threefoldRepetition';
-                    lastMoveHistory['message'] = 'Threefold repetition';
+                    lastMoveHistory['message'] = 'Draw ! Threefold repetition';
                 } else if (chess.isInsufficientMaterial()) {
                     lastMoveHistory['gameReason'] = 'insufficientMaterial';
-                    lastMoveHistory['message'] = 'Insufficient material';
+                    lastMoveHistory['message'] = 'Draw ! Insufficient material';
                 } else {
                     lastMoveHistory['gameReason'] = 'fiftyMoves';
-                    lastMoveHistory['message'] = 'Fifty moves without progressions';
+                    lastMoveHistory['message'] = 'Draw ! Fifty moves without progressions';
                 }
                 gameIsOver('d', PLAYERCOLOR, lastMoveHistory['message']);
             }
@@ -1297,23 +1301,29 @@ function startTimer(playerTurn, playerTime, opponentTime) {
                 timer = false;
 
                 if ((turn === 'player' && PLAYERCOLOR === 'white') || (turn === 'opponent' && PLAYERCOLOR === 'black')) {
-                    GAMESTATUS = 'finished';
-
                     socket.send(JSON.stringify({
                         'method': 'timeout',
                         'color': PLAYERCOLOR,
                         'idGame': IDGAME,
                     }));
-                    setWinner('noirs');
+
+                    if (PLAYERCOLOR === 'white') {
+                        gameIsOver('win', PLAYERCOLOR, 'White win ! Black timer is over');
+                    } else {
+                        gameIsOver('win', PLAYERCOLOR, 'Black win ! White timer is over');
+                    }
                 } else if ((turn === 'player' && PLAYERCOLOR === 'black') || (turn === 'opponent' && PLAYERCOLOR === 'white')) {
-                    GAMESTATUS = 'finished';
-
                     socket.send(JSON.stringify({
                         'method': 'timeout',
                         'color': PLAYERCOLOR,
                         'idGame': IDGAME,
                     }));
-                    setWinner('blancs');
+
+                    if (PLAYERCOLOR === 'white') {
+                        gameIsOver('win', PLAYERCOLOR, 'White win ! Black timer is over');
+                    } else {
+                        gameIsOver('win', PLAYERCOLOR, 'Black win ! White timer is over');
+                    }
                 }
             }
         }, 1000);
@@ -1325,13 +1335,9 @@ function stopTimer() {
     timer = false;
 }
 
-// function setWinner(playerColor) {
-//     alert('Victoire des '+ playerColor +' !');
-//     stopTimer()
-//     $('#player-turn').text('Victoire des '+ playerColor +' !');
-// }
-
 function gameIsOver(gameStatus, playerWinner, endReason) {
+    GAMESTATUS = 'finished';
+
     stopTimer();
     if (gameStatus === 'd') { // Draw
         $('.tchat').append('<div><p>' + endReason + '</p></div>');
@@ -1342,6 +1348,8 @@ function gameIsOver(gameStatus, playerWinner, endReason) {
             $('.tchat').append('<div><p>' + endReason + '</p></div>');
         }
     }
+
+    $('.piece.' + PLAYERCOLOR).draggable('destroy');
 }
 
 // history functions
