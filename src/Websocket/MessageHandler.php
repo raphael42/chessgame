@@ -64,6 +64,52 @@ class MessageHandler implements MessageComponentInterface
         // Use this var to have cleaner code
         $idGame = $msgArray['idGame'];
 
+        // Game not saved in the websocket yet, save it
+        if (!isset($this->gameEntity[$idGame])) {
+            // Get the game entity
+            $this->gameEntity[$idGame] = $this->em->getRepository(Entity\Game::class)->find($idGame);
+
+            // Get the game timer per player
+            $this->gameTimer[$idGame] = $this->gameEntity[$idGame]->getTime();
+            $this->gameIncrement[$idGame] = $this->gameEntity[$idGame]->getIncrement();
+
+            // Get the players datas too
+            $this->playerWhiteEntity[$idGame] = $this->em->getRepository(Entity\Player::class)->findOneBy([
+                'color' => 'white',
+                'game' => $this->gameEntity[$idGame]->getId(),
+            ]);
+            $this->playerBlackEntity[$idGame] = $this->em->getRepository(Entity\Player::class)->findOneBy([
+                'color' => 'black',
+                'game' => $this->gameEntity[$idGame]->getId(),
+            ]);
+
+            $this->whiteMicrotimeSpend[$idGame] = 0;
+            $this->blackMicrotimeSpend[$idGame] = 0;
+
+            $this->whiteMicrotimeStart[$idGame] = 0;
+            $this->blackMicrotimeStart[$idGame] = 0;
+        }
+
+        // We have a message to display in the tchat, save it in DB
+        if (isset($msgArray['message']) && !empty($msgArray['message'])) {
+            $dateTimeNow = new \DateTime();
+
+            $messagesEntity = new Entity\Messages();
+            $messagesEntity->setDateInsert($dateTimeNow);
+            // It's a message from the tchat, set the player
+            if (isset($msgArray['isTchat'], $msgArray['color']) && !empty($msgArray['isTchat']) && !empty($msgArray['color'])) {
+                if ($msgArray['color'] === 'w' || $msgArray['color'] === 'white') {
+                    $messagesEntity->setPlayer($this->playerWhiteEntity[$idGame]);
+                } elseif ($msgArray['color'] === 'b' || $msgArray['color'] === 'black') {
+                    $messagesEntity->setPlayer($this->playerBlackEntity[$idGame]);
+                }
+            }
+            $messagesEntity->setGame($this->gameEntity[$idGame]);
+            $messagesEntity->setMessage($msgArray['message']);
+            $this->em->persist($messagesEntity);
+            $this->em->flush();
+        }
+
         // One player resign, send info to the other
         if (isset($msgArray['method']) && $msgArray['method'] === 'resign') {
             $resignColor = null;
@@ -133,32 +179,6 @@ class MessageHandler implements MessageComponentInterface
             return;
         }
 
-        // Game not saved in the websocket yet, save it
-        if (!isset($this->gameEntity[$idGame])) {
-            // Get the game entity
-            $this->gameEntity[$idGame] = $this->em->getRepository(Entity\Game::class)->find($idGame);
-
-            // Get the game timer per player
-            $this->gameTimer[$idGame] = $this->gameEntity[$idGame]->getTime();
-            $this->gameIncrement[$idGame] = $this->gameEntity[$idGame]->getIncrement();
-
-            // Get the players datas too
-            $this->playerWhiteEntity[$idGame] = $this->em->getRepository(Entity\Player::class)->findOneBy([
-                'color' => 'white',
-                'game' => $this->gameEntity[$idGame]->getId(),
-            ]);
-            $this->playerBlackEntity[$idGame] = $this->em->getRepository(Entity\Player::class)->findOneBy([
-                'color' => 'black',
-                'game' => $this->gameEntity[$idGame]->getId(),
-            ]);
-
-            $this->whiteMicrotimeSpend[$idGame] = 0;
-            $this->blackMicrotimeSpend[$idGame] = 0;
-
-            $this->whiteMicrotimeStart[$idGame] = 0;
-            $this->blackMicrotimeStart[$idGame] = 0;
-        }
-
         // If it's a reconnection, send the timers
         if (isset($msgArray['method']) && $msgArray['method'] === 'connection') {
             if ($msgArray['color'] === 'w') {
@@ -176,18 +196,28 @@ class MessageHandler implements MessageComponentInterface
                     $theoricBlackTimeSpend = $this->blackMicrotimeSpend[$idGame] + ($microtimeNow - $this->blackMicrotimeStart[$idGame]);
                     $theoricWhiteTimeSpend = $this->whiteMicrotimeSpend[$idGame] + ($microtimeNow - $this->whiteMicrotimeStart[$idGame]);
 
-                    $msg = json_encode([
-                        'method' => 'opponent_connect',
-                        'whiteMicrotimeSpend' => round($this->gameTimer[$idGame] - $theoricWhiteTimeSpend),
-                        'blackMicrotimeSpend' => round($this->gameTimer[$idGame] - $theoricBlackTimeSpend),
-                    ]);
+                    // If game is finished, do not send the timer being decremented. Get the each players one saved in DB
+                    if ($this->gameEntity[$idGame]->getStatus() === 'finished') {
+                        $msg = json_encode([
+                            'method' => 'opponent_connect',
+                            'whiteMicrotimeSpend' => $this->playerWhiteEntity[$idGame]->getTimeLeft(),
+                            'blackMicrotimeSpend' => $this->playerBlackEntity[$idGame]->getTimeLeft(),
+                        ]);
+                    } else {
+                        $msg = json_encode([
+                            'method' => 'opponent_connect',
+                            'whiteMicrotimeSpend' => round($this->gameTimer[$idGame] - $theoricWhiteTimeSpend),
+                            'blackMicrotimeSpend' => round($this->gameTimer[$idGame] - $theoricBlackTimeSpend),
+                        ]);
+                    }
+
                     $connection->send($msg);
                 }
             }
             return;
         }
 
-        // Game is finished
+        // Game just finished
         if (isset($msgArray['gameStatus'], $msgArray['gameReason'])) {
             $this->gameEntity[$idGame]->setStatus('finished');
 
@@ -206,6 +236,24 @@ class MessageHandler implements MessageComponentInterface
 
             $this->em->persist($this->gameEntity[$idGame]);
             $this->em->flush();
+        }
+
+        // Game is timeout
+        if (isset($msgArray['method']) && $msgArray['method'] === 'timeout') {
+            $this->gameEntity[$idGame]->setStatus('finished');
+            $this->gameEntity[$idGame]->setWinner($msgArray['color']);
+            $this->gameEntity[$idGame]->setEndReason('timeout');
+
+            $this->em->persist($this->gameEntity[$idGame]);
+            $this->em->flush();
+
+            foreach ($this->connections as $connection) {
+                if ($connection !== $from && in_array($connection->resourceId, [$this->playerWhiteResourceId[$idGame], $this->playerBlackResourceId[$idGame]])) {
+                    $connection->send($msg);
+                }
+            }
+
+            return;
         }
 
         // At this point, we need to have a move method. If not, there is a problem ...

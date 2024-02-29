@@ -12,6 +12,7 @@
         var IDGAME = '{{ idGame }}';
         var PIECESIMGURL = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
         var MOVES = {{ arrMovesForJS|json_encode|raw }};
+        var GAMESTATUS = {{ gameStatus|json_encode|raw }};
     </script>
 
     {{ encore_entry_link_tags('gameJs') }}
@@ -63,6 +64,7 @@
                 </div>
             </div>
             <div class="tchat">
+
             </div>
         </div>
         <div class="col-lg-7 col-md-8 col-sm-12 col-center">

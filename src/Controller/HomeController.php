@@ -22,11 +22,11 @@ class HomeController extends AbstractController
             $data = $form->getData();
 
             $url = time().bin2hex(random_bytes(10));
-            $this->createNewGame($url, $data, $entityManager);
+            $gameId = $this->createNewGame($url, $data, $entityManager);
 
             $session = new Session();
             // $session->start();
-            $session->set('gameCreator', true);
+            $session->set('gameCreator', $gameId);
 
             return $this->redirectToRoute('game-second', ['url' => $url]);
         }
@@ -36,7 +36,7 @@ class HomeController extends AbstractController
         ]);
     }
 
-    private function createNewGame(string $url, array $data, EntityManagerInterface $entityManager) : void
+    private function createNewGame(string $url, array $data, EntityManagerInterface $entityManager) : int
     {
         $dateTimeNow = new \DateTime();
 
@@ -81,6 +81,6 @@ class HomeController extends AbstractController
         $entityManager->flush();
         // EOF update database
 
-        return;
+        return $gameEntity->getId();
     }
 }

@@ -12,14 +12,14 @@ var turn = null;
 var times, timer;
 placePieces(FEN);
 setUpTimer();
-
 if (chess.inCheck() === true) {
     let kingposition = null;
-    if (PLAYERCOLOR === 'white') {
-        kingposition = getKingPosition(FEN, 'black');
-    } else if (PLAYERCOLOR === 'black') {
+    if (chess.turn() === 'w') {
         kingposition = getKingPosition(FEN, 'white');
+    } else {
+        kingposition = getKingPosition(FEN, 'black');
     }
+
     $('#' + kingposition).addClass('in-check');
 }
 
@@ -42,7 +42,6 @@ $(function() {
 
     socket.addEventListener('message', function(e) {
         var socketMessage = JSON.parse(e.data);
-        console.log(socketMessage);
 
         // Disconnect
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'opponent_disconnect') {
@@ -80,10 +79,12 @@ $(function() {
 
         // Opponent resign
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'resign') {
+            GAMESTATUS = 'finished';
+
             if (PLAYERCOLOR === 'white') {
-                setWinner('blancs');
+                gameIsOver('win', PLAYERCOLOR, 'White win ! Black resign');
             } else {
-                setWinner('noirs');
+                gameIsOver('win', PLAYERCOLOR, 'Black win ! White resign');
             }
             return;
         }
@@ -112,8 +113,22 @@ $(function() {
 
         // Opponent accept the draw
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'offer-draw-yes') {
+            GAMESTATUS = 'finished';
             $('#offer-draw-display').addClass('d-none');
             $('.tchat').append('<div><p>Draw offer accepted</p></div>');
+            return;
+        }
+
+        // Opponent timer is over
+        if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'timeout') {
+            GAMESTATUS = 'finished';
+
+            if (PLAYERCOLOR === 'white') {
+                gameIsOver('win', PLAYERCOLOR, 'White win ! Black timer is over');
+            } else {
+                gameIsOver('win', PLAYERCOLOR, 'Black win ! White timer is over');
+            }
+
             return;
         }
 
@@ -186,15 +201,29 @@ $(function() {
                 console.log(error);
             }
 
-            if (chess.isDraw() === true) {
-                alert('Match nul !');
-            }
+            if (chess.isGameOver()) {
+                GAMESTATUS = 'finished';
 
-            if (chess.isCheckmate() === true) {
+                let colorToUse = 'black';
                 if (socketMessage.color === 'w') {
-                    setWinner('blancs');
-                } else if (socketMessage.color === 'b') {
-                    setWinner('noirs');
+                    colorToUse = 'white';
+                }
+                if (chess.isCheckmate() === true) {
+                    if (socketMessage.color === 'w') {
+                        gameIsOver('win', colorToUse, 'White win ! Black is checkmate');
+                    } else {
+                        gameIsOver('win', colorToUse, 'Black win ! White is checkmate');
+                    }
+                } else if (chess.isDraw()) {
+                    if (chess.isStalemate()) {
+                        gameIsOver('d', colorToUse, 'Game is stalemated');
+                    } else if (chess.isThreefoldRepetition()) {
+                        gameIsOver('d', colorToUse, 'Threefold repetition');
+                    } else if (chess.isInsufficientMaterial()) {
+                        gameIsOver('d', colorToUse, 'Insufficient material');
+                    } else {
+                        gameIsOver('d', colorToUse, 'Fifty moves without progressions');
+                    }
                 }
             }
 
@@ -227,15 +256,29 @@ $(function() {
                 console.log(error);
             }
 
-            if (chess.isDraw() === true) {
-                alert('Match nul !');
-            }
+            if (chess.isGameOver()) {
+                GAMESTATUS = 'finished';
 
-            if (chess.isCheckmate() === true) {
+                let colorToUse = 'black';
                 if (socketMessage.color === 'w') {
-                    setWinner('blancs');
-                } else if (socketMessage.color === 'b') {
-                    setWinner('noirs');
+                    colorToUse = 'white';
+                }
+                if (chess.isCheckmate() === true) {
+                    if (socketMessage.color === 'w') {
+                        gameIsOver('win', colorToUse, 'White win ! Black is checkmate');
+                    } else {
+                        gameIsOver('win', colorToUse, 'Black win ! White is checkmate');
+                    }
+                } else if (chess.isDraw()) {
+                    if (chess.isStalemate()) {
+                        gameIsOver('d', colorToUse, 'Game is stalemated');
+                    } else if (chess.isThreefoldRepetition()) {
+                        gameIsOver('d', colorToUse, 'Threefold repetition');
+                    } else if (chess.isInsufficientMaterial()) {
+                        gameIsOver('d', colorToUse, 'Insufficient material');
+                    } else {
+                        gameIsOver('d', colorToUse, 'Fifty moves without progressions');
+                    }
                 }
             }
 
@@ -342,6 +385,11 @@ $(function() {
             return;
         }
 
+        // If game is finished, disable moves
+        if (GAMESTATUS === 'finished') {
+            return;
+        }
+
         const self = $(this);
         var idSquare = $(this).attr('id');
 
@@ -443,7 +491,11 @@ $(function() {
 
     $('.chess-table').droppable({
         drop: function(ev, ui) {
-            console.log('drop');
+            // If game is finished, disable moves
+            if (GAMESTATUS === 'finished') {
+                return;
+            }
+
             // If player is watching history, disable the possibility to move
             if (HISTORYINVIEW) {
                 return;
@@ -540,8 +592,8 @@ $(function() {
             // fenSplit[1] is color and fenSplit[5] is the move number
             $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
 
-            // if san ends with '+', then the other color player is in check, display the class
-            if ((allHistory[allHistory.length - 1].san).endsWith('+')) {
+            // if san ends with '+', then the other color player is in check, display the class. If ends with '#', it's checkmate but apply the color too
+            if ((allHistory[allHistory.length - 1].san).endsWith('+') || (allHistory[allHistory.length - 1].san).endsWith('#')) {
                 let kingposition = null;
                 if (allHistory[allHistory.length - 1].color === 'white' || allHistory[allHistory.length - 1].color === 'w') {
                     kingposition = getKingPosition(allHistory[allHistory.length - 1].after, 'black');
@@ -578,8 +630,8 @@ $(function() {
                 // fenSplit[1] is color and fenSplit[5] is the move number
                 $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
 
-                // if san ends with '+', then the other color player is in check, display the class
-                if ((allHistory[HISTORYINDEX].san).endsWith('+')) {
+                // if san ends with '+', then the other color player is in check, display the class. If ends with '#', it's checkmate but apply the color too
+                if ((allHistory[HISTORYINDEX].san).endsWith('+') || (allHistory[HISTORYINDEX].san).endsWith('#')) {
                     let kingposition = null;
                     if (allHistory[HISTORYINDEX].color === 'white' || allHistory[HISTORYINDEX].color === 'w') {
                         kingposition = getKingPosition(fen, 'black');
@@ -616,8 +668,8 @@ $(function() {
             // fenSplit[1] is color and fenSplit[5] is the move number
             $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
 
-            // if san ends with '+', then the other color player is in check, display the class
-            if ((allHistory[HISTORYINDEX].san).endsWith('+')) {
+            // if san ends with '+', then the other color player is in check, display the class.  If ends with '#', it's checkmate but apply the color too
+            if ((allHistory[HISTORYINDEX].san).endsWith('+') || (allHistory[HISTORYINDEX].san).endsWith('#')) {
                 let kingposition = null;
                 if (allHistory[HISTORYINDEX].color === 'white' || allHistory[HISTORYINDEX].color === 'w') {
                     kingposition = getKingPosition(allHistory[HISTORYINDEX].after, 'black');
@@ -709,8 +761,8 @@ $(function() {
                 // fenSplit[1] is color and fenSplit[5] is the move number
                 $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
 
-                // if san ends with '+', then the other color player is in check, display the class
-                if ((allHistory[i].san).endsWith('+')) {
+                // if san ends with '+', then the other color player is in check, display the class. If ends with '#', it's checkmate but apply the color too
+                if ((allHistory[i].san).endsWith('+') || (allHistory[i].san).endsWith('#')) {
                     let kingposition = null;
                     if (allHistory[i].color === 'white' || allHistory[i].color === 'w') {
                         kingposition = getKingPosition(allHistory[i].after, 'black');
@@ -730,6 +782,11 @@ $(function() {
     });
 
     $('#resign').on('click', function() {
+        // If game is finished, disable resigns
+        if (GAMESTATUS === 'finished') {
+            return;
+        }
+
         let isConfirmed = confirm('Vous êtes sur le point d\'abandonner. Voulez-vous confirmer ?');
         if (!isConfirmed) {
             return;
@@ -747,6 +804,11 @@ $(function() {
     });
 
     $('#offer-draw').on('click', function() {
+        // If game is finished, disable draw offers
+        if (GAMESTATUS === 'finished') {
+            return;
+        }
+
         let isConfirmed = confirm('Voulez-vous proposer un match nul à votre adversaire ?');
         if (!isConfirmed) {
             return;
@@ -754,16 +816,18 @@ $(function() {
 
         $('#offer-draw-display').removeClass('d-none');
 
+        let message = 'Black offers draw';
         if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
-            $('.tchat').append('<div><p>White offers draw</p></div>');
-        } else {
-            $('.tchat').append('<div><p>Black offers draw</p></div>');
+            message = 'White offers draw';
         }
+
+        $('.tchat').append('<div><p>' + message + '</p></div>');
 
         try {
             socket.send(JSON.stringify({
                 'method': 'offer-draw',
                 'idGame': IDGAME,
+                'message': message,
             }));
         } catch (error) {
             console.log('Socket error', error);
@@ -772,12 +836,15 @@ $(function() {
 
     $('#offer-draw-yes').on('click', function() {
         $('#offer-draw-opponent-response').addClass('d-none');
-        $('.tchat').append('<div><p>Draw offer accepted</p></div>');
+
+        let message = 'Draw offer accepted';
+        $('.tchat').append('<div><p>' + message + '</p></div>');
 
         try {
             socket.send(JSON.stringify({
                 'method': 'offer-draw-yes',
                 'idGame': IDGAME,
+                'message': message,
             }));
         } catch (error) {
             console.log('Socket error', error);
@@ -785,16 +852,19 @@ $(function() {
     });
     $('#offer-draw-no').on('click', function() {
         $('#offer-draw-opponent-response').addClass('d-none');
+
+        let message = 'Black declines draw';
         if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
-            $('.tchat').append('<div><p>White declines draw</p></div>');
-        } else {
-            $('.tchat').append('<div><p>Black declines draw</p></div>');
+            message = 'White declines draw';
         }
+
+        $('.tchat').append('<div><p>' + message + '</p></div>');
 
         try {
             socket.send(JSON.stringify({
                 'method': 'offer-draw-no',
                 'idGame': IDGAME,
+                'message': message,
             }));
         } catch (error) {
             console.log('Socket error', error);
@@ -811,7 +881,6 @@ function setupDraggable(chess, jQueryElement) {
     $(elementToDraggable).draggable({
         revert: true,
         start: function(ev, ui) {
-            console.log('drag');
             // If player is watching history, disable the possibility to move
             if (HISTORYINVIEW) {
                 return;
@@ -959,19 +1028,33 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
         }
 
         if (chess.isGameOver()) {
+            GAMESTATUS = 'finished';
+
             if (chess.isCheckmate() === true) {
                 lastMoveHistory['gameStatus'] = 'checkmate';
                 lastMoveHistory['gameReason'] = 'checkmate';
+                if (moving.color === 'w') {
+                    lastMoveHistory['message'] = 'White win ! Black is checkmate';
+                } else {
+                    lastMoveHistory['message'] = 'Black win ! White is checkmate';
+                }
+                gameIsOver('win', PLAYERCOLOR, lastMoveHistory['message']);
             } else if (chess.isDraw()) {
                 lastMoveHistory['gameStatus'] = 'draw';
-                lastMoveHistory['gameReason'] = 'fiftyMoves';
                 if (chess.isStalemate()) {
                     lastMoveHistory['gameReason'] = 'stalemate';
+                    lastMoveHistory['message'] = 'Game is stalemated';
                 } else if (chess.isThreefoldRepetition()) {
                     lastMoveHistory['gameReason'] = 'threefoldRepetition';
+                    lastMoveHistory['message'] = 'Threefold repetition';
                 } else if (chess.isInsufficientMaterial()) {
                     lastMoveHistory['gameReason'] = 'insufficientMaterial';
+                    lastMoveHistory['message'] = 'Insufficient material';
+                } else {
+                    lastMoveHistory['gameReason'] = 'fiftyMoves';
+                    lastMoveHistory['message'] = 'Fifty moves without progressions';
                 }
+                gameIsOver('d', PLAYERCOLOR, lastMoveHistory['message']);
             }
         }
 
@@ -990,14 +1073,6 @@ function processMove(chess, socket, squareIdFrom, squareIdTo, promotion) {
         }
 
         $('#player-turn').text('En attente de l\'adversaire');
-
-        if (chess.isCheckmate() === true) {
-            if (moving.color === 'w') {
-                setWinner('blancs');
-            } else if (moving.color === 'b') {
-                setWinner('noirs');
-            }
-        }
 
         $('.chess-table.clicked').removeClass('clicked');
         $('.chess-table.possible-move').each(function() {
@@ -1209,24 +1284,40 @@ function startTimer(playerTurn, playerTime, opponentTime) {
 
     turn = playerTurn;
 
-    timer = setInterval(function() {
-        times[turn]--;
+    if (GAMESTATUS !== 'finished') {
+        timer = setInterval(function() {
+            times[turn]--;
 
-        $('#timer-player').text(getTime(times['player']));
-        $('#timer-opponent').text(getTime(times['opponent']));
+            $('#timer-player').text(getTime(times['player']));
+            $('#timer-opponent').text(getTime(times['opponent']));
 
-        if (times[turn] == 0) {
-            navigator.vibrate(1000);
-            clearInterval(timer);
-            timer = false;
+            if (times[turn] == 0) {
+                navigator.vibrate(1000);
+                clearInterval(timer);
+                timer = false;
 
-            if ((turn === 'player' && PLAYERCOLOR === 'white') || (turn === 'opponent' && PLAYERCOLOR === 'black')) {
-                setWinner('noirs');
-            } else if ((turn === 'player' && PLAYERCOLOR === 'black') || (turn === 'opponent' && PLAYERCOLOR === 'white')) {
-                setWinner('blancs');
+                if ((turn === 'player' && PLAYERCOLOR === 'white') || (turn === 'opponent' && PLAYERCOLOR === 'black')) {
+                    GAMESTATUS = 'finished';
+
+                    socket.send(JSON.stringify({
+                        'method': 'timeout',
+                        'color': PLAYERCOLOR,
+                        'idGame': IDGAME,
+                    }));
+                    setWinner('noirs');
+                } else if ((turn === 'player' && PLAYERCOLOR === 'black') || (turn === 'opponent' && PLAYERCOLOR === 'white')) {
+                    GAMESTATUS = 'finished';
+
+                    socket.send(JSON.stringify({
+                        'method': 'timeout',
+                        'color': PLAYERCOLOR,
+                        'idGame': IDGAME,
+                    }));
+                    setWinner('blancs');
+                }
             }
-        }
-    }, 1000);
+        }, 1000);
+    }
 }
 
 function stopTimer() {
@@ -1234,10 +1325,23 @@ function stopTimer() {
     timer = false;
 }
 
-function setWinner(playerColor) {
-    alert('Victoire des '+ playerColor +' !');
-    stopTimer()
-    $('#player-turn').text('Victoire des '+ playerColor +' !');
+// function setWinner(playerColor) {
+//     alert('Victoire des '+ playerColor +' !');
+//     stopTimer()
+//     $('#player-turn').text('Victoire des '+ playerColor +' !');
+// }
+
+function gameIsOver(gameStatus, playerWinner, endReason) {
+    stopTimer();
+    if (gameStatus === 'd') { // Draw
+        $('.tchat').append('<div><p>' + endReason + '</p></div>');
+    } else { // One player win
+        if (playerWinner === 'w' || playerWinner === 'white') {
+            $('.tchat').append('<div><p>' + endReason + '</p></div>');
+        } else {
+            $('.tchat').append('<div><p>' + endReason + '</p></div>');
+        }
+    }
 }
 
 // history functions

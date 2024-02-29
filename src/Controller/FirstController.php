@@ -18,22 +18,26 @@ class FirstController extends AbstractController
         ]);
 
         $idGame = $game->getId();
+        $gameStatus = $game->getStatus();
 
         $session = new Session();
         $session->start();
-        // $session->set('gameCreator', true); // TODELETE
 
         $player = $entityManager->getRepository(Entity\Player::class)->findOneBy([
-            'game_creator' => $session->get('gameCreator') ?? false,
+            'game_creator' => (!is_null($session->get('gameCreator')) && $session->get('gameCreator') === $idGame) ? true : false,
             'game' => $idGame,
         ]);
 
         $opponent = $entityManager->getRepository(Entity\Player::class)->findOneBy([
-            'game_creator' => !$session->get('gameCreator') ?? true,
+            'game_creator' => (is_null($session->get('gameCreator')) || $session->get('gameCreator') !== $idGame) ? false : true,
             'game' => $idGame,
         ]);
 
         $moves = $entityManager->getRepository(Entity\Moves::class)->findBy([
+            'game' => $idGame,
+        ]);
+
+        $messages = $entityManager->getRepository(Entity\Messages::class)->findBy([
             'game' => $idGame,
         ]);
 
@@ -66,10 +70,12 @@ class FirstController extends AbstractController
 
         return $this->render('secondpage.html.twig', [
             'idGame' => $idGame,
+            'gameStatus' => $gameStatus,
             'player' => $player,
             'opponent' => $opponent,
             'arrMovesForJS' => $arrMovesForJS,
             'arrMovesForHtml' => $arrMovesForHtml,
+            // 'messages' => $messages,
             'fen' => $game->getFen(),
             'increment' => $game->getIncrement(),
         ]);
