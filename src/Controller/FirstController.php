@@ -75,7 +75,7 @@ class FirstController extends AbstractController
             'opponent' => $opponent,
             'arrMovesForJS' => $arrMovesForJS,
             'arrMovesForHtml' => $arrMovesForHtml,
-            // 'messages' => $messages,
+            'messages' => $messages,
             'fen' => $game->getFen(),
             'increment' => $game->getIncrement(),
         ]);

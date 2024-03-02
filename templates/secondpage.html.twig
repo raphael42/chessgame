@@ -64,7 +64,11 @@
                 </div>
             </div>
             <div class="tchat">
-
+                {% for oneMessage in messages %}
+                    <div>
+                        <p>{{ oneMessage.message }}</p>
+                    </div>
+                {% endfor %}
             </div>
         </div>
         <div class="col-lg-7 col-md-8 col-sm-12 col-center">

@@ -477,7 +477,9 @@ $(function() {
         }
     });
 
-    setupDraggable();
+    if (GAMESTATUS !== 'finished') {
+        setupDraggable();
+    }
 
     $('.chess-table').droppable({
         drop: function(ev, ui) {
@@ -678,13 +680,7 @@ $(function() {
         }
     });
 
-    // Transfert one-move-san here
-    $('.history-section').on('click', function() {
-        console.log('click on history section');
-    });
-
-
-    $('.one-move-san').on('click', function() {
+    $('.history-section').on('click', '.one-move-san', function() {
         // Empty history line, just return
         if ($(this).html() === '') {
             return;
