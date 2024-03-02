@@ -45,6 +45,9 @@ class Game
     #[ORM\OneToMany(mappedBy: 'game', targetEntity: Messages::class, orphanRemoval: true)]
     private Collection $messages;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $pgn = null;
+
     public function __construct()
     {
         $this->moves = new ArrayCollection();
@@ -208,6 +211,18 @@ class Game
                 $message->setGame(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPgn(): ?string
+    {
+        return $this->pgn;
+    }
+
+    public function setPgn(?string $pgn): static
+    {
+        $this->pgn = $pgn;
 
         return $this;
     }

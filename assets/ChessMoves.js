@@ -6,13 +6,19 @@ require('bootstrap');
 
 var HISTORYINDEX = null;
 var HISTORYINVIEW = false;
+
 const chess = new Chess(FEN);
+if (PGN !== null) {
+    chess.loadPgn(PGN);
+}
+
 const socket = new WebSocket('ws://localhost:3001');
 
 var turn = null;
 var times, timer;
 placePieces(FEN);
 setUpTimer();
+
 if (chess.inCheck() === true) {
     let kingposition = null;
     if (chess.turn() === 'w') {
@@ -537,20 +543,6 @@ $(function() {
         // in-check class will be recalculate for each history except the start button
         $('.in-check').removeClass('in-check');
 
-        for (let i in MOVES) {
-            allHistory.push({
-                'after': MOVES[i].fen_after,
-                'before': MOVES[i].fen_before,
-                'color': MOVES[i].player_color,
-                'flags': MOVES[i].flags,
-                'from': MOVES[i].square_from,
-                'lan': MOVES[i].lan,
-                'piece': MOVES[i].piece,
-                'san': MOVES[i].san,
-                'to': MOVES[i].square_to,
-            });
-        }
-
         let chessHistory = chess.history({verbose: true});
         for (let i in chessHistory) {
             allHistory.push({
@@ -691,21 +683,6 @@ $(function() {
         });
 
         $('.last-history-move').removeClass('last-history-move');
-
-        let allHistory = [];
-        for (let i in MOVES) {
-            allHistory.push({
-                'after': MOVES[i].fen_after,
-                'before': MOVES[i].fen_before,
-                'color': MOVES[i].player_color,
-                'flags': MOVES[i].flags,
-                'from': MOVES[i].square_from,
-                'lan': MOVES[i].lan,
-                'piece': MOVES[i].piece,
-                'san': MOVES[i].san,
-                'to': MOVES[i].square_to,
-            });
-        }
 
         let chessHistory = chess.history({verbose: true});
         for (let i in chessHistory) {
@@ -868,6 +845,10 @@ $(function() {
             console.log('Socket error', error);
         }
     });
+
+    // $('#ask-revert').on('click', function() {
+    //     console.log(chess.fen());
+    // });
 });
 
 function setupDraggable(jQueryElement) {
@@ -1013,6 +994,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         lastMoveHistory['idGame'] = IDGAME;
         lastMoveHistory['method'] = 'move';
         lastMoveHistory['moveNumber'] = moveNumber;
+        lastMoveHistory['pgn'] = chess.pgn();
 
         $('.history-section').find('.last-history-move').removeClass('last-history-move');
         if (moving.color === 'w') { // White play, make a new line
@@ -1206,6 +1188,7 @@ function placePieces(fen, noLastMove) {
         $('#' + k).html('<img class="piece ' + color + '" src="' + src + '" alt>');
     }
 
+    // Set in green color the last move
     if (typeof noLastMove === 'undefined' || noLastMove !== true) {
         let lastMoveHistory = MOVES[MOVES.length - 1];
         if (typeof lastMoveHistory !== 'undefined') {
