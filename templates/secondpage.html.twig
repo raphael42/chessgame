@@ -36,7 +36,7 @@
             </div>
             <div class="row mb-3">
                 <div class="col-4">
-                    <button id="ask-revert" class="btn btn-primary">
+                    <button id="takeback" class="btn btn-primary">
                         <i class="bi bi-skip-backward" title="Annuler le dernier déplacement"></i>
                     </button>
                 </div>
@@ -57,11 +57,19 @@
                 <div id="offer-draw-display" class="col-12 d-none">
                     <p>Proposition de match nul envoyé. En attente de réponse de votre adversaire</p>
                 </div>
-
                 <div id="offer-draw-opponent-response" class="col-12 d-none">
                     <p>Votre adversaire propose un match nul. Voulez-vous accepter ?</p>
                     <button id="offer-draw-yes" class="btn btn-success"><i class="bi bi-check-lg"></i> Oui</button>
                     <button id="offer-draw-no" class="btn btn-danger"><i class="bi bi-x-lg"></i>Non</button>
+                </div>
+
+                <div id="takeback-display" class="col-12 d-none">
+                    <p>Proposition d'annulation envoyé à votre adversaire</p>
+                </div>
+                <div id="takeback-opponent-response" class="col-12 d-none">
+                    <p>Demande d'annulation du dernier déplacement par votre adversaire. Voulez-vous accepter ?</p>
+                    <button id="takeback-yes" class="btn btn-success"><i class="bi bi-check-lg"></i> Oui</button>
+                    <button id="takeback-no" class="btn btn-danger"><i class="bi bi-x-lg"></i>Non</button>
                 </div>
             </div>
             <div class="tchat">

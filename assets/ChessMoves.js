@@ -95,29 +95,94 @@ $(function() {
         // Opponent propose a draw
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'offer-draw') {
             $('#offer-draw-opponent-response').removeClass('d-none');
-            if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
-                $('.tchat').append('<div><p>Black offers draw</p></div>');
-            } else {
-                $('.tchat').append('<div><p>White offers draw</p></div>');
-            }
+            $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
             return;
         }
 
         // Opponent refuse the draw
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'offer-draw-no') {
             $('#offer-draw-display').addClass('d-none');
-            if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
-                $('.tchat').append('<div><p>Black declines draw</p></div>');
-            } else {
-                $('.tchat').append('<div><p>White declines draw</p></div>');
-            }
+            $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
             return;
         }
 
         // Opponent accept the draw
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'offer-draw-yes') {
             $('#offer-draw-display').addClass('d-none');
-            gameIsOver('d', PLAYERCOLOR, 'Draw offer accepted');
+            gameIsOver('d', PLAYERCOLOR, socketMessage.message);
+            return;
+        }
+
+        // Opponent ask for a takeback
+        if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'takeback') {
+            $('#takeback-opponent-response').removeClass('d-none');
+            $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
+            return;
+        }
+
+        // Opponent refuses the takeback
+        if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'takeback-no') {
+            $('#takeback-display').addClass('d-none');
+            $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
+            return;
+        }
+
+        // Opponent accepts the takeback
+        if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'takeback-yes') {
+            $('#takeback-display').addClass('d-none');
+            $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
+
+            // PLAYERCOLOR in one letter format
+            let playerColorFormat = 'b';
+            if (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white') {
+                playerColorFormat = 'w';
+            }
+
+            // If it's the PLAYERCOLOR turn, we need to remove 2 moves, the opponent turn and next the PLAYERCOLOR one
+            // If it's NOT the PLAYERCOLOR turn, we need to remove only the PLAYERCOLOR turn
+            if (chess.turn() === playerColorFormat) {
+                let undo = chess.undo();
+                let fenSplit = undo.before.split(' ');
+                let moveNumber = fenSplit[5];
+                // If undo a white move, remove an history line
+                if (undo.color === 'w') {
+                    $('.move-' + moveNumber).remove();
+                } else { // If undo a black move, empty the move history square
+                    $('#move-san-b-' + moveNumber).empty();
+                }
+            }
+
+            let undo = chess.undo();
+            let fenSplit = undo.before.split(' ');
+            let moveNumber = fenSplit[5];
+            // If undo a white move, remove an history line
+            if (undo.color === 'w') {
+                $('.move-' + moveNumber).remove();
+            } else { // If undo a black move, empty the move history square
+                $('#move-san-b-' + moveNumber).empty();
+            }
+
+            placePieces(chess.fen());
+            if (chess.inCheck() === true) {
+                if (chess.turn() === 'w') {
+                    let kingposition = getKingPosition(chess.fen(), 'white');
+                    $('#' + kingposition).addClass('in-check');
+                } else if (chess.turn() === 'b') {
+                    let kingposition = getKingPosition(chess.fen(), 'black');
+                    $('#' + kingposition).addClass('in-check');
+                }
+            }
+
+            $('.last-history-move').removeClass('last-history-move');
+
+            let chessHistory = chess.history({verbose: true});
+            // We need to use the before for this one
+            let fenSplitForHistory = (chessHistory[chessHistory.length - 1].before).split(' ');
+            // fenSplitForHistory[1] is color and fenSplitForHistory[5] is the move number
+            $('#move-san-' + fenSplitForHistory[1] + '-' + fenSplitForHistory[5]).addClass('last-history-move');
+
+            setupDraggable();
+
             return;
         }
 
@@ -818,9 +883,116 @@ $(function() {
         }
     });
 
-    // $('#ask-revert').on('click', function() {
-    //     console.log(chess.fen());
-    // });
+    $('#takeback').on('click', function() {
+        // If game is finished, disable takeback
+        if (GAMESTATUS === 'finished') {
+            return;
+        }
+
+        $('#takeback-display').removeClass('d-none');
+
+        let message = 'Takeback sent';
+        $('.tchat').append('<div><p>' + message + '</p></div>');
+
+        try {
+            socket.send(JSON.stringify({
+                'method': 'takeback',
+                'idGame': IDGAME,
+                'message': message,
+                'noSave': true, // Don't save in DB this message
+            }));
+        } catch (error) {
+            console.log('Socket error', error);
+        }
+    });
+    $('#takeback-no').on('click', function() {
+        $('#takeback-opponent-response').addClass('d-none');
+
+        let message = 'Takeback declined';
+        $('.tchat').append('<div><p>' + message + '</p></div>');
+        try {
+            socket.send(JSON.stringify({
+                'method': 'takeback-no',
+                'idGame': IDGAME,
+                'message': message,
+                'noSave': true, // Don't save in DB this message
+            }));
+        } catch (error) {
+            console.log('Socket error', error);
+        }
+    });
+    $('#takeback-yes').on('click', function() {
+        $('#takeback-opponent-response').addClass('d-none');
+
+        let message = 'Takeback accepted';
+        $('.tchat').append('<div><p>' + message + '</p></div>');
+
+        // PLAYERCOLOR in one letter format
+        let playerColorFormat = 'b';
+        if (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white') {
+            playerColorFormat = 'w';
+        }
+
+        // If it's the PLAYERCOLOR turn, we need to remove only one move, the opponent one
+        // If it's NOT the PLAYERCOLOR turn, we need to remove 2 moves, the PLAYERCOLOR turn and next the opponent one
+        let onlyOne = true;
+        if (chess.turn() !== playerColorFormat) {
+            let undo = chess.undo();
+            let fenSplit = undo.before.split(' ');
+            let moveNumber = fenSplit[5];
+            // If undo a white move, remove an history line
+            if (undo.color === 'w') {
+                $('.move-' + moveNumber).remove();
+            } else { // If undo a black move, empty the move history square
+                $('#move-san-b-' + moveNumber).empty();
+            }
+            onlyOne = false;
+        }
+
+        let undo = chess.undo();
+        let fenSplit = undo.before.split(' ');
+        let moveNumber = fenSplit[5];
+        // If undo a white move, remove an history line
+        if (undo.color === 'w') {
+            $('.move-' + moveNumber).remove();
+        } else { // If undo a black move, empty the move history square
+            $('#move-san-b-' + moveNumber).empty();
+        }
+
+        placePieces(chess.fen());
+        if (chess.inCheck() === true) {
+            if (chess.turn() === 'w') {
+                let kingposition = getKingPosition(chess.fen(), 'white');
+                $('#' + kingposition).addClass('in-check');
+            } else if (chess.turn() === 'b') {
+                let kingposition = getKingPosition(chess.fen(), 'black');
+                $('#' + kingposition).addClass('in-check');
+            }
+        }
+
+        $('.last-history-move').removeClass('last-history-move');
+
+        let chessHistory = chess.history({verbose: true});
+        // We need to use the before for this one
+        let fenSplitForHistory = (chessHistory[chessHistory.length - 1].before).split(' ');
+        // fenSplitForHistory[1] is color and fenSplitForHistory[5] is the move number
+        $('#move-san-' + fenSplitForHistory[1] + '-' + fenSplitForHistory[5]).addClass('last-history-move');
+
+        setupDraggable();
+
+        try {
+            socket.send(JSON.stringify({
+                'method': 'takeback-yes',
+                'idGame': IDGAME,
+                'message': message,
+                'fen' : chess.fen(),
+                'pgn': chess.pgn(),
+                'onlyOne': onlyOne,
+            }));
+        } catch (error) {
+            console.log('Socket error', error);
+        }
+    });
 });
 
 function setupDraggable(jQueryElement) {
@@ -895,7 +1067,10 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             promotion: promotion,
         });
     } catch (error) {
-        console.log(error);
+        let regex = /Invalid move/;
+        if (!regex.test(error)) { // Do not display a log if it's an invalid move
+            console.log(error);
+        }
     }
 
     if (moving !== null) {
@@ -1096,17 +1271,17 @@ function placePieces(fen, noLastMove) {
         }
     });
 
-    var tmp = fen.split(' ');
-    var tmp2 = tmp[0].split('/');
+    var fenSplit = fen.split(' ');
+    var fenSplitPieces = fenSplit[0].split('/');
 
     if (PLAYERCOLOR === 'white') {
-        if (tmp[1] === 'w') {
+        if (fenSplit[1] === 'w') {
             $('#player-turn').text('À votre tour !');
         } else {
             $('#player-turn').text('En attente de l\'adversaire');
         }
     } else {
-        if (tmp[1] === 'w') {
+        if (fenSplit[1] === 'w') {
             $('#player-turn').text('En attente de l\'adversaire');
         } else {
             $('#player-turn').text('À votre tour !');
@@ -1133,8 +1308,8 @@ function placePieces(fen, noLastMove) {
     var line = 8;
     var chessboard = [];
     var count = '';
-    for (var i in tmp2) {
-        count = tmp2[i].split('');
+    for (var i in fenSplitPieces) {
+        count = fenSplitPieces[i].split('');
         columnKey = 0;
         for (var j in count) {
             if ($.inArray(count[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) {
@@ -1162,10 +1337,12 @@ function placePieces(fen, noLastMove) {
 
     // Set in green color the last move
     if (typeof noLastMove === 'undefined' || noLastMove !== true) {
-        let lastMoveHistory = MOVES[MOVES.length - 1];
+        let historyVerbose = chess.history({verbose: true});
+        let lastMoveHistory = historyVerbose[historyVerbose.length - 1];
+        $('.last-move').removeClass('last-move');
         if (typeof lastMoveHistory !== 'undefined') {
-            $('#' + lastMoveHistory.square_from).addClass('last-move');
-            $('#' + lastMoveHistory.square_to).addClass('last-move');
+            $('#' + lastMoveHistory.from).addClass('last-move');
+            $('#' + lastMoveHistory.to).addClass('last-move');
         }
     }
 }
@@ -1286,11 +1463,11 @@ function stopTimer() {
     timer = false;
 }
 
-function gameIsOver(gameStatus, playerWinner, endReason) {
+function gameIsOver(status, playerWinner, endReason) {
     GAMESTATUS = 'finished';
 
     stopTimer();
-    if (gameStatus === 'd') { // Draw
+    if (status === 'd') { // Draw
         $('.tchat').append('<div><p>' + endReason + '</p></div>');
     } else { // One player win
         if (playerWinner === 'w' || playerWinner === 'white') {
