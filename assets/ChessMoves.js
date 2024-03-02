@@ -532,7 +532,6 @@ $(function() {
 
     $('.history-button').on('click', function() {
         let self = $(this);
-        let allHistory = [];
 
         $('.chess-table.last-move').each(function() {
             $(this).removeClass('last-move');
@@ -544,45 +543,31 @@ $(function() {
         $('.in-check').removeClass('in-check');
 
         let chessHistory = chess.history({verbose: true});
-        for (let i in chessHistory) {
-            allHistory.push({
-                'after': chessHistory[i].after,
-                'before': chessHistory[i].before,
-                'color': chessHistory[i].color,
-                'flags': chessHistory[i].flags,
-                'from': chessHistory[i].from,
-                'lan': chessHistory[i].lan,
-                'piece': chessHistory[i].piece,
-                'san': chessHistory[i].san,
-                'to': chessHistory[i].to,
-            });
-        }
-
         if (self.attr('id') === 'history-start') { // Go to the begening of the game
             HISTORYINVIEW = true;
             HISTORYINDEX = -1;
-            placePieces(allHistory[0].before, true);
+            placePieces(chessHistory[0].before, true);
         } else if (self.attr('id') === 'history-end') { // Go to the end of the game
             HISTORYINVIEW = false;
 
-            HISTORYINDEX = allHistory.length - 1;
-            placePieces(allHistory[allHistory.length - 1].after, true);
+            HISTORYINDEX = chessHistory.length - 1;
+            placePieces(chessHistory[chessHistory.length - 1].after, true);
 
-            $('#' + allHistory[allHistory.length - 1].from).addClass('last-move');
-            $('#' + allHistory[allHistory.length - 1].to).addClass('last-move');
+            $('#' + chessHistory[chessHistory.length - 1].from).addClass('last-move');
+            $('#' + chessHistory[chessHistory.length - 1].to).addClass('last-move');
 
             // We need to use the before for this one
-            let fenSplit = (allHistory[allHistory.length - 1].before).split(' ');
+            let fenSplit = (chessHistory[chessHistory.length - 1].before).split(' ');
             // fenSplit[1] is color and fenSplit[5] is the move number
             $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
 
             // if san ends with '+', then the other color player is in check, display the class. If ends with '#', it's checkmate but apply the color too
-            if ((allHistory[allHistory.length - 1].san).endsWith('+') || (allHistory[allHistory.length - 1].san).endsWith('#')) {
+            if ((chessHistory[chessHistory.length - 1].san).endsWith('+') || (chessHistory[chessHistory.length - 1].san).endsWith('#')) {
                 let kingposition = null;
-                if (allHistory[allHistory.length - 1].color === 'white' || allHistory[allHistory.length - 1].color === 'w') {
-                    kingposition = getKingPosition(allHistory[allHistory.length - 1].after, 'black');
-                } else if (allHistory[allHistory.length - 1].color === 'black' || allHistory[allHistory.length - 1].color === 'b') {
-                    kingposition = getKingPosition(allHistory[allHistory.length - 1].after, 'white');
+                if (chessHistory[chessHistory.length - 1].color === 'white' || chessHistory[chessHistory.length - 1].color === 'w') {
+                    kingposition = getKingPosition(chessHistory[chessHistory.length - 1].after, 'black');
+                } else if (chessHistory[chessHistory.length - 1].color === 'black' || chessHistory[chessHistory.length - 1].color === 'b') {
+                    kingposition = getKingPosition(chessHistory[chessHistory.length - 1].after, 'white');
                 }
                 $('#' + kingposition).addClass('in-check');
             }
@@ -592,12 +577,12 @@ $(function() {
         } else if (self.attr('id') === 'history-backward') { // 1 step backward
             HISTORYINVIEW = true;
             if (HISTORYINDEX === null) {
-                HISTORYINDEX = allHistory.length - 2;
+                HISTORYINDEX = chessHistory.length - 2;
             } else if (HISTORYINDEX > -1) {
                 HISTORYINDEX--;
             }
 
-            if (typeof allHistory[HISTORYINDEX] === 'undefined' && HISTORYINDEX !== -1) {
+            if (typeof chessHistory[HISTORYINDEX] === 'undefined' && HISTORYINDEX !== -1) {
                 return;
             }
 
@@ -605,21 +590,21 @@ $(function() {
             if (HISTORYINDEX === -1) {
                 fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
             } else {
-                fen = allHistory[HISTORYINDEX].after;
-                $('#' + allHistory[HISTORYINDEX].from).addClass('last-move');
-                $('#' + allHistory[HISTORYINDEX].to).addClass('last-move');
+                fen = chessHistory[HISTORYINDEX].after;
+                $('#' + chessHistory[HISTORYINDEX].from).addClass('last-move');
+                $('#' + chessHistory[HISTORYINDEX].to).addClass('last-move');
 
                 // We need to use the before for this one
-                let fenSplit = (allHistory[HISTORYINDEX].before).split(' ');
+                let fenSplit = (chessHistory[HISTORYINDEX].before).split(' ');
                 // fenSplit[1] is color and fenSplit[5] is the move number
                 $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
 
                 // if san ends with '+', then the other color player is in check, display the class. If ends with '#', it's checkmate but apply the color too
-                if ((allHistory[HISTORYINDEX].san).endsWith('+') || (allHistory[HISTORYINDEX].san).endsWith('#')) {
+                if ((chessHistory[HISTORYINDEX].san).endsWith('+') || (chessHistory[HISTORYINDEX].san).endsWith('#')) {
                     let kingposition = null;
-                    if (allHistory[HISTORYINDEX].color === 'white' || allHistory[HISTORYINDEX].color === 'w') {
+                    if (chessHistory[HISTORYINDEX].color === 'white' || chessHistory[HISTORYINDEX].color === 'w') {
                         kingposition = getKingPosition(fen, 'black');
-                    } else if (allHistory[HISTORYINDEX].color === 'black' || allHistory[HISTORYINDEX].color === 'b') {
+                    } else if (chessHistory[HISTORYINDEX].color === 'black' || chessHistory[HISTORYINDEX].color === 'b') {
                         kingposition = getKingPosition(fen, 'white');
                     }
                     $('#' + kingposition).addClass('in-check');
@@ -630,43 +615,43 @@ $(function() {
         } else if (self.attr('id') === 'history-forward') { // 1 step forward
             HISTORYINVIEW = true;
             if (HISTORYINDEX === null) {
-                HISTORYINDEX = allHistory.length - 1;
-            } else if (typeof allHistory[HISTORYINDEX + 1] !== 'undefined') {
+                HISTORYINDEX = chessHistory.length - 1;
+            } else if (typeof chessHistory[HISTORYINDEX + 1] !== 'undefined') {
                 HISTORYINDEX++;
             }
 
-            if (typeof allHistory[HISTORYINDEX] === 'undefined') {
+            if (typeof chessHistory[HISTORYINDEX] === 'undefined') {
                 return;
             }
 
             // Last move, history not in view
-            if (HISTORYINDEX === allHistory.length - 1) {
+            if (HISTORYINDEX === chessHistory.length - 1) {
                 HISTORYINVIEW = false;
             }
 
-            $('#' + allHistory[HISTORYINDEX].from).addClass('last-move');
-            $('#' + allHistory[HISTORYINDEX].to).addClass('last-move');
+            $('#' + chessHistory[HISTORYINDEX].from).addClass('last-move');
+            $('#' + chessHistory[HISTORYINDEX].to).addClass('last-move');
 
             // We need to use the before for this one
-            let fenSplit = (allHistory[HISTORYINDEX].before).split(' ');
+            let fenSplit = (chessHistory[HISTORYINDEX].before).split(' ');
             // fenSplit[1] is color and fenSplit[5] is the move number
             $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
 
             // if san ends with '+', then the other color player is in check, display the class.  If ends with '#', it's checkmate but apply the color too
-            if ((allHistory[HISTORYINDEX].san).endsWith('+') || (allHistory[HISTORYINDEX].san).endsWith('#')) {
+            if ((chessHistory[HISTORYINDEX].san).endsWith('+') || (chessHistory[HISTORYINDEX].san).endsWith('#')) {
                 let kingposition = null;
-                if (allHistory[HISTORYINDEX].color === 'white' || allHistory[HISTORYINDEX].color === 'w') {
-                    kingposition = getKingPosition(allHistory[HISTORYINDEX].after, 'black');
-                } else if (allHistory[HISTORYINDEX].color === 'black' || allHistory[HISTORYINDEX].color === 'b') {
-                    kingposition = getKingPosition(allHistory[HISTORYINDEX].after, 'white');
+                if (chessHistory[HISTORYINDEX].color === 'white' || chessHistory[HISTORYINDEX].color === 'w') {
+                    kingposition = getKingPosition(chessHistory[HISTORYINDEX].after, 'black');
+                } else if (chessHistory[HISTORYINDEX].color === 'black' || chessHistory[HISTORYINDEX].color === 'b') {
+                    kingposition = getKingPosition(chessHistory[HISTORYINDEX].after, 'white');
                 }
                 $('#' + kingposition).addClass('in-check');
             }
 
-            placePieces(allHistory[HISTORYINDEX].after, true);
+            placePieces(chessHistory[HISTORYINDEX].after, true);
 
             // Set draggable back on all player color pieces if we set the last move
-            if (HISTORYINDEX === allHistory.length - 1) {
+            if (HISTORYINDEX === chessHistory.length - 1) {
                 setupDraggable();
             }
         }
@@ -685,29 +670,16 @@ $(function() {
         $('.last-history-move').removeClass('last-history-move');
 
         let chessHistory = chess.history({verbose: true});
-        for (let i in chessHistory) {
-            allHistory.push({
-                'after': chessHistory[i].after,
-                'before': chessHistory[i].before,
-                'color': chessHistory[i].color,
-                'flags': chessHistory[i].flags,
-                'from': chessHistory[i].from,
-                'lan': chessHistory[i].lan,
-                'piece': chessHistory[i].piece,
-                'san': chessHistory[i].san,
-                'to': chessHistory[i].to,
-            });
-        }
 
         let elementId = $(this).attr('id');
         let elementIdSplit = elementId.split('-');
         let elementColorTurn = elementIdSplit[2];
         let elementMoveNumber = elementIdSplit[3];
 
-        for (let i in allHistory) {
+        for (let i in chessHistory) {
             i = parseInt(i); // variable i is string, so parse it
 
-            let historyFenSplit = (allHistory[i].before).split(' ');
+            let historyFenSplit = (chessHistory[i].before).split(' ');
             let hisotryColorTurn = historyFenSplit[1];
             let historyMoveNumber = historyFenSplit[5];
 
@@ -716,34 +688,34 @@ $(function() {
                 HISTORYINDEX = i;
 
                 // Click on the last history, it's the last move
-                if (HISTORYINDEX === allHistory.length - 1) {
+                if (HISTORYINDEX === chessHistory.length - 1) {
                     HISTORYINVIEW = false;
                 } else {
                     HISTORYINVIEW = true;
                 }
 
-                $('#' + allHistory[i].from).addClass('last-move');
-                $('#' + allHistory[i].to).addClass('last-move');
+                $('#' + chessHistory[i].from).addClass('last-move');
+                $('#' + chessHistory[i].to).addClass('last-move');
 
                 // We need to use the before for this one
-                let fenSplit = (allHistory[i].before).split(' ');
+                let fenSplit = (chessHistory[i].before).split(' ');
                 // fenSplit[1] is color and fenSplit[5] is the move number
                 $('#move-san-' + fenSplit[1] + '-' + fenSplit[5]).addClass('last-history-move');
 
                 // if san ends with '+', then the other color player is in check, display the class. If ends with '#', it's checkmate but apply the color too
-                if ((allHistory[i].san).endsWith('+') || (allHistory[i].san).endsWith('#')) {
+                if ((chessHistory[i].san).endsWith('+') || (chessHistory[i].san).endsWith('#')) {
                     let kingposition = null;
-                    if (allHistory[i].color === 'white' || allHistory[i].color === 'w') {
-                        kingposition = getKingPosition(allHistory[i].after, 'black');
-                    } else if (allHistory[i].color === 'black' || allHistory[i].color === 'b') {
-                        kingposition = getKingPosition(allHistory[i].after, 'white');
+                    if (chessHistory[i].color === 'white' || chessHistory[i].color === 'w') {
+                        kingposition = getKingPosition(chessHistory[i].after, 'black');
+                    } else if (chessHistory[i].color === 'black' || chessHistory[i].color === 'b') {
+                        kingposition = getKingPosition(chessHistory[i].after, 'white');
                     }
                     $('#' + kingposition).addClass('in-check');
                 }
 
-                placePieces(allHistory[i].after, true);
+                placePieces(chessHistory[i].after, true);
 
-                if (HISTORYINDEX === allHistory.length - 1) {
+                if (HISTORYINDEX === chessHistory.length - 1) {
                     setupDraggable();
                 }
             }
