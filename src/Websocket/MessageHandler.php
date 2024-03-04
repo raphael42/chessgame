@@ -55,6 +55,8 @@ class MessageHandler implements MessageComponentInterface
 
         $msgArray = json_decode($msg, true);
 
+        dump($msgArray);
+
         // idGame missing, there is a problem ...
         if (!isset($msgArray['idGame'])) {
             $from->close();
@@ -452,7 +454,7 @@ class MessageHandler implements MessageComponentInterface
         if ($this->debug) {
             print_r('onError'.PHP_EOL);
         }
-        echo '<pre><br><br><br><br><br><br><br><br>';var_dump($e);echo '</pre>';
+        dump($e);
         $this->connections->detach($conn);
         $conn->close();
     }

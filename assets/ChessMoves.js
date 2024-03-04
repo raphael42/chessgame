@@ -51,15 +51,78 @@ $(function() {
 
         // Disconnect
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'opponent_disconnect') {
-            // TODO : for spectators, check for the both players which one disconnected
-            $('.opponent-connect').html('KO');
+            if (PLAYERTYPE === 'spectator') {
+                let playerFound = false;
+                let opponentFound = false;
+                for (let i in socketMessage.connectedUsers) {
+                    // Not spectator and color is the same than the player one, then, the player is connected
+                    if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType === PLAYERCOLOR) {
+                        playerFound = true;
+                    }
+
+                    // Not spectator and color is different than the player one, then, the opponent is connected
+                    if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType !== PLAYERCOLOR) {
+                        opponentFound = true;
+                    }
+                }
+
+                if (playerFound) {
+                    $('.player-connect').html('OK');
+                } else {
+                    $('.player-connect').html('KO');
+                }
+
+                if (opponentFound) {
+                    $('.opponent-connect').html('OK');
+                } else {
+                    $('.opponent-connect').html('KO');
+                }
+            } else {
+                $('.opponent-connect').html('KO');
+            }
             return;
         }
 
         // Connect
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'opponent_connect') {
+            if (PLAYERTYPE === 'spectator') { // For spectators, check the 2 players status
+                let playerFound = false;
+                let opponentFound = false;
+                for (let i in socketMessage.connectedUsers) {
+                    // Not spectator and color is the same than the player one, then, the player is connected
+                    if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType === PLAYERCOLOR) {
+                        playerFound = true;
+                    }
+
+                    // Not spectator and color is different than the player one, then, the opponent is connected
+                    if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType !== PLAYERCOLOR) {
+                        opponentFound = true;
+                    }
+                }
+
+                if (playerFound) {
+                    $('.player-connect').html('OK');
+                } else {
+                    $('.player-connect').html('KO');
+                }
+
+                if (opponentFound) {
+                    $('.opponent-connect').html('OK');
+                } else {
+                    $('.opponent-connect').html('KO');
+                }
+            } else { // For players, we don't need to check if the player is connected. Only check for the opponent
+                for (let i in socketMessage.connectedUsers) {
+                    // Not spectator and color is different than the player one, then, the opponent is connected
+                    if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType !== PLAYERCOLOR) {
+                        $('.opponent-connect').html('OK');
+                    }
+                }
+            }
+
+
             for (let i in socketMessage.connectedUsers) {
-                if (PLAYERTYPE === 'spectator') { // For spectators, check the 2 players status
+                if (PLAYERTYPE === 'spectator') { // TODO : For spectators, check the 2 players status
 
                 } else { // For players, we don't need to check if the player is connected. Only check for the opponent
                     // Not spectator and color is different than the player one, then, the opponent is connected
