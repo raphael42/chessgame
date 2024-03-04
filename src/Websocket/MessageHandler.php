@@ -44,7 +44,42 @@ class MessageHandler implements MessageComponentInterface
         if ($this->debug) {
             print_r('onOpen'.PHP_EOL);
         }
+
+        // Obtenir l'objet Request de la connexion
+        $request = $conn->httpRequest;
+
+        // Obtenir l'URL de la requête (y compris la chaîne de requête)
+        $uri = $request->getUri();
+
+        // Convertir l'objet URI en chaîne de caractères
+        $queryString = $uri->getQuery();
+
+        // Analyser la chaîne de requête pour obtenir les paramètres
+        parse_str($queryString, $queryParams);
+
+        // À ce stade, $queryParams est un tableau associatif de vos paramètres d'URL
+        // Par exemple, si l'URL est ws://exemple.com/socket?userId=123
+        // Vous pouvez accéder à userId comme ceci :
+        $conn->gameId = $queryParams['idGame'];
+        $conn->playerType = $queryParams['playerType'];
+
         $this->connections->attach($conn);
+
+        foreach ($this->connections as $connection) {
+            $arrDisplay = [
+                'resourceId' => $connection->resourceId,
+                'gameId' => null,
+                'playerType' => null,
+            ];
+            if (isset($connection->gameId)) {
+                $arrDisplay['gameId'] = $connection->gameId;
+            }
+            if (isset($connection->playerType)) {
+                $arrDisplay['playerType'] = $connection->playerType;
+            }
+
+            dump($arrDisplay);
+        }
     }
 
     public function onMessage(ConnectionInterface $from, $msg)
@@ -55,13 +90,30 @@ class MessageHandler implements MessageComponentInterface
 
         $msgArray = json_decode($msg, true);
 
-        dump($msgArray);
+        // dump($msgArray);
 
         // idGame missing, there is a problem ...
         if (!isset($msgArray['idGame'])) {
             $from->close();
             return false;
         }
+
+        foreach ($this->connections as $connection) {
+            $arrDisplay = [
+                'resourceId' => $connection->resourceId,
+                'gameId' => null,
+                'playerType' => null,
+            ];
+            if (isset($connection->gameId)) {
+                $arrDisplay['gameId'] = $connection->gameId;
+            }
+            if (isset($connection->playerType)) {
+                $arrDisplay['playerType'] = $connection->playerType;
+            }
+
+            dump($arrDisplay);
+        }
+
 
         // Use this var to have cleaner code
         $idGame = $msgArray['idGame'];
@@ -94,8 +146,8 @@ class MessageHandler implements MessageComponentInterface
 
         // If it's a reconnection, send the timers
         if (isset($msgArray['method']) && $msgArray['method'] === 'connection') {
-            $from->gameId = $idGame;
-            $from->playerType = $msgArray['playerType'];
+            // $from->gameId = $idGame;
+            // $from->playerType = $msgArray['playerType'];
 
             if ($msgArray['color'] === 'w') {
                 $this->playerWhiteResourceId[$idGame] = $from->resourceId;
@@ -332,7 +384,7 @@ class MessageHandler implements MessageComponentInterface
             $this->em->flush();
         }
 
-        dump($from);
+        // dump($from);
 
         $microtimeNow = microtime(true);
         if (isset($msgArray['after'])) {
@@ -360,10 +412,10 @@ class MessageHandler implements MessageComponentInterface
             $msg = json_encode($msgArray);
             foreach ($this->connections as $connection) {
                 if (!isset($this->playerWhiteResourceId[$idGame])) {
-                    dump($this->playerWhiteResourceId);
+                    // dump($this->playerWhiteResourceId);
                 }
                 if (!isset($this->playerBlackResourceId[$idGame])) {
-                    dump($this->playerBlackResourceId);
+                    // dump($this->playerBlackResourceId);
                 }
                 if ($connection !== $from && $connection->gameId === $idGame) {
                     $connection->send($msg);

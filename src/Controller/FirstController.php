@@ -81,7 +81,7 @@ class FirstController extends AbstractController
                 $entityManager->flush();
 
             } else { // Infos already saved in DB, check playerType session. If not exist or not the player color, it's a spectator
-                if (empty($gameSession) || !isset($gameSession['id']) || is_null($gameSession['id']) || $gameSession['id'] !== $game->getId() || is_null($gameSession['playerType'])) { // No playerType session, it's a spectator
+                if (empty($gameSession) || !isset($gameSession['id']) || is_null($gameSession['id']) || $gameSession['id'] !== $game->getId() || !isset($gameSession['playerType'])) { // No playerType session, it's a spectator
                     $gameSession['playerType'] = 'spectator';
                     $session->set('gameDatas', $gameSession);
                 } elseif (!empty($gameSession) && !is_null($gameSession['id']) && $gameSession['id'] === $game->getId() && $gameSession['playerType'] === $player->getColor()) { // Opponent of the game creator player is reconnecting

@@ -12,7 +12,7 @@ if (PGN !== null) {
     chess.loadPgn(PGN);
 }
 
-const socket = new WebSocket('ws://localhost:3001');
+const socket = new WebSocket('ws://localhost:3001?idGame=' + IDGAME + '&playerType=' + PLAYERTYPE + '&color=' + PLAYERCOLOR.charAt(0));
 
 var turn = null;
 var times, timer;
