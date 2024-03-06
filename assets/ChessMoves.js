@@ -12,7 +12,7 @@ if (PGN !== null) {
     chess.loadPgn(PGN);
 }
 
-const socket = new WebSocket('ws://localhost:3001');
+const socket = new WebSocket('ws://localhost:3001?idGame=' + IDGAME + '&playerType=' + PLAYERTYPE + '&color=' + PLAYERCOLOR.charAt(0));
 
 var turn = null;
 var times, timer;
@@ -34,15 +34,16 @@ $(function() {
     socket.addEventListener('open', function(e) {
         console.log('open', e);
 
-        try {
-            socket.send(JSON.stringify({
-                'method': 'connection',
-                'idGame': IDGAME,
-                'color': (PLAYERCOLOR === 'white') ? 'w' : 'b',
-            }));
-        } catch (error) {
-            console.log('Socket error', error);
-        }
+        // try {
+        //     socket.send(JSON.stringify({
+        //         'method': 'connection',
+        //         'idGame': IDGAME,
+        //         'color': (PLAYERCOLOR === 'white') ? 'w' : 'b',
+        //         'playerType': PLAYERTYPE,
+        //     }));
+        // } catch (error) {
+        //     console.log('Socket error', error);
+        // }
     });
 
     socket.addEventListener('message', function(e) {
@@ -50,13 +51,98 @@ $(function() {
 
         // Disconnect
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'opponent_disconnect') {
-            $('.opponent-connect').html('KO');
+            let playerFound = false;
+            let opponentFound = false;
+            let spectatorsNumber = 0;
+            for (let i in socketMessage.connectedUsers) {
+                // Not spectator and color is the same than the player one, then, the player is connected
+                if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType === PLAYERCOLOR) {
+                    playerFound = true;
+                }
+
+                // Not spectator and color is different than the player one, then, the opponent is connected
+                if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType !== PLAYERCOLOR) {
+                    opponentFound = true;
+                }
+
+                // Check the spectators number
+                if (socketMessage.connectedUsers[i].playerType === 'spectator') {
+                    spectatorsNumber++;
+                }
+            }
+
+            // Update player connection status
+            if (playerFound) {
+                $('.player-connect').html('OK');
+            } else {
+                $('.player-connect').html('KO');
+            }
+
+            // update opponent status
+            if (opponentFound) {
+                $('.opponent-connect').html('OK');
+            } else {
+                $('.opponent-connect').html('KO');
+            }
+
+            // One or more spectators, remove d-none on div if there is one, and update the number
+            if (spectatorsNumber > 0 && $('.spectators').hasClass('d-none')) {
+                $('.spectators').removeClass('d-none');
+            }
+
+            if (spectatorsNumber === 0 && !$('.spectators').hasClass('d-none')){ // No spectators
+                $('.spectators').addClass('d-none');
+            }
+            $('.spectators-number').html(spectatorsNumber);
             return;
         }
 
         // Connect
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'opponent_connect') {
-            $('.opponent-connect').html('OK');
+            let playerFound = false;
+            let opponentFound = false;
+            let spectatorsNumber = 0;
+            for (let i in socketMessage.connectedUsers) {
+                // Not spectator and color is the same than the player one, then, the player is connected
+                if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType === PLAYERCOLOR) {
+                    playerFound = true;
+                }
+
+                // Not spectator and color is different than the player one, then, the opponent is connected
+                if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType !== PLAYERCOLOR) {
+                    opponentFound = true;
+                }
+
+                // Check the spectators number
+                if (socketMessage.connectedUsers[i].playerType === 'spectator') {
+                    spectatorsNumber++;
+                }
+            }
+
+            // Update player connection status
+            if (playerFound) {
+                $('.player-connect').html('OK');
+            } else {
+                $('.player-connect').html('KO');
+            }
+
+            // update opponent status
+            if (opponentFound) {
+                $('.opponent-connect').html('OK');
+            } else {
+                $('.opponent-connect').html('KO');
+            }
+
+            // One or more spectators, remove d-none on div if there is one, and update the number
+            if (spectatorsNumber > 0 && $('.spectators').hasClass('d-none')) {
+                $('.spectators').removeClass('d-none');
+            }
+
+            if (spectatorsNumber === 0 && !$('.spectators').hasClass('d-none')){ // No spectators
+                $('.spectators').addClass('d-none');
+            }
+            $('.spectators-number').html(spectatorsNumber);
+
 
             let fenSplit = chess.fen().split(' ');
             let fenTurnNumber = parseInt(fenSplit[5]);
@@ -94,42 +180,54 @@ $(function() {
 
         // Opponent propose a draw
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'offer-draw') {
-            $('#offer-draw-opponent-response').removeClass('d-none');
+            if (PLAYERTYPE !== 'spectator') {
+                $('#offer-draw-opponent-response').removeClass('d-none');
+            }
             $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
             return;
         }
 
         // Opponent refuse the draw
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'offer-draw-no') {
-            $('#offer-draw-display').addClass('d-none');
+            if (PLAYERTYPE !== 'spectator') {
+                $('#offer-draw-display').addClass('d-none');
+            }
             $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
             return;
         }
 
         // Opponent accept the draw
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'offer-draw-yes') {
-            $('#offer-draw-display').addClass('d-none');
+            if (PLAYERTYPE !== 'spectator') {
+                $('#offer-draw-display').addClass('d-none');
+            }
             gameIsOver('d', PLAYERCOLOR, socketMessage.message);
             return;
         }
 
         // Opponent ask for a takeback
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'takeback') {
-            $('#takeback-opponent-response').removeClass('d-none');
+            if (PLAYERTYPE !== 'spectator') {
+                $('#takeback-opponent-response').removeClass('d-none');
+            }
             $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
             return;
         }
 
         // Opponent refuses the takeback
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'takeback-no') {
-            $('#takeback-display').addClass('d-none');
+            if (PLAYERTYPE !== 'spectator') {
+                $('#takeback-display').addClass('d-none');
+            }
             $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
             return;
         }
 
         // Opponent accepts the takeback
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'takeback-yes') {
-            $('#takeback-display').addClass('d-none');
+            if (PLAYERTYPE !== 'spectator') {
+                $('#takeback-display').addClass('d-none');
+            }
             $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
 
             // PLAYERCOLOR in one letter format
@@ -367,6 +465,8 @@ $(function() {
             }
         }
 
+        $('#playerturn-start').addClass('d-none');
+
         $('.history-section').find('.last-history-move').removeClass('last-history-move');
         if (socketMessage.color === 'w') { // White play, make a new line
             let htmlMoveRow = '' +
@@ -389,10 +489,6 @@ $(function() {
 
             $('#' + socketMessage.from).addClass('last-move');
             $('#' + socketMessage.to).addClass('last-move');
-        }
-
-        if (typeof socketMessage.idGame === 'undefined') {
-            $('#player-turn').text('À votre tour !');
         }
 
         // 2 squares premove, execute the move instantly
@@ -448,6 +544,11 @@ $(function() {
 
         // If game is finished, disable moves
         if (GAMESTATUS === 'finished') {
+            return;
+        }
+
+        // If the user is a spectator, disable moves
+        if (PLAYERTYPE === 'spectator') {
             return;
         }
 
@@ -548,7 +649,8 @@ $(function() {
         }
     });
 
-    if (GAMESTATUS !== 'finished') {
+    // Set up draggable only if the game is not finished and the player is not a spectator
+    if (GAMESTATUS !== 'finished' && PLAYERTYPE !== 'spectator') {
         setupDraggable();
     }
 
@@ -556,6 +658,11 @@ $(function() {
         drop: function(ev, ui) {
             // If game is finished, disable moves
             if (GAMESTATUS === 'finished') {
+                return;
+            }
+
+            // If the user is a spectator, disable moves
+            if (PLAYERTYPE === 'spectator') {
                 return;
             }
 
@@ -793,6 +900,11 @@ $(function() {
             return;
         }
 
+        // If the user is a spectator, disable resigns
+        if (PLAYERTYPE === 'spectator') {
+            return;
+        }
+
         let isConfirmed = confirm('Vous êtes sur le point d\'abandonner. Voulez-vous confirmer ?');
         if (!isConfirmed) {
             return;
@@ -808,7 +920,7 @@ $(function() {
             socket.send(JSON.stringify({
                 'method': 'resign',
                 'idGame': IDGAME,
-                'resign': true
+                'color': PLAYERCOLOR,
             }));
         } catch (error) {
             console.log('Socket error', error);
@@ -818,6 +930,11 @@ $(function() {
     $('#offer-draw').on('click', function() {
         // If game is finished, disable draw offers
         if (GAMESTATUS === 'finished') {
+            return;
+        }
+
+        // If the user is a spectator, disable draw offers
+        if (PLAYERTYPE === 'spectator') {
             return;
         }
 
@@ -886,6 +1003,11 @@ $(function() {
     $('#takeback').on('click', function() {
         // If game is finished, disable takeback
         if (GAMESTATUS === 'finished') {
+            return;
+        }
+
+        // If the user is a spectator, disable takeback
+        if (PLAYERTYPE === 'spectator') {
             return;
         }
 
@@ -1009,7 +1131,13 @@ function setupDraggable(jQueryElement) {
                 return;
             }
 
+            // If game is finished, disable moves
             if (GAMESTATUS === 'finished') {
+                return;
+            }
+
+            // If the user is a spectator, disable moves
+            if (PLAYERTYPE === 'spectator') {
                 return;
             }
 
@@ -1143,6 +1271,8 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         lastMoveHistory['moveNumber'] = moveNumber;
         lastMoveHistory['pgn'] = chess.pgn();
 
+        $('#playerturn-start').addClass('d-none');
+
         $('.history-section').find('.last-history-move').removeClass('last-history-move');
         if (moving.color === 'w') { // White play, make a new line
             let htmlMoveRow = '' +
@@ -1200,8 +1330,6 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         } else {
             switchTurn();
         }
-
-        $('#player-turn').text('En attente de l\'adversaire');
 
         $('.chess-table.clicked').removeClass('clicked');
         $('.chess-table.possible-move').each(function() {
@@ -1273,20 +1401,6 @@ function placePieces(fen, noLastMove) {
 
     var fenSplit = fen.split(' ');
     var fenSplitPieces = fenSplit[0].split('/');
-
-    if (PLAYERCOLOR === 'white') {
-        if (fenSplit[1] === 'w') {
-            $('#player-turn').text('À votre tour !');
-        } else {
-            $('#player-turn').text('En attente de l\'adversaire');
-        }
-    } else {
-        if (fenSplit[1] === 'w') {
-            $('#player-turn').text('En attente de l\'adversaire');
-        } else {
-            $('#player-turn').text('À votre tour !');
-        }
-    }
 
     var piecesLabel = {
         'r': 'black-rook',

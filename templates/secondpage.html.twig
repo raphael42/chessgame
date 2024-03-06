@@ -4,16 +4,16 @@
 
 {% block javascripts %}
     <script>
-        var FEN = '{{ fen }}';
-        var PGN = '{{ pgn }}';
-        var INCREMENT = '{{ increment }}';
-        var PLAYERCOLOR = '{{ player.color }}';
-        var PLAYERTIMELEFT = '{{ player.timeLeft }}';
-        var OPPONENTTIMELEFT = '{{ opponent.timeLeft }}';
-        var IDGAME = '{{ idGame }}';
-        var PIECESIMGURL = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
-        var MOVES = {{ arrMovesForJS|json_encode|raw }};
-        var GAMESTATUS = {{ gameStatus|json_encode|raw }};
+        const FEN = '{{ game.fen }}';
+        const PGN = '{{ game.pgn }}';
+        const INCREMENT = '{{ game.increment }}';
+        const PLAYERCOLOR = '{{ player.color }}';
+        const PLAYERTIMELEFT = '{{ player.timeLeft }}';
+        const OPPONENTTIMELEFT = '{{ opponent.timeLeft }}';
+        const IDGAME = '{{ game.id }}';
+        const PIECESIMGURL = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
+        var GAMESTATUS = {{ gameStatus|json_encode|raw }}; // This one can be updated in JS, so don't set up as const
+        const PLAYERTYPE = '{{ playerType }}';
     </script>
 
     {{ encore_entry_link_tags('gameJs') }}
@@ -26,58 +26,67 @@
 {% block body %}
     <div class="row">
         <div class="col-lg-2 col-md-4 col-sm-12">
-            <div class="bg-grey mb-3">
+            {# <div class="bg-grey mb-3">
                 <div>Votre temps : <span id="timer-player"></span></div>
                 <div><span id="player-turn"></span></div>
                 <div>Temps de l'adversaire : <span id="timer-opponent"></span></div>
-            </div>
-            <div class="mb-3">
-                Statut de connection de l'adversaire : <span class="opponent-connect"></span>
-            </div>
-            <div class="row mb-3">
-                <div class="col-4">
-                    <button id="takeback" class="btn btn-primary">
-                        <i class="bi bi-skip-backward" title="Annuler le dernier déplacement"></i>
-                    </button>
+            </div> #}
+            {# <div class="mb-3">
+                Statut de connexion de l'adversaire : <span class="opponent-connect"></span>
+            </div> #}
+            {% if playerType == 'spectator' %}
+                <div>
+                    <p>Mode spectateur</p>
                 </div>
+            {% else %}
+                <div class="row mb-3">
+                    <div class="col-4">
+                        <button id="takeback" class="btn btn-primary">
+                            <i class="bi bi-skip-backward" title="Annuler le dernier déplacement"></i>
+                        </button>
+                    </div>
 
-                <div class="col-4">
-                    <button id="offer-draw" class="btn btn-warning" title="Proposer une égalité">
-                        ½
-                    </button>
-                </div>
+                    <div class="col-4">
+                        <button id="offer-draw" class="btn btn-warning" title="Proposer une égalité">
+                            ½
+                        </button>
+                    </div>
 
-                <div class="col-4">
-                    <button id="resign" class="btn btn-danger" title="Abandonner">
-                        <i class="bi bi-flag"></i>
-                    </button>
+                    <div class="col-4">
+                        <button id="resign" class="btn btn-danger" title="Abandonner">
+                            <i class="bi bi-flag"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <div class="row mb-3">
-                <div id="offer-draw-display" class="col-12 d-none">
-                    <p>Proposition de match nul envoyé. En attente de réponse de votre adversaire</p>
-                </div>
-                <div id="offer-draw-opponent-response" class="col-12 d-none">
-                    <p>Votre adversaire propose un match nul. Voulez-vous accepter ?</p>
-                    <button id="offer-draw-yes" class="btn btn-success"><i class="bi bi-check-lg"></i> Oui</button>
-                    <button id="offer-draw-no" class="btn btn-danger"><i class="bi bi-x-lg"></i>Non</button>
-                </div>
+                <div class="row mb-3">
+                    <div id="offer-draw-display" class="col-12 d-none">
+                        <p>Proposition de match nul envoyé. En attente de réponse de votre adversaire</p>
+                    </div>
+                    <div id="offer-draw-opponent-response" class="col-12 d-none">
+                        <p>Votre adversaire propose un match nul. Voulez-vous accepter ?</p>
+                        <button id="offer-draw-yes" class="btn btn-success"><i class="bi bi-check-lg"></i> Oui</button>
+                        <button id="offer-draw-no" class="btn btn-danger"><i class="bi bi-x-lg"></i>Non</button>
+                    </div>
 
-                <div id="takeback-display" class="col-12 d-none">
-                    <p>Proposition d'annulation envoyé à votre adversaire</p>
+                    <div id="takeback-display" class="col-12 d-none">
+                        <p>Proposition d'annulation envoyé à votre adversaire</p>
+                    </div>
+                    <div id="takeback-opponent-response" class="col-12 d-none">
+                        <p>Demande d'annulation du dernier déplacement par votre adversaire. Voulez-vous accepter ?</p>
+                        <button id="takeback-yes" class="btn btn-success"><i class="bi bi-check-lg"></i> Oui</button>
+                        <button id="takeback-no" class="btn btn-danger"><i class="bi bi-x-lg"></i>Non</button>
+                    </div>
                 </div>
-                <div id="takeback-opponent-response" class="col-12 d-none">
-                    <p>Demande d'annulation du dernier déplacement par votre adversaire. Voulez-vous accepter ?</p>
-                    <button id="takeback-yes" class="btn btn-success"><i class="bi bi-check-lg"></i> Oui</button>
-                    <button id="takeback-no" class="btn btn-danger"><i class="bi bi-x-lg"></i>Non</button>
-                </div>
-            </div>
+            {% endif %}
             <div class="tchat">
                 {% for oneMessage in messages %}
                     <div>
                         <p>{{ oneMessage.message }}</p>
                     </div>
                 {% endfor %}
+            </div>
+            <div class="spectators d-none">
+                <p><i class="bi bi-person-fill"></i><span class="spectators-number"></span></p>
             </div>
         </div>
         <div class="col-lg-7 col-md-8 col-sm-12 col-center">
@@ -134,6 +143,15 @@
             </table>
         </div>
         <div class="col-lg-3 col-md-12 col-sm-12">
+            <div>
+                <span id="timer-opponent"></span>
+            </div>
+            <div>
+                <span id="timer-opponent"></span>
+            </div>
+            <div>
+                Statut de connexion : <span class="opponent-connect"></span>
+            </div>
             <div class="history">
                 <div class="row text-center">
                     <div class="col-3 btn history-button" id="history-start"><i class="bi bi-chevron-double-left"></i></div>
@@ -141,6 +159,18 @@
                     <div class="col-3 btn history-button" id="history-forward"><i class="bi bi-chevron-right"></i></div>
                     <div class="col-3 btn history-button" id="history-end"><i class="bi bi-chevron-double-right"></i></div>
                 </div>
+
+                <div id="playerturn-start" class="{{ game.status != 'begining' ? 'd-none' }}">
+                   <p>
+                        {% if player.color == 'w' or player.color == 'white' %}
+                            Vous jouez avec les blancs.<br>
+                            C'est votre tour !
+                        {% else %}
+                            Vous jouez avec les noirs.
+                        {% endif %}
+                    </p>
+                </div>
+
                 <div class="history-section">
                     {% for moveNumber, oneMove in arrMovesForHtml %}
                         <div class="row move-{{ moveNumber }} text-center">
@@ -150,6 +180,12 @@
                         </div>
                     {% endfor %}
                 </div>
+            </div>
+            <div>
+                Statut de connexion : <span class="player-connect">OK</span>
+            </div>
+            <div>
+                <span id="timer-player"></span>
             </div>
         </div>
     </div>

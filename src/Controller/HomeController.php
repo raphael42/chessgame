@@ -26,7 +26,10 @@ class HomeController extends AbstractController
 
             $session = new Session();
             // $session->start();
-            $session->set('gameCreator', $gameId);
+            $session->set('gameDatas', [
+                'gameCreator' => true,
+                'id' => $gameId,
+            ]);
 
             return $this->redirectToRoute('game-second', ['url' => $url]);
         }

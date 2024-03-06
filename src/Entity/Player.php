@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: "App\Repository\PlayerRepository")]
@@ -32,6 +33,12 @@ class Player
 
     #[ORM\OneToMany(mappedBy: 'player', targetEntity: Messages::class)]
     private Collection $messages;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $user_agent = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $ip = null;
 
     public function __construct()
     {
@@ -165,6 +172,30 @@ class Player
                 $message->setPlayer(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUserAgent(): ?string
+    {
+        return $this->user_agent;
+    }
+
+    public function setUserAgent(?string $user_agent): static
+    {
+        $this->user_agent = $user_agent;
+
+        return $this;
+    }
+
+    public function getIp(): ?string
+    {
+        return $this->ip;
+    }
+
+    public function setIp(?string $ip): static
+    {
+        $this->ip = $ip;
 
         return $this;
     }
