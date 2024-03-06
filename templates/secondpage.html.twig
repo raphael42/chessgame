@@ -25,7 +25,7 @@
 
 {% block body %}
     <div class="row">
-        <div class="col-lg-2 col-md-4 col-sm-12">
+        <div class="col-lg-3 col-md-4 col-sm-12">
             {# <div class="bg-grey mb-3">
                 <div>Votre temps : <span id="timer-player"></span></div>
                 <div><span id="player-turn"></span></div>
@@ -79,17 +79,22 @@
                 </div>
             {% endif %}
             <div class="tchat">
-                {% for oneMessage in messages %}
-                    <div>
-                        <p>{{ oneMessage.message }}</p>
-                    </div>
-                {% endfor %}
+                <div class="messages">
+                    {% for oneMessage in messages %}
+                        <div>
+                            <p>{{ oneMessage.message }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div>
+                <input id="input-tchat" type="text" class="form-control" placeholder="Écrire à votre adversaire">
             </div>
             <div class="spectators d-none">
                 <p><i class="bi bi-person-fill"></i><span class="spectators-number"></span></p>
             </div>
         </div>
-        <div class="col-lg-7 col-md-8 col-sm-12 col-center">
+        <div class="col-lg-6 col-md-8 col-sm-12 col-center">
             <table id="board">
                 {% if player.color == 'white' %}
                     {% for i in 8..1 %}
