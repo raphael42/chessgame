@@ -45,26 +45,66 @@ class MessageHandler implements MessageComponentInterface
             print_r('onOpen'.PHP_EOL);
         }
 
-        // Obtenir l'objet Request de la connexion
+        // Get the query params send in the websocket url
         $request = $conn->httpRequest;
-
-        // Obtenir l'URL de la requête (y compris la chaîne de requête)
         $uri = $request->getUri();
-
-        // Convertir l'objet URI en chaîne de caractères
         $queryString = $uri->getQuery();
-
-        // Analyser la chaîne de requête pour obtenir les paramètres
         parse_str($queryString, $queryParams);
 
-        // À ce stade, $queryParams est un tableau associatif de vos paramètres d'URL
-        // Par exemple, si l'URL est ws://exemple.com/socket?userId=123
-        // Vous pouvez accéder à userId comme ceci :
-        $conn->gameId = $queryParams['idGame'];
+        // Save this as var to have easy access
+        $idGame = $queryParams['idGame'];
+
+        // And fill the ConnectionInterface object with this datas to make them easy access
+        $conn->gameId = $idGame;
         $conn->playerType = $queryParams['playerType'];
+
+        // Game not saved in the websocket yet, save it
+        if (!isset($this->gameEntity[$idGame])) {
+            $this->fillClassVars($idGame);
+        }
 
         $this->connections->attach($conn);
 
+        // Get all connections linked to the game, a check is made in JS to see how many spectators and if a player is connected or not
+        $arrConnectedUsers = [];
+        foreach ($this->connections as $connection) {
+            if ($connection->gameId === $idGame) {
+                $arrConnectedUsers[] = [
+                    'gameId' => $connection->gameId,
+                    'resourceId' => $connection->resourceId,
+                    'playerType' => $connection->playerType,
+                ];
+            }
+        }
+
+        $microtimeNow = microtime(true);
+        foreach ($this->connections as $connection) {
+            if ($connection->gameId === $idGame) {
+                $theoricBlackTimeSpend = $this->blackMicrotimeSpend[$idGame] + ($microtimeNow - $this->blackMicrotimeStart[$idGame]);
+                $theoricWhiteTimeSpend = $this->whiteMicrotimeSpend[$idGame] + ($microtimeNow - $this->whiteMicrotimeStart[$idGame]);
+
+                // If game is finished, do not send the timer being decremented. Get the each players one saved in DB
+                if ($this->gameEntity[$idGame]->getStatus() === 'finished') {
+                    $msg = json_encode([
+                        'method' => 'opponent_connect',
+                        'whiteMicrotimeSpend' => $this->playerWhiteEntity[$idGame]->getTimeLeft(),
+                        'blackMicrotimeSpend' => $this->playerBlackEntity[$idGame]->getTimeLeft(),
+                        'connectedUsers' => $arrConnectedUsers,
+                    ]);
+                } else {
+                    $msg = json_encode([
+                        'method' => 'opponent_connect',
+                        'whiteMicrotimeSpend' => round($this->gameTimer[$idGame] - $theoricWhiteTimeSpend),
+                        'blackMicrotimeSpend' => round($this->gameTimer[$idGame] - $theoricBlackTimeSpend),
+                        'connectedUsers' => $arrConnectedUsers,
+                    ]);
+                }
+
+                $connection->send($msg);
+            }
+        }
+
+        // This is for the tests, delete it later
         foreach ($this->connections as $connection) {
             $arrDisplay = [
                 'resourceId' => $connection->resourceId,
@@ -120,28 +160,7 @@ class MessageHandler implements MessageComponentInterface
 
         // Game not saved in the websocket yet, save it
         if (!isset($this->gameEntity[$idGame])) {
-            // Get the game entity
-            $this->gameEntity[$idGame] = $this->em->getRepository(Entity\Game::class)->find($idGame);
-
-            // Get the game timer per player
-            $this->gameTimer[$idGame] = $this->gameEntity[$idGame]->getTime();
-            $this->gameIncrement[$idGame] = $this->gameEntity[$idGame]->getIncrement();
-
-            // Get the players datas too
-            $this->playerWhiteEntity[$idGame] = $this->em->getRepository(Entity\Player::class)->findOneBy([
-                'color' => 'white',
-                'game' => $this->gameEntity[$idGame]->getId(),
-            ]);
-            $this->playerBlackEntity[$idGame] = $this->em->getRepository(Entity\Player::class)->findOneBy([
-                'color' => 'black',
-                'game' => $this->gameEntity[$idGame]->getId(),
-            ]);
-
-            $this->whiteMicrotimeSpend[$idGame] = 0;
-            $this->blackMicrotimeSpend[$idGame] = 0;
-
-            $this->whiteMicrotimeStart[$idGame] = 0;
-            $this->blackMicrotimeStart[$idGame] = 0;
+            $this->fillClassVars($idGame);
         }
 
         // If it's a reconnection, send the timers
@@ -489,12 +508,34 @@ class MessageHandler implements MessageComponentInterface
         if ($this->debug) {
             print_r('onClose'.PHP_EOL);
         }
-        foreach ($this->connections as $connection) {
-            if ($connection !== $conn && $connection->gameId === $conn->gameId) {
-                $msg = json_encode([
-                    'method' => 'opponent_disconnect',
-                ]);
-                $connection->send($msg);
+
+        // No gameId, stange connected user
+        if (!isset($conn->gameId)) {
+            print_r('Strange close'.PHP_EOL);
+        } else {
+            // Save this as var to have easy access
+            $idGame = $conn->gameId;
+
+            // Get all connections linked to the game, a check is made in JS to see how many spectators and if a player is connected or not
+            $arrConnectedUsers = [];
+            foreach ($this->connections as $connection) {
+                if ($connection !== $conn && $connection->gameId === $idGame) {
+                    $arrConnectedUsers[] = [
+                        'gameId' => $connection->gameId,
+                        'resourceId' => $connection->resourceId,
+                        'playerType' => $connection->playerType,
+                    ];
+                }
+            }
+
+            foreach ($this->connections as $connection) {
+                if ($connection !== $conn && $connection->gameId === $idGame) {
+                    $msg = json_encode([
+                        'method' => 'opponent_disconnect',
+                        'connectedUsers' => $arrConnectedUsers,
+                    ]);
+                    $connection->send($msg);
+                }
             }
         }
 
@@ -509,5 +550,38 @@ class MessageHandler implements MessageComponentInterface
         dump($e);
         $this->connections->detach($conn);
         $conn->close();
+    }
+
+    private function fillClassVars($idGame)
+    {
+        // Get the game entity
+        $this->gameEntity[$idGame] = $this->em->getRepository(Entity\Game::class)->find($idGame);
+
+        // Get the game timer per player
+        $this->gameTimer[$idGame] = $this->gameEntity[$idGame]->getTime();
+        $this->gameIncrement[$idGame] = $this->gameEntity[$idGame]->getIncrement();
+
+        // Get the players datas too if not isset
+        if (!isset($this->playerWhiteEntity[$idGame])) {
+            $this->playerWhiteEntity[$idGame] = $this->em->getRepository(Entity\Player::class)->findOneBy([
+                'color' => 'white',
+                'game' => $this->gameEntity[$idGame]->getId(),
+            ]);
+        }
+
+        if (!isset($this->playerBlackEntity[$idGame])) {
+            $this->playerBlackEntity[$idGame] = $this->em->getRepository(Entity\Player::class)->findOneBy([
+                'color' => 'black',
+                'game' => $this->gameEntity[$idGame]->getId(),
+            ]);
+        }
+
+        $this->whiteMicrotimeSpend[$idGame] = 0;
+        $this->blackMicrotimeSpend[$idGame] = 0;
+
+        $this->whiteMicrotimeStart[$idGame] = 0;
+        $this->blackMicrotimeStart[$idGame] = 0;
+
+        return true;
     }
 }

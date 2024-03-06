@@ -27,9 +27,11 @@ class FirstController extends AbstractController
 
         $gameSession = $session->get('gameDatas');
 
-        // No gameid in session, add it
-        if (!isset($gameSession['id'])) {
-            $gameSession['id'] = $idGame;
+        // No gameid in session, add a new gameDatas array in session
+        if (!isset($gameSession['id']) || $gameSession['id'] !== $idGame) {
+            $gameSession = [
+                'id' => $idGame,
+            ];
             $session->set('gameDatas', $gameSession);
         }
 
@@ -79,7 +81,6 @@ class FirstController extends AbstractController
                 $player->setUserAgent($_SERVER['HTTP_USER_AGENT']);
                 $entityManager->persist($player);
                 $entityManager->flush();
-
             } else { // Infos already saved in DB, check playerType session. If not exist or not the player color, it's a spectator
                 if (empty($gameSession) || !isset($gameSession['id']) || is_null($gameSession['id']) || $gameSession['id'] !== $game->getId() || !isset($gameSession['playerType'])) { // No playerType session, it's a spectator
                     $gameSession['playerType'] = 'spectator';

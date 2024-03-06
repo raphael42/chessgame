@@ -34,16 +34,16 @@ $(function() {
     socket.addEventListener('open', function(e) {
         console.log('open', e);
 
-        try {
-            socket.send(JSON.stringify({
-                'method': 'connection',
-                'idGame': IDGAME,
-                'color': (PLAYERCOLOR === 'white') ? 'w' : 'b',
-                'playerType': PLAYERTYPE,
-            }));
-        } catch (error) {
-            console.log('Socket error', error);
-        }
+        // try {
+        //     socket.send(JSON.stringify({
+        //         'method': 'connection',
+        //         'idGame': IDGAME,
+        //         'color': (PLAYERCOLOR === 'white') ? 'w' : 'b',
+        //         'playerType': PLAYERTYPE,
+        //     }));
+        // } catch (error) {
+        //     console.log('Socket error', error);
+        // }
     });
 
     socket.addEventListener('message', function(e) {
@@ -51,6 +51,7 @@ $(function() {
 
         // Disconnect
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'opponent_disconnect') {
+            console.log(socketMessage);
             if (PLAYERTYPE === 'spectator') {
                 let playerFound = false;
                 let opponentFound = false;
@@ -85,6 +86,7 @@ $(function() {
 
         // Connect
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'opponent_connect') {
+            console.log(socketMessage);
             if (PLAYERTYPE === 'spectator') { // For spectators, check the 2 players status
                 let playerFound = false;
                 let opponentFound = false;
