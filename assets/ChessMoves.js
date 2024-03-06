@@ -51,88 +51,98 @@ $(function() {
 
         // Disconnect
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'opponent_disconnect') {
-            console.log(socketMessage);
-            if (PLAYERTYPE === 'spectator') {
-                let playerFound = false;
-                let opponentFound = false;
-                for (let i in socketMessage.connectedUsers) {
-                    // Not spectator and color is the same than the player one, then, the player is connected
-                    if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType === PLAYERCOLOR) {
-                        playerFound = true;
-                    }
-
-                    // Not spectator and color is different than the player one, then, the opponent is connected
-                    if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType !== PLAYERCOLOR) {
-                        opponentFound = true;
-                    }
+            let playerFound = false;
+            let opponentFound = false;
+            let spectatorsNumber = 0;
+            for (let i in socketMessage.connectedUsers) {
+                // Not spectator and color is the same than the player one, then, the player is connected
+                if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType === PLAYERCOLOR) {
+                    playerFound = true;
                 }
 
-                if (playerFound) {
-                    $('.player-connect').html('OK');
-                } else {
-                    $('.player-connect').html('KO');
+                // Not spectator and color is different than the player one, then, the opponent is connected
+                if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType !== PLAYERCOLOR) {
+                    opponentFound = true;
                 }
 
-                if (opponentFound) {
-                    $('.opponent-connect').html('OK');
-                } else {
-                    $('.opponent-connect').html('KO');
+                // Check the spectators number
+                if (socketMessage.connectedUsers[i].playerType === 'spectator') {
+                    spectatorsNumber++;
                 }
+            }
+
+            // Update player connection status
+            if (playerFound) {
+                $('.player-connect').html('OK');
+            } else {
+                $('.player-connect').html('KO');
+            }
+
+            // update opponent status
+            if (opponentFound) {
+                $('.opponent-connect').html('OK');
             } else {
                 $('.opponent-connect').html('KO');
             }
+
+            // One or more spectators, remove d-none on div if there is one, and update the number
+            if (spectatorsNumber > 0 && $('.spectators').hasClass('d-none')) {
+                $('.spectators').removeClass('d-none');
+            }
+
+            if (spectatorsNumber === 0 && !$('.spectators').hasClass('d-none')){ // No spectators
+                $('.spectators').addClass('d-none');
+            }
+            $('.spectators-number').html(spectatorsNumber);
             return;
         }
 
         // Connect
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'opponent_connect') {
-            console.log(socketMessage);
-            if (PLAYERTYPE === 'spectator') { // For spectators, check the 2 players status
-                let playerFound = false;
-                let opponentFound = false;
-                for (let i in socketMessage.connectedUsers) {
-                    // Not spectator and color is the same than the player one, then, the player is connected
-                    if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType === PLAYERCOLOR) {
-                        playerFound = true;
-                    }
-
-                    // Not spectator and color is different than the player one, then, the opponent is connected
-                    if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType !== PLAYERCOLOR) {
-                        opponentFound = true;
-                    }
-                }
-
-                if (playerFound) {
-                    $('.player-connect').html('OK');
-                } else {
-                    $('.player-connect').html('KO');
-                }
-
-                if (opponentFound) {
-                    $('.opponent-connect').html('OK');
-                } else {
-                    $('.opponent-connect').html('KO');
-                }
-            } else { // For players, we don't need to check if the player is connected. Only check for the opponent
-                for (let i in socketMessage.connectedUsers) {
-                    // Not spectator and color is different than the player one, then, the opponent is connected
-                    if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType !== PLAYERCOLOR) {
-                        $('.opponent-connect').html('OK');
-                    }
-                }
-            }
-
-
+            let playerFound = false;
+            let opponentFound = false;
+            let spectatorsNumber = 0;
             for (let i in socketMessage.connectedUsers) {
-                if (PLAYERTYPE === 'spectator') { // TODO : For spectators, check the 2 players status
+                // Not spectator and color is the same than the player one, then, the player is connected
+                if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType === PLAYERCOLOR) {
+                    playerFound = true;
+                }
 
-                } else { // For players, we don't need to check if the player is connected. Only check for the opponent
-                    // Not spectator and color is different than the player one, then, the opponent is connected
-                    if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType !== PLAYERCOLOR) {
-                        $('.opponent-connect').html('OK');
-                    }
+                // Not spectator and color is different than the player one, then, the opponent is connected
+                if (socketMessage.connectedUsers[i].playerType !== 'spectator' && socketMessage.connectedUsers[i].playerType !== PLAYERCOLOR) {
+                    opponentFound = true;
+                }
+
+                // Check the spectators number
+                if (socketMessage.connectedUsers[i].playerType === 'spectator') {
+                    spectatorsNumber++;
                 }
             }
+
+            // Update player connection status
+            if (playerFound) {
+                $('.player-connect').html('OK');
+            } else {
+                $('.player-connect').html('KO');
+            }
+
+            // update opponent status
+            if (opponentFound) {
+                $('.opponent-connect').html('OK');
+            } else {
+                $('.opponent-connect').html('KO');
+            }
+
+            // One or more spectators, remove d-none on div if there is one, and update the number
+            if (spectatorsNumber > 0 && $('.spectators').hasClass('d-none')) {
+                $('.spectators').removeClass('d-none');
+            }
+
+            if (spectatorsNumber === 0 && !$('.spectators').hasClass('d-none')){ // No spectators
+                $('.spectators').addClass('d-none');
+            }
+            $('.spectators-number').html(spectatorsNumber);
+
 
             let fenSplit = chess.fen().split(' ');
             let fenTurnNumber = parseInt(fenSplit[5]);
