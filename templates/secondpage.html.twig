@@ -87,9 +87,9 @@
                     {% endfor %}
                 </div>
             </div>
-            <div>
+            <form id="form-tchat" class="{{ playerType == 'spectator' ? 'd-none' }}">
                 <input id="input-tchat" type="text" class="form-control" placeholder="Écrire à votre adversaire">
-            </div>
+            </form>
             <div class="spectators d-none">
                 <p><i class="bi bi-person-fill"></i><span class="spectators-number"></span></p>
             </div>
