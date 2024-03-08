@@ -222,7 +222,7 @@ class MessageHandler implements MessageComponentInterface
             $messagesEntity = new Entity\Messages();
             $messagesEntity->setDateInsert($dateTimeNow);
             // It's a message from the tchat, set the player
-            if (isset($msgArray['isTchat'], $msgArray['color']) && !empty($msgArray['isTchat']) && !empty($msgArray['color'])) {
+            if (isset($msgArray['method'], $msgArray['color']) && !empty($msgArray['color']) && $msgArray['method'] === 'tchat-message') {
                 if ($msgArray['color'] === 'w' || $msgArray['color'] === 'white') {
                     $messagesEntity->setPlayer($this->playerWhiteEntity[$idGame]);
                 } elseif ($msgArray['color'] === 'b' || $msgArray['color'] === 'black') {
@@ -233,6 +233,16 @@ class MessageHandler implements MessageComponentInterface
             $messagesEntity->setMessage($msgArray['message']);
             $this->em->persist($messagesEntity);
             $this->em->flush();
+
+            // If it's only a tchat message, return now because we don't have more actions to do
+            if (isset($msgArray['method']) && $msgArray['method'] === 'tchat-message') {
+                foreach ($this->connections as $connection) {
+                    if ($connection !== $from && $connection->gameId === $idGame) {
+                        $connection->send($msg);
+                    }
+                }
+                return;
+            }
         }
 
         // One player resign, send info to the other

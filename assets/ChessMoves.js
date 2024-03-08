@@ -168,6 +168,13 @@ $(function() {
             return;
         }
 
+        // Message in the tchat from the opponent
+        if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'tchat-message') {
+            $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
+
+            return;
+        }
+
         // Opponent resign
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'resign') {
             if (PLAYERCOLOR === 'white') {
@@ -1114,6 +1121,26 @@ $(function() {
         } catch (error) {
             console.log('Socket error', error);
         }
+    });
+
+    $('#form-tchat').on('submit', function() {
+        let message = '[white] ';
+        if (PLAYERCOLOR === 'b' || PLAYERCOLOR === 'black') {
+            message = '[black] ';
+        }
+        message += $('#input-tchat').val();
+
+        socket.send(JSON.stringify({
+            'method': 'tchat-message',
+            'idGame': IDGAME,
+            'message': message,
+            'color': PLAYERCOLOR,
+        }));
+
+        $('#input-tchat').val('');
+        $('.tchat').append('<div><p>' + message + '</p></div>');
+
+        return false; // Return false to prevent a real submit of the form and a reload of the page
     });
 });
 
