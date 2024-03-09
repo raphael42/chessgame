@@ -26,14 +26,6 @@
 {% block body %}
     <div class="row">
         <div class="col-lg-3 col-md-4 col-sm-12">
-            {# <div class="bg-grey mb-3">
-                <div>Votre temps : <span id="timer-player"></span></div>
-                <div><span id="player-turn"></span></div>
-                <div>Temps de l'adversaire : <span id="timer-opponent"></span></div>
-            </div> #}
-            {# <div class="mb-3">
-                Statut de connexion de l'adversaire : <span class="opponent-connect"></span>
-            </div> #}
             {% if playerType == 'spectator' %}
                 <div>
                     <p>Mode spectateur</p>
@@ -94,58 +86,46 @@
                 <p><i class="bi bi-person-fill"></i><span class="spectators-number"></span></p>
             </div>
         </div>
-        <div class="col-lg-6 col-md-8 col-sm-12 col-center">
-            <table id="board">
+        <div class="col-lg-6 col-md-8 col-sm-12">
+            <div id="board">
                 {% if player.color == 'white' %}
-                    {% for i in 8..1 %}
-                        <tr>
-                            <td id="a{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                            <td id="b{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                            <td id="c{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                            <td id="d{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                            <td id="e{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                            <td id="f{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                            <td id="g{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                            <td id="h{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                            <td><span style="margin-left:5px">{{ i }}</span></td>
-                        </tr>
+                    {% for key, column in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] %}
+                        <div class="one-column">
+                            {% for line in 8..1 %}
+                                {% if key is even %}
+                                    <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-white' : 'case-black' }}"></div>
+                                {% else %}
+                                    <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-black' : 'case-white' }}"></div>
+                                {% endif %}
+                            {% endfor %}
+                            <div class="chess-column-letter"><span>{{ column }}</span></div>
+                        </div>
                     {% endfor %}
-                    <tr>
-                        <td class="text-center">a</td>
-                        <td class="text-center">b</td>
-                        <td class="text-center">c</td>
-                        <td class="text-center">d</td>
-                        <td class="text-center">e</td>
-                        <td class="text-center">f</td>
-                        <td class="text-center">g</td>
-                        <td class="text-center">h</td>
-                    </tr>
+                    <div class="one-column">
+                        {% for line in 8..1 %}
+                            <div class="chess-line-number"><span>{{ line }}</span></div>
+                        {% endfor %}
+                    </div>
                 {% else %}
-                    {% for i in 1..8 %}
-                        <tr>
-                            <td id="h{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                            <td id="g{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                            <td id="f{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                            <td id="e{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                            <td id="d{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                            <td id="c{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                            <td id="b{{ i }}" class="chess-table {{ i is even ? 'case-black' : 'case-white' }}"></td>
-                            <td id="a{{ i }}" class="chess-table {{ i is even ? 'case-white' : 'case-black' }}"></td>
-                            <td><span style="margin-left:5px">{{ i }}</span></td>
-                        </tr>
+                    {% for key, column in ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'] %}
+                        <div class="one-column">
+                            {% for line in 1..8 %}
+                                {% if key is even %}
+                                    <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-white' : 'case-black' }}"></div>
+                                {% else %}
+                                    <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-black' : 'case-white' }}"></div>
+                                {% endif %}
+                            {% endfor %}
+                            <div class="chess-column-letter"><span>{{ column }}</span></div>
+                        </div>
                     {% endfor %}
-                    <tr>
-                        <td class="text-center">h</td>
-                        <td class="text-center">g</td>
-                        <td class="text-center">f</td>
-                        <td class="text-center">e</td>
-                        <td class="text-center">d</td>
-                        <td class="text-center">c</td>
-                        <td class="text-center">b</td>
-                        <td class="text-center">a</td>
-                    </tr>
+                    <div class="one-column">
+                        {% for line in 1..8 %}
+                            <div class="chess-line-number"><span>{{ line }}</span></div>
+                        {% endfor %}
+                    </div>
                 {% endif %}
-            </table>
+            </div>
         </div>
         <div class="col-lg-3 col-md-12 col-sm-12">
             <div>

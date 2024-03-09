@@ -543,7 +543,7 @@ $(function() {
         console.log('error', e);
     });
 
-    $('#board').off().on('click', 'td', function() {
+    $('#board').off().on('click', '.chess-table', function() {
         // If player is watching history, disable the possibility to move
         if (HISTORYINVIEW) {
             return;
@@ -1281,7 +1281,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             $('#' + squareIdTo).empty();
         }
 
-        $('#' + squareIdFrom + ' img').detach().css({top: 0, left: 0}).appendTo('#' + squareIdTo);
+        $('#' + squareIdFrom + ' img').detach().appendTo('#' + squareIdTo);
 
         if (promotion !== null) {
             let src = PIECESIMGURL;
