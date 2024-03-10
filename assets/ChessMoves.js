@@ -1124,6 +1124,10 @@ $(function() {
     });
 
     $('#form-tchat').on('submit', function() {
+        if ($('#input-tchat').val() === '') {
+            return false; // empty message, do nothing
+        }
+
         let message = '[white] ';
         if (PLAYERCOLOR === 'b' || PLAYERCOLOR === 'black') {
             message = '[black] ';

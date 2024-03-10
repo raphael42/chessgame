@@ -85,6 +85,11 @@ class FirstController extends AbstractController
                 if (empty($gameSession) || !isset($gameSession['id']) || is_null($gameSession['id']) || $gameSession['id'] !== $game->getId() || !isset($gameSession['playerType'])) { // No playerType session, it's a spectator
                     $gameSession['playerType'] = 'spectator';
                     $session->set('gameDatas', $gameSession);
+
+                    // If spectator, the main player is white
+                    $tmpPlayer = $player;
+                    $player = $opponent;
+                    $opponent = $tmpPlayer;
                 } elseif (!empty($gameSession) && !is_null($gameSession['id']) && $gameSession['id'] === $game->getId() && $gameSession['playerType'] === $player->getColor()) { // Opponent of the game creator player is reconnecting
                     $playerType = $player->getColor();
                 }
