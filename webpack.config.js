@@ -22,6 +22,7 @@ Encore
      */
     .addEntry('allSite', './assets/allSite.js')
     .addEntry('gameJs', './assets/ChessMoves.js')
+    .addEntry('homeJs', './assets/home.js')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()

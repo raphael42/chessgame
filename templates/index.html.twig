@@ -1,8 +1,62 @@
 {% extends 'base.html.twig' %}
 
+{% block javascripts %}
+    <script>
+        const PIECESIMGURL = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
+    </script>
+
+    {{ encore_entry_link_tags('homeJs') }}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ encore_entry_script_tags('homeJs') }}
+{% endblock %}
+
 {% block body %}
-    <h1>Créer une partie</h1>
-    <div>
-        {{ form(form) }}
+    <div class="row">
+        <div class="col-lg-9 col-sm-12">
+            <div id="board">
+                {% for key, column in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] %}
+                    <div class="one-column">
+                        {% for line in 8..1 %}
+                            {% if key is even %}
+                                <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-white' : 'case-black' }}"></div>
+                            {% else %}
+                                <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-black' : 'case-white' }}"></div>
+                            {% endif %}
+                        {% endfor %}
+                        <div class="chess-column-letter"><span>{{ column }}</span></div>
+                    </div>
+                {% endfor %}
+                <div class="one-column">
+                    {% for line in 8..1 %}
+                        <div class="chess-line-number"><span>{{ line }}</span></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-12" style="display: flex; flex-flow: column;">
+            <div style="justify-content: center;flex: 1 1 auto; gap: .5em; align-items: stretch;flex-flow: column;">
+                <button title"A venir ..." disabled>Créer une partie</button>
+                <button type="button" data-bs-toggle="modal" data-bs-target="#game-with-friend">Jouer contre un ami</button>
+                <button title"A venir ..." disabled>Créer contre l'ordinateur</button>
+            </div>
+        </div>
     </div>
+
+    <!-- Modal -->
+    <div class="modal  fade" id="game-with-friend" tabindex="-1" aria-labelledby="game-with-friendLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Créer une partie</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
