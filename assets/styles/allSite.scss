@@ -64,13 +64,20 @@
                 }
 
                 &.possible-move {
-                    &:before {
-                        content: "";
-                        width: 20px;
-                        height: 20px;
-                        background-color: #8baf73; /* Couleur de fond du cercle */
-                        border-radius: 50%;
+                    &:not(:empty) {
+                        background: radial-gradient(transparent 0%, transparent 79%, #8baf73 80%), #f7dfc5;
                     }
+
+                    &:empty {
+                        &:before {
+                            content: "";
+                            width: 20px;
+                            height: 20px;
+                            background-color: #8baf73; /* Couleur de fond du cercle */
+                            border-radius: 50%;
+                        }
+                    }
+
                     &:hover {
                         background-color: #8baf73;
                     }
@@ -110,13 +117,20 @@
                 }
 
                 &.possible-move {
-                    &:before {
-                        content: "";
-                        width: 20px;
-                        height: 20px;
-                        background-color: #646f40; /* Couleur de fond du cercle */
-                        border-radius: 50%;
+                    &:not(:empty) {
+                        background: radial-gradient(transparent 0%, transparent 79%, #646f40 80%), #c67945;
                     }
+
+                    &:empty {
+                        &:before {
+                            content: "";
+                            width: 20px;
+                            height: 20px;
+                            background-color: #646f40; /* Couleur de fond du cercle */
+                            border-radius: 50%;
+                        }
+                    }
+
                     &:hover {
                         background-color: #646f40;
                     }
