@@ -30,6 +30,14 @@ if (chess.inCheck() === true) {
     $('#' + kingposition).addClass('in-check');
 }
 
+if (GAMESTATUS !== 'finished') {
+    if (chess.turn() === 'w' && (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white')) {
+        $('#title').html('C\'est votre tour ! | freechess.fr');
+    } else {
+        $('#title').html('En attente de l\'adversaire | freechess.fr');
+    }
+}
+
 $(function() {
     socket.addEventListener('open', function(e) {
         console.log('open', e);
@@ -471,6 +479,8 @@ $(function() {
                 }
             }
         }
+
+        $('#title').html('C\'est votre tour ! | freechess.fr');
 
         $('#playerturn-start').addClass('d-none');
 
@@ -1376,6 +1386,8 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         });
         $('#' + squareIdFrom).addClass('last-move');
         $('#' + squareIdTo).addClass('last-move');
+
+        $('#title').html('En attente de l\'adversaire | freechess.fr');
 
         return true;
     }
