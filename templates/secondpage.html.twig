@@ -71,13 +71,11 @@
                 </div>
             {% endif %}
             <div class="tchat">
-                <div class="messages">
-                    {% for oneMessage in messages %}
-                        <div>
-                            <p>{{ oneMessage.message }}</p>
-                        </div>
-                    {% endfor %}
-                </div>
+                {% for oneMessage in messages %}
+                    <div>
+                        {{ oneMessage.message }}
+                    </div>
+                {% endfor %}
             </div>
             <form id="form-tchat" class="{{ playerType == 'spectator' ? 'd-none' }}">
                 <input id="input-tchat" type="text" class="form-control" placeholder="Écrire à votre adversaire">

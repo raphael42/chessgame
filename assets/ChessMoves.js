@@ -170,7 +170,7 @@ $(function() {
 
         // Message in the tchat from the opponent
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'tchat-message') {
-            $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
+            $('.tchat').append('<div>' + socketMessage.message + '</div>');
 
             return;
         }
@@ -190,7 +190,7 @@ $(function() {
             if (PLAYERTYPE !== 'spectator') {
                 $('#offer-draw-opponent-response').removeClass('d-none');
             }
-            $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
+            $('.tchat').append('<div>' + socketMessage.message + '</div>');
             return;
         }
 
@@ -199,7 +199,7 @@ $(function() {
             if (PLAYERTYPE !== 'spectator') {
                 $('#offer-draw-display').addClass('d-none');
             }
-            $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
+            $('.tchat').append('<div>' + socketMessage.message + '</div>');
             return;
         }
 
@@ -217,7 +217,7 @@ $(function() {
             if (PLAYERTYPE !== 'spectator') {
                 $('#takeback-opponent-response').removeClass('d-none');
             }
-            $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
+            $('.tchat').append('<div>' + socketMessage.message + '</div>');
             return;
         }
 
@@ -226,7 +226,7 @@ $(function() {
             if (PLAYERTYPE !== 'spectator') {
                 $('#takeback-display').addClass('d-none');
             }
-            $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
+            $('.tchat').append('<div>' + socketMessage.message + '</div>');
             return;
         }
 
@@ -235,7 +235,7 @@ $(function() {
             if (PLAYERTYPE !== 'spectator') {
                 $('#takeback-display').addClass('d-none');
             }
-            $('.tchat').append('<div><p>' + socketMessage.message + '</p></div>');
+            $('.tchat').append('<div>' + socketMessage.message + '</div>');
 
             // PLAYERCOLOR in one letter format
             let playerColorFormat = 'b';
@@ -957,7 +957,7 @@ $(function() {
             message = 'White offers draw';
         }
 
-        $('.tchat').append('<div><p>' + message + '</p></div>');
+        $('.tchat').append('<div>' + message + '</div>');
 
         try {
             socket.send(JSON.stringify({
@@ -994,7 +994,7 @@ $(function() {
             message = 'White declines draw';
         }
 
-        $('.tchat').append('<div><p>' + message + '</p></div>');
+        $('.tchat').append('<div>' + message + '</div>');
 
         try {
             socket.send(JSON.stringify({
@@ -1021,7 +1021,7 @@ $(function() {
         $('#takeback-display').removeClass('d-none');
 
         let message = 'Takeback sent';
-        $('.tchat').append('<div><p>' + message + '</p></div>');
+        $('.tchat').append('<div>' + message + '</div>');
 
         try {
             socket.send(JSON.stringify({
@@ -1038,7 +1038,7 @@ $(function() {
         $('#takeback-opponent-response').addClass('d-none');
 
         let message = 'Takeback declined';
-        $('.tchat').append('<div><p>' + message + '</p></div>');
+        $('.tchat').append('<div>' + message + '</div>');
         try {
             socket.send(JSON.stringify({
                 'method': 'takeback-no',
@@ -1054,7 +1054,7 @@ $(function() {
         $('#takeback-opponent-response').addClass('d-none');
 
         let message = 'Takeback accepted';
-        $('.tchat').append('<div><p>' + message + '</p></div>');
+        $('.tchat').append('<div>' + message + '</div>');
 
         // PLAYERCOLOR in one letter format
         let playerColorFormat = 'b';
@@ -1138,7 +1138,7 @@ $(function() {
         }));
 
         $('#input-tchat').val('');
-        $('.tchat').append('<div><p>' + message + '</p></div>');
+        $('.tchat').append('<div>' + message + '</div>');
 
         return false; // Return false to prevent a real submit of the form and a reload of the page
     });
@@ -1610,16 +1610,14 @@ function gameIsOver(status, playerWinner, endReason) {
 
     stopTimer();
     if (status === 'd') { // Draw
-        $('.tchat').append('<div><p>' + endReason + '</p></div>');
+        $('.tchat').append('<div>' + endReason + '</div>');
     } else { // One player win
         if (playerWinner === 'w' || playerWinner === 'white') {
-            $('.tchat').append('<div><p>' + endReason + '</p></div>');
+            $('.tchat').append('<div>' + endReason + '</div>');
         } else {
-            $('.tchat').append('<div><p>' + endReason + '</p></div>');
+            $('.tchat').append('<div>' + endReason + '</div>');
         }
     }
 
     $('.piece.' + PLAYERCOLOR).draggable('destroy');
 }
-
-// history functions
