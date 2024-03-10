@@ -1,127 +1,146 @@
 @import "~bootstrap/scss/bootstrap";
 
-.case-white {
-    background-color: #f7dfc5;
+#board {
+    display: flex;
+    justify-content: center;
 
-    &.clicked,
-    &.selected {
-        background-color: #8baf73;
-    }
+    .one-column {
+        flex: 0 1 auto;
 
-    &.last-move {
-        background-color: #cdd26b;
-    }
+        .chess-column-letter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    &.possible-move {
-        &:before {
-            content: "";
-            display: block;
+        .chess-line-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 64px;
             width: 20px;
-            height: 20px;
-            background-color: #8baf73; /* Couleur de fond du cercle */
-            border-radius: 50%;
-            position: relative;
-            transform: translate(-50%, -50%);
-            left: 32px;
-            top: 11px;
         }
-        &:hover {
-            background-color: #8baf73;
-        }
-        &.ui-droppable-hover {
-            background-color: #8baf73;
+
+        .chess-table {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            cursor: pointer;
+
+            .piece {
+                width: 64px;
+                height: 64px;
+            }
+
+            &.case-white {
+                background-color: #f7dfc5;
+
+                &.clicked,
+                &.selected {
+                    background-color: #8baf73;
+                }
+
+                &.last-move {
+                    background-color: #cdd26b;
+                }
+
+                &.in-check {
+                    background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #f7dfc5 89%, #f7dfc5 100%);
+                    &.clicked {
+                        background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #8baf73 89%, #8baf73 100%);
+                    }
+                }
+
+                &.clicked-premove {
+                    background-color: #827a85;
+                }
+
+                &.clicked-premove-hover {
+                    &:hover {
+                        background-color: #827a85;
+                    }
+                }
+
+                &.possible-move {
+                    &:not(:empty) {
+                        background: radial-gradient(transparent 0%, transparent 79%, #8baf73 80%), #f7dfc5;
+                    }
+
+                    &:empty {
+                        &:before {
+                            content: "";
+                            width: 20px;
+                            height: 20px;
+                            background-color: #8baf73; /* Couleur de fond du cercle */
+                            border-radius: 50%;
+                        }
+                    }
+
+                    &:hover {
+                        background-color: #8baf73;
+                    }
+                    &.ui-droppable-hover {
+                        background-color: #8baf73;
+                    }
+                }
+            }
+
+            &.case-black {
+                background-color: #c67945;
+
+                &.selected,
+                &.clicked {
+                    background-color: #646f40;
+                }
+
+                &.last-move {
+                    background-color: #aba239;
+                }
+
+                &.in-check {
+                    background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #c67945 89%, #c67945 100%);
+                    &.clicked {
+                        background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #646f40 89%, #646f40 100%);
+                    }
+                }
+
+                &.clicked-premove {
+                    background-color: #64535d;
+                }
+
+                &.clicked-premove-hover {
+                    &:hover {
+                        background-color: #64535d;
+                    }
+                }
+
+                &.possible-move {
+                    &:not(:empty) {
+                        background: radial-gradient(transparent 0%, transparent 79%, #646f40 80%), #c67945;
+                    }
+
+                    &:empty {
+                        &:before {
+                            content: "";
+                            width: 20px;
+                            height: 20px;
+                            background-color: #646f40; /* Couleur de fond du cercle */
+                            border-radius: 50%;
+                        }
+                    }
+
+                    &:hover {
+                        background-color: #646f40;
+                    }
+                    &.ui-droppable-hover {
+                        background-color: #646f40;
+                    }
+                }
+            }
         }
     }
-
-    &.in-check {
-        background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #f7dfc5 89%, #f7dfc5 100%);
-
-        &.clicked {
-            background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #8baf73 89%, #8baf73 100%);
-        }
-    }
-
-    &.clicked-premove {
-        background-color: #827a85;
-    }
-
-    &.clicked-premove-hover {
-        &:hover {
-            background-color: #827a85;
-        }
-    }
-}
-
-.case-black {
-    background-color: #c67945;
-
-    &.selected,
-    &.clicked {
-        background-color: #646f40;
-    }
-
-    &.last-move {
-        background-color: #aba239;
-    }
-
-    &.possible-move {
-        &:before {
-            content: "";
-            display: block;
-            width: 20px;
-            height: 20px;
-            background-color: #646f40; /* Couleur de fond du cercle */
-            border-radius: 50%;
-            position: relative;
-            transform: translate(-50%, -50%);
-            left: 32px;
-            top: 11px;
-        }
-        &:hover {
-            background-color: #646f40;
-        }
-        &.ui-droppable-hover {
-            background-color: #646f40;
-        }
-    }
-
-    &.in-check {
-        background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #c67945 89%, #c67945 100%);
-
-        &clicked {
-            background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #646f40 89%, #646f40 100%);
-        }
-    }
-
-    &.clicked-premove {
-        background-color: #64535d;
-    }
-
-    &.clicked-premove-hover {
-        &:hover {
-            background-color: #64535d;
-        }
-    }
-}
-
-.chess-table {
-    width: 64px;
-    height: 64px;
-    cursor: pointer;
-}
-
-.piece {
-    width: 64px;
-    height: 64px;
-}
-
-.bg-grey {
-    background-color: #cecece;
-}
-
-.col-center {
-    display: inline-block;
-    float: none;
 }
 
 .history {
