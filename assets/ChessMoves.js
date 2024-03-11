@@ -32,9 +32,9 @@ if (chess.inCheck() === true) {
 
 if (GAMESTATUS !== 'finished') {
     if (chess.turn() === 'w' && (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white')) {
-        $('#title').html('C\'est votre tour ! | freechess.fr');
+        $('#title').html('C\'est votre tour ! | ' + SERVERNAME);
     } else {
-        $('#title').html('En attente de l\'adversaire | freechess.fr');
+        $('#title').html('En attente de l\'adversaire | ' + SERVERNAME);
     }
 }
 
@@ -480,7 +480,7 @@ $(function() {
             }
         }
 
-        $('#title').html('C\'est votre tour ! | freechess.fr');
+        $('#title').html('C\'est votre tour ! | ' + SERVERNAME);
 
         $('#playerturn-start').addClass('d-none');
 
@@ -1387,7 +1387,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         $('#' + squareIdFrom).addClass('last-move');
         $('#' + squareIdTo).addClass('last-move');
 
-        $('#title').html('En attente de l\'adversaire | freechess.fr');
+        $('#title').html('En attente de l\'adversaire | ' + SERVERNAME);
 
         return true;
     }
