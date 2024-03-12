@@ -9,9 +9,9 @@ use Doctrine\ORM\EntityManagerInterface;
 
 use App\Entity;
 
-class FirstController extends AbstractController
+class GameController extends AbstractController
 {
-    public function secondfunction($url, EntityManagerInterface $entityManager)
+    public function gamefunction($url, EntityManagerInterface $entityManager)
     {
         $game = $entityManager->getRepository(Entity\Game::class)->findOneBy([
             'url' => $url,
@@ -115,7 +115,7 @@ class FirstController extends AbstractController
             }
         }
 
-        return $this->render('secondpage.html.twig', [
+        return $this->render('game.html.twig', [
             'game' => $game,
             'gameStatus' => $gameStatus,
             'player' => $player,

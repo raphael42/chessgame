@@ -31,7 +31,7 @@ class HomeController extends AbstractController
                 'id' => $gameId,
             ]);
 
-            return $this->redirectToRoute('game-second', ['url' => $url]);
+            return $this->redirectToRoute('game', ['url' => $url]);
         }
 
         return $this->render('index.html.twig', [

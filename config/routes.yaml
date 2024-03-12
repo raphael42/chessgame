@@ -3,12 +3,8 @@ index:
     controller: App\Controller\HomeController::index
 
 game:
-    path: first-page/{url}
-    controller: App\Controller\FirstController::firstfunction
-
-game-second:
-    path: second-page/{url}
-    controller: App\Controller\FirstController::secondfunction
+    path: game/{url}
+    controller: App\Controller\GameController::gamefunction
 
 controllers:
     resource:
