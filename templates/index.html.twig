@@ -14,7 +14,10 @@
 
 {% block body %}
     <div class="row">
-        <div class="col-lg-9 col-sm-12">
+        <div class="col-lg-3 col-md-12 col-sm-12">
+            {# section partie en cours #}
+        </div>
+        <div class="col-lg-6 col-md-8 col-sm-12">
             <div id="board">
                 {% for key, column in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] %}
                     <div class="one-column">
@@ -35,12 +38,10 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-sm-12" style="display: flex; flex-flow: column;">
-            <div style="justify-content: center;flex: 1 1 auto; gap: .5em; align-items: stretch;flex-flow: column;">
-                <button title"A venir ..." disabled>Créer une partie</button>
-                <button type="button" data-bs-toggle="modal" data-bs-target="#game-with-friend">Jouer contre un ami</button>
-                <button title"A venir ..." disabled>Créer contre l'ordinateur</button>
-            </div>
+        <div class="col-lg-3 col-md-4 col-sm-12" style="display: flex; flex-direction: column; align-items: flex-start; width: 400px;">
+            <button style="align-self: stretch;" title"A venir ..." disabled>Créer une partie</button>
+            <button style="align-self: stretch;" type="button" data-bs-toggle="modal" data-bs-target="#game-with-friend">Jouer contre un ami</button>
+            <button style="align-self: stretch;" title"A venir ..." disabled>Créer contre l'ordinateur</button>
         </div>
     </div>
 
