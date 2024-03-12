@@ -10,7 +10,7 @@
 
         <title id="title">{% block title %}{{ app.request.host }} | Jeu d'échecs gratuit{% endblock %}</title>
 
-        {# {% include './favicons.html.twig' %} #}
+        <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon-rook.png') }}">
 
         {% block stylesheets %}{% endblock %}
         {{ encore_entry_link_tags('allSite') }}
