@@ -1,0 +1,36 @@
+<style>
+/* Style pour le menu fixe en haut */
+.navbar {
+  display: flex; /* Utilisation de Flexbox */
+  justify-content: left; /* Alignement des éléments à gauche */
+  align-items: center; /* Centrage vertical des éléments */
+  overflow: hidden;
+  background-color: #333; /* Couleur de fond */
+  position: fixed; /* Fixe le menu en haut de la page */
+  top: 0; /* Position en haut */
+  width: 100%; /* Largeur complète */
+  z-index: 1000; /* S'assure que le menu reste au-dessus des autres éléments */
+}
+
+/* Style des liens du menu */
+.navbar a {
+  display: block;
+  color: white; /* Couleur du texte */
+  text-align: center;
+  padding: 14px 20px; /* Espacement */
+  text-decoration: none; /* Pas de soulignement pour les liens */
+}
+
+/* Changement de couleur au survol */
+.navbar a:hover {
+  background-color: #ddd; /* Couleur de fond au survol */
+  color: black; /* Couleur du texte au survol */
+}
+</style>
+
+<div class="navbar">
+  <a href="#home">Accueil</a>
+  <a href="#news">Nouvelles</a>
+  <a href="#contact">Contact</a>
+  <a href="#about">À propos</a>
+</div>

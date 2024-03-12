@@ -17,6 +17,10 @@
     </head>
 
     <body class="{% block body_class %}{% endblock %}">
+        <header>
+            {% include "menu.html.twig" %}
+        </header>
+
         <div class="container-fluid">
             {% block body %}{% endblock %}
         </div>
