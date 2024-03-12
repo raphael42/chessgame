@@ -1,7 +1,5 @@
 twig:
     default_path: '%kernel.project_dir%/templates'
-    globals:
-        nomServeur: '%env(SERVER_NAME)%'
 
 when@test:
     twig:

@@ -8,7 +8,7 @@
         <meta name="author" content="Raphael Bellon">
         <meta name="robots" content="noindex, nofollow">
 
-        <title id="title">{% block title %}{{ nomServeur }} | Jeu d'échecs gratuit{% endblock %}</title>
+        <title id="title">{% block title %}{{ app.request.host }} | Jeu d'échecs gratuit{% endblock %}</title>
 
         {# {% include './favicons.html.twig' %} #}
 
