@@ -218,32 +218,9 @@
 .create-game-section {
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: center;
 
     button {
         align-self: stretch;
-    }
-}
-
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    overflow: hidden;
-    background-color: #333;
-    width: 100%;
-    z-index: 1000;
-    height: 40px;
-
-    a {
-        color: white;
-        text-align: center;
-        padding: 0 20px;
-        text-decoration: none;
-    }
-
-    a:hover {
-        background-color: #ddd;
-        color: black;
     }
 }
