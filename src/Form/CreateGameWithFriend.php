@@ -11,7 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
-class GameCreationType extends AbstractType
+class CreateGameWithFriend extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {

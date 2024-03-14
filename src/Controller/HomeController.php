@@ -8,24 +8,41 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Doctrine\ORM\EntityManagerInterface;
 
-use App\Form\GameCreationType;
+use App\Form\CreateGameWithFriend;
+use App\Form\CreateGameRandom;
 use App\Entity;
 
 class HomeController extends AbstractController
 {
     public function index(Request $request, EntityManagerInterface $entityManager)
     {
-        $form = $this->createForm(GameCreationType::class);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
+        $formWithFriend = $this->createForm(CreateGameWithFriend::class);
+        $formWithFriend->handleRequest($request);
+        if ($formWithFriend->isSubmitted() && $formWithFriend->isValid()) {
+            $data = $formWithFriend->getData();
+            $data['type'] = 'with-friend'; // Game type is with friend, set it
 
             $url = time().bin2hex(random_bytes(10));
             $gameId = $this->createNewGame($url, $data, $entityManager);
 
             $session = new Session();
-            // $session->start();
+            $session->set('gameDatas', [
+                'gameCreator' => true,
+                'id' => $gameId,
+            ]);
+
+            return $this->redirectToRoute('game', ['url' => $url]);
+        }
+
+        $formRandom = $this->createForm(CreateGameRandom::class);
+        $formRandom->handleRequest($request);
+        if ($formRandom->isSubmitted() && $formRandom->isValid()) {
+            $data = $formRandom->getData();
+
+            $url = time().bin2hex(random_bytes(10));
+            $gameId = $this->createNewGame($url, $data, $entityManager);
+
+            $session = new Session();
             $session->set('gameDatas', [
                 'gameCreator' => true,
                 'id' => $gameId,
@@ -35,7 +52,8 @@ class HomeController extends AbstractController
         }
 
         return $this->render('index.html.twig', [
-            'form' => $form->createView(),
+            'formWithFriend' => $formWithFriend->createView(),
+            'formRandom' => $formRandom->createView(),
         ]);
     }
 
@@ -51,6 +69,7 @@ class HomeController extends AbstractController
         $gameEntity->setTime($data['timePerPlayer'] * 60);
         $gameEntity->setDateInsert($dateTimeNow);
         $gameEntity->setStatus('begining');
+        $gameEntity->setType($data['type']);
         $entityManager->persist($gameEntity);
         // EOF create game
 

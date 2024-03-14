@@ -48,6 +48,9 @@ class Game
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $pgn = null;
 
+    #[ORM\Column(length: 100)]
+    private ?string $type = null;
+
     public function __construct()
     {
         $this->moves = new ArrayCollection();
@@ -223,6 +226,18 @@ class Game
     public function setPgn(?string $pgn): static
     {
         $this->pgn = $pgn;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
 
         return $this;
     }
