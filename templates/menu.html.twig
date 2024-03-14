@@ -1,0 +1,37 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ path('index') }}">{{ app.request.host }}</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarColor01">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('index') }}">Accueil</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Jouer
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <li><a class="dropdown-item" href="{{ path('index') }}?game=create-random-game">Créer une partie</a></li>
+                        <li><a class="dropdown-item" href="{{ path('index') }}?game=create-friend-game">Jouer avec un ami</a></li>
+                        <li><a class="dropdown-item" href="{{ path('index') }}?game=create-computer-game">Jouer contre l'ordinateur</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('watch') }}">Regarder</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('contact') }}">Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="{{ path('about') }}" tabindex="-1" aria-disabled="true">À propos</a>
+                </li>
+            </ul>
+            <div class="d-flex">
+                <a class="btn btn-outline-light" href="{{ path('login') }}">Connexion</a>
+            </div>
+        </div>
+    </div>
+</nav>

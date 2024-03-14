@@ -214,3 +214,13 @@
     overflow-y: auto;
     overflow-x: hidden;
 }
+
+.create-game-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    button {
+        align-self: stretch;
+    }
+}

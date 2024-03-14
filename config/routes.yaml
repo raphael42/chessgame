@@ -6,6 +6,22 @@ game:
     path: game/{url}
     controller: App\Controller\GameController::gamefunction
 
+watch:
+    path: watch
+    controller: App\Controller\WatchController::watchfunction
+
+contact:
+    path: contact
+    controller: App\Controller\ContactController::contactfunction
+
+about:
+    path: about
+    controller: App\Controller\AboutController::aboutfunction
+
+login:
+    path: login
+    controller: App\Controller\LoginController::loginfunction
+
 controllers:
     resource:
         path: ../src/Controller/
