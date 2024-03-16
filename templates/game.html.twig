@@ -142,7 +142,7 @@
                     <div class="col-3 btn history-button" id="history-end"><i class="bi bi-chevron-double-right"></i></div>
                 </div>
 
-                <div id="playerturn-start" class="{{ game.status != 'begining' ? 'd-none' }}">
+                <div id="playerturn-start" class="{{ game.status not in ['begining', 'waiting-players'] ? 'd-none' }}">
                    <p>
                         {% if player.color == 'w' or player.color == 'white' %}
                             Vous jouez avec les blancs.<br>

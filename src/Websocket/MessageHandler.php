@@ -46,10 +46,38 @@ class MessageHandler implements MessageComponentInterface
         }
 
         // Get the query params send in the websocket url
-        $request = $conn->httpRequest;
-        $uri = $request->getUri();
-        $queryString = $uri->getQuery();
+        $queryString = $conn->httpRequest->getUri()->getQuery();
+        $path = $conn->httpRequest->getUri()->getPath();
         parse_str($queryString, $queryParams);
+
+        dump($path);
+
+        // Client connected from home page, attach the connection and send a message with the list of games in waiting
+        if ($path === '/home') {
+            // Get all randoms games waiting
+            $games = $this->em->getRepository(Entity\Game::class)->findBy([
+                'type' => 'random',
+                'status' => 'waiting-player',
+            ]);
+
+            foreach ($games as $oneGame) {
+                // Get players too
+                $player = $this->em->getRepository(Entity\Player::class)->findBy([
+                    'game' => $oneGame,
+                    'game_creator' => false,
+                ]);
+            }
+
+            dump($games);
+
+            // $msg = [
+
+            // ];
+            // $conn->send($msg);
+
+            $this->connections->attach($conn);
+            return;
+        }
 
         // Save this as var to have easy access
         $idGame = $queryParams['idGame'];

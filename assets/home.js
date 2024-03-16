@@ -1,6 +1,8 @@
 import $ from 'jquery';
 require('bootstrap');
 
+const socket = new WebSocket('ws://localhost:3001/home');
+
 $(function() {
     var fenSplit = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
     var fenSplitPieces = fenSplit.split('/');

@@ -35,6 +35,9 @@ class GameController extends AbstractController
             $session->set('gameDatas', $gameSession);
         }
 
+        // Use a variable to flush only one time
+        $flushNeeded = false;
+
         // The current player is the game creator
         if (isset($gameSession['gameCreator']) && $gameSession['gameCreator'] === true) {
             $player = $entityManager->getRepository(Entity\Player::class)->findOneBy([
@@ -54,7 +57,8 @@ class GameController extends AbstractController
                 $player->setIp($_SERVER['REMOTE_ADDR']);
                 $player->setUserAgent($_SERVER['HTTP_USER_AGENT']);
                 $entityManager->persist($player);
-                $entityManager->flush();
+
+                $flushNeeded = true;
 
                 // Set the playerType session the value of the player color
                 $gameSession['playerType'] = $playerType;
@@ -80,7 +84,8 @@ class GameController extends AbstractController
                 $player->setIp($_SERVER['REMOTE_ADDR']);
                 $player->setUserAgent($_SERVER['HTTP_USER_AGENT']);
                 $entityManager->persist($player);
-                $entityManager->flush();
+
+                $flushNeeded = true;
             } else { // Infos already saved in DB, check playerType session. If not exist or not the player color, it's a spectator
                 if (empty($gameSession) || !isset($gameSession['id']) || is_null($gameSession['id']) || $gameSession['id'] !== $game->getId() || !isset($gameSession['playerType'])) { // No playerType session, it's a spectator
                     $gameSession['playerType'] = 'spectator';
@@ -113,6 +118,16 @@ class GameController extends AbstractController
             if ($oneMove->getPlayer()->getColor() === 'black') {
                 $arrMovesForHtml[$oneMove->getMoveNumber()]['san_black'] = $oneMove->getSan();
             }
+        }
+
+        // Game status is waiting players and we get the ip of the two players, then set begining status
+        if ($game->getStatus() === 'waiting-player' && $player->getIp() !== null && $opponent->getIp() !== null) {
+            $game->setStatus('begining');
+            $flushNeeded = true;
+        }
+
+        if ($flushNeeded) {
+            $entityManager->flush();
         }
 
         return $this->render('game.html.twig', [

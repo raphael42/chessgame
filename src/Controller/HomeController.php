@@ -68,7 +68,7 @@ class HomeController extends AbstractController
         $gameEntity->setIncrement($data['secondsIncrement']);
         $gameEntity->setTime($data['timePerPlayer'] * 60);
         $gameEntity->setDateInsert($dateTimeNow);
-        $gameEntity->setStatus('begining');
+        $gameEntity->setStatus('waiting-player');
         $gameEntity->setType($data['type']);
         $entityManager->persist($gameEntity);
         // EOF create game
