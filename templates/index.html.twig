@@ -3,6 +3,7 @@
 {% block javascripts %}
     <script>
         const PIECESIMGURL = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
+        const GAMEURL = "{{ path('game', {'url': 'TOREPLACE'}) }}";
     </script>
 
     {{ encore_entry_link_tags('homeJs') }}
@@ -15,7 +16,17 @@
 {% block body %}
     <div class="row">
         <div class="col-lg-3 col-md-12 col-sm-12">
-            {# section partie en cours #}
+            <table class="table table-striped table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Joueur</th>
+                        <th>Temps</th>
+                        <th>Mode</th>
+                    </tr>
+                </thead>
+                <tbody class="tbody-waiting-games">
+                </tbody>
+            </table>
         </div>
         <div class="col-lg-6 col-md-8 col-sm-12">
             <div id="board">

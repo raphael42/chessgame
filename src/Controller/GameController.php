@@ -121,9 +121,16 @@ class GameController extends AbstractController
         }
 
         // Game status is waiting players and we get the ip of the two players, then set begining status
+        $gameUnavailable = false; // Use to remove from homepage the game from waiting list
         if ($game->getStatus() === 'waiting-player' && $player->getIp() !== null && $opponent->getIp() !== null) {
             $game->setStatus('begining');
+            $entityManager->persist($game);
             $flushNeeded = true;
+
+            // Only if random. Later for ranked too
+            if ($game->getType() === 'random') {
+                $gameUnavailable = true;
+            }
         }
 
         if ($flushNeeded) {
@@ -138,6 +145,7 @@ class GameController extends AbstractController
             'arrMovesForHtml' => $arrMovesForHtml,
             'messages' => $messages,
             'playerType' => $playerType,
+            'gameUnavailable' => $gameUnavailable,
         ]);
     }
 }

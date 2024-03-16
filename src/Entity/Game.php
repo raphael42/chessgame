@@ -51,6 +51,9 @@ class Game
     #[ORM\Column(length: 100)]
     private ?string $type = null;
 
+    #[ORM\Column(length: 20)]
+    private ?string $creator_color_chose = null;
+
     public function __construct()
     {
         $this->moves = new ArrayCollection();
@@ -238,6 +241,18 @@ class Game
     public function setType(string $type): static
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    public function getCreatorColorChose(): ?string
+    {
+        return $this->creator_color_chose;
+    }
+
+    public function setCreatorColorChose(string $creator_color_chose): static
+    {
+        $this->creator_color_chose = $creator_color_chose;
 
         return $this;
     }

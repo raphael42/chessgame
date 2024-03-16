@@ -70,6 +70,7 @@ class HomeController extends AbstractController
         $gameEntity->setDateInsert($dateTimeNow);
         $gameEntity->setStatus('waiting-player');
         $gameEntity->setType($data['type']);
+        $gameEntity->setCreatorColorChose($data['color']);
         $entityManager->persist($gameEntity);
         // EOF create game
 

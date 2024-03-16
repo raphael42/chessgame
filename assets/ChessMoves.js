@@ -41,17 +41,6 @@ if (GAMESTATUS !== 'finished') {
 $(function() {
     socket.addEventListener('open', function(e) {
         console.log('open', e);
-
-        // try {
-        //     socket.send(JSON.stringify({
-        //         'method': 'connection',
-        //         'idGame': IDGAME,
-        //         'color': (PLAYERCOLOR === 'white') ? 'w' : 'b',
-        //         'playerType': PLAYERTYPE,
-        //     }));
-        // } catch (error) {
-        //     console.log('Socket error', error);
-        // }
     });
 
     socket.addEventListener('message', function(e) {
@@ -552,6 +541,32 @@ $(function() {
     socket.addEventListener('error', function(e) {
         console.log('error', e);
     });
+
+    // The game is random or ranked and has now two player. Send to socket that the game is not available anymore
+    if (GAMEUNAVAILABLE) {
+        if (socket.readyState) {
+            try {
+                socket.send(JSON.stringify({
+                    'method': 'unavailable',
+                    'idGame': IDGAME,
+                }));
+            } catch (error) {
+                console.log('Socket error', error);
+            }
+        } else {
+            // TODO : use async / await function for this one
+            setTimeout(() => {
+                try {
+                    socket.send(JSON.stringify({
+                        'method': 'unavailable',
+                        'idGame': IDGAME,
+                    }));
+                } catch (error) {
+                    console.log('Socket error', error);
+                }
+            }, 2000);
+        }
+    }
 
     $('#board').off().on('click', '.chess-table', function() {
         // If player is watching history, disable the possibility to move

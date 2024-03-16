@@ -224,3 +224,15 @@
         align-self: stretch;
     }
 }
+
+.tbody-waiting-games {
+    .join-game {
+        cursor: pointer;
+
+        &.disabled {
+            // background-color: grey;
+            cursor: not-allowed;
+            opacity: 0.4;
+        }
+    }
+}
