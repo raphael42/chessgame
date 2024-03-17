@@ -125,8 +125,6 @@ class MessageHandler implements MessageComponentInterface
 
         $this->connections->attach($conn);
 
-        dump($this->gameEntity[$idGame]);
-
         // The game that has been created is random and waiting for a player, send the information to the users connected in the homepage
         if ($queryParams['gameType'] === 'random' && $queryParams['gameStatus'] === 'waiting-player') {
             $color = $this->gameEntity[$idGame]->getCreatorColorChose();
@@ -212,7 +210,6 @@ class MessageHandler implements MessageComponentInterface
 
         // Game is random or ranked and is joined by 2 players, it is not available anymore. Send info to users connected in homepage
         if (isset($msgArray['method']) && $msgArray['method'] === 'unavailable') {
-            dump($msgArray);
             foreach ($this->connections as $connection) {
                 if ($connection->httpRequest->getUri()->getPath() === '/home') {
                     $msg = json_encode([

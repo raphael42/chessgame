@@ -236,3 +236,13 @@
         }
     }
 }
+
+.contact-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    i {
+        font-size: 5rem;
+    }
+}
