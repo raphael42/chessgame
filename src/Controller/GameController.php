@@ -18,7 +18,6 @@ class GameController extends AbstractController
         ]);
 
         $idGame = $game->getId();
-        $gameStatus = $game->getStatus();
 
         $session = new Session();
         $session->start();
@@ -139,13 +138,14 @@ class GameController extends AbstractController
 
         return $this->render('game.html.twig', [
             'game' => $game,
-            'gameStatus' => $gameStatus,
+            'gameStatus' => $game->getStatus(),
             'player' => $player,
             'opponent' => $opponent,
             'arrMovesForHtml' => $arrMovesForHtml,
             'messages' => $messages,
             'playerType' => $playerType,
             'gameUnavailable' => $gameUnavailable,
+            'gameType' => $game->getType(),
         ]);
     }
 }

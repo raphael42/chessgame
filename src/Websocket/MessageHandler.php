@@ -121,9 +121,6 @@ class MessageHandler implements MessageComponentInterface
         // Game not saved in the websocket yet, save it
         if (!isset($this->gameEntity[$idGame])) {
             $this->fillClassVars($idGame);
-        } else {
-            $this->em->getUnitOfWork()->clear(Entity\Game::class); // Refresh the game gameEntity, need the status bellow
-            $this->gameEntity[$idGame] = $this->em->getRepository(Entity\Game::class)->find($idGame);
         }
 
         $this->connections->attach($conn);
@@ -131,7 +128,7 @@ class MessageHandler implements MessageComponentInterface
         dump($this->gameEntity[$idGame]);
 
         // The game that has been created is random and waiting for a player, send the information to the users connected in the homepage
-        if ($this->gameEntity[$idGame]->getType() === 'random' && $this->gameEntity[$idGame]->getStatus() === 'waiting-player') {
+        if ($queryParams['gameType'] === 'random' && $queryParams['gameStatus'] === 'waiting-player') {
             $color = $this->gameEntity[$idGame]->getCreatorColorChose();
             if ($color === 'white' || $color === 'w') { // If game creator chose white, you will play with black
                 $color = 'black';

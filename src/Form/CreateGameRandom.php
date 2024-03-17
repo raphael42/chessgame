@@ -23,6 +23,12 @@ class CreateGameRandom extends AbstractType
                     'Classé' => 'ranked',
                 ),
                 'expanded' => true,
+                'choice_attr' => function($choice, $key, $value) {
+                    if ($value == 'ranked') {
+                        return ['disabled' => 'disabled']; // Disable rankeds for now
+                    }
+                    return []; // If no ranked, do nothing
+                },
             ])
             ->add('color', ChoiceType::class, [
                 'label' => 'Choisissez votre couleur',

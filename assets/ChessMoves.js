@@ -12,7 +12,15 @@ if (PGN !== null) {
     chess.loadPgn(PGN);
 }
 
-const socket = new WebSocket('ws://localhost:3001/game?idGame=' + IDGAME + '&playerType=' + PLAYERTYPE + '&color=' + PLAYERCOLOR.charAt(0));
+// For better visibility, set the socket params in JSON format and transform it to queryString with a function
+const queryString = jsonToQueryString({
+    idGame: IDGAME,
+    playerType: PLAYERTYPE,
+    color: PLAYERCOLOR.charAt(0),
+    gameType: GAMETYPE,
+    gameStatus: GAMESTATUS,
+});
+const socket = new WebSocket('ws://localhost:3001/game?' + queryString);
 
 var turn = null;
 var times, timer;
@@ -41,6 +49,18 @@ if (GAMESTATUS !== 'finished') {
 $(function() {
     socket.addEventListener('open', function(e) {
         console.log('open', e);
+
+        // Socket is open and the game is random or ranked and has now two player. Send to socket that the game is not available anymore
+        if (GAMEUNAVAILABLE) {
+            try {
+                socket.send(JSON.stringify({
+                    'method': 'unavailable',
+                    'idGame': IDGAME,
+                }));
+            } catch (error) {
+                console.log('Socket error', error);
+            }
+        }
     });
 
     socket.addEventListener('message', function(e) {
@@ -541,32 +561,6 @@ $(function() {
     socket.addEventListener('error', function(e) {
         console.log('error', e);
     });
-
-    // The game is random or ranked and has now two player. Send to socket that the game is not available anymore
-    if (GAMEUNAVAILABLE) {
-        if (socket.readyState) {
-            try {
-                socket.send(JSON.stringify({
-                    'method': 'unavailable',
-                    'idGame': IDGAME,
-                }));
-            } catch (error) {
-                console.log('Socket error', error);
-            }
-        } else {
-            // TODO : use async / await function for this one
-            setTimeout(() => {
-                try {
-                    socket.send(JSON.stringify({
-                        'method': 'unavailable',
-                        'idGame': IDGAME,
-                    }));
-                } catch (error) {
-                    console.log('Socket error', error);
-                }
-            }, 2000);
-        }
-    }
 
     $('#board').off().on('click', '.chess-table', function() {
         // If player is watching history, disable the possibility to move
@@ -1651,4 +1645,10 @@ function gameIsOver(status, playerWinner, endReason) {
     }
 
     $('.piece.' + PLAYERCOLOR).draggable('destroy');
+}
+
+function jsonToQueryString(json) {
+    return Object.entries(json)
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+        .join('&');
 }

@@ -104,6 +104,15 @@ $(function() {
     }
     // EOF fill the show chessboard
 
+    // Click on menu btn create Game
+    let url = new URL(window.location.href);
+    if (url.searchParams.get('game') === 'create-random-game') {
+        $('#game-random-modal').modal('show');
+    }
+    if (url.searchParams.get('game') === 'create-friend-game') {
+        $('#game-with-friend-modal').modal('show');
+    }
+
     $('.tbody-waiting-games').off().on('click', '.join-game', function() {
         // Element is disabled, return and do not redirect
         if ($(this).hasClass('disabled')) {
