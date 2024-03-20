@@ -3,6 +3,14 @@
 {% block title %}{{ app.request.host }} | Contactez-moi{% endblock %}
 
 {% block body %}
+    {% if status == 'send' %}
+        <div class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill me-2" style="font-size:1.5rem"></i>
+            <div>
+                Votre message a bien été envoyé. Merci !
+            </div>
+        </div>
+    {% endif %}
     <div class="text-center">
         <h1>Contactez-moi !</h1>
         <p>Vous souhaitez signaler un bug, le développement d'une nouvelle fonctionnalité ou me contacter pour tout autre sujet, vous pouvez m'écrire via ce formulaire.</p>
