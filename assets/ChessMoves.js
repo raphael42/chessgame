@@ -27,26 +27,35 @@ var times, timer;
 placePieces(FEN);
 setUpTimer();
 
-if (chess.inCheck() === true) {
-    let kingposition = null;
-    if (chess.turn() === 'w') {
-        kingposition = getKingPosition(FEN, 'white');
-    } else {
-        kingposition = getKingPosition(FEN, 'black');
-    }
-
-    $('#' + kingposition).addClass('in-check');
-}
-
-if (GAMESTATUS !== 'finished') {
-    if (chess.turn() === 'w' && (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white')) {
-        $('#title').html('C\'est votre tour ! | ' + SERVERNAME);
-    } else {
-        $('#title').html('En attente de l\'adversaire | ' + SERVERNAME);
-    }
-}
-
 $(function() {
+    if (chess.inCheck() === true) {
+        let kingposition = null;
+        if (chess.turn() === 'w') {
+            kingposition = getKingPosition(FEN, 'white');
+        } else {
+            kingposition = getKingPosition(FEN, 'black');
+        }
+
+        $('#' + kingposition).addClass('in-check');
+    }
+
+    if (GAMESTATUS !== 'finished') {
+        if (chess.turn() === 'w' && (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white')) {
+            $('#title').html('C\'est votre tour ! | ' + SERVERNAME);
+        } else {
+            $('#title').html('En attente de l\'adversaire | ' + SERVERNAME);
+        }
+    }
+
+    // Game with friend and the player is waiting for his opponent, display the modal
+    if (GAMESTATUS === 'waiting-players' && GAMETYPE === 'with-friend') {
+        $('#begining-with-friend-modal').modal('show');
+    } else { // If not ...
+        if ($('#begining-with-friend-modal').hasClass('show')) { // ... and the modal is open, close it
+            $('#begining-with-friend-modal').modal('hide');
+        }
+    }
+
     socket.addEventListener('open', function(e) {
         console.log('open', e);
 
