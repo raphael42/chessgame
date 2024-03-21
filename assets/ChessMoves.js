@@ -56,6 +56,15 @@ $(function() {
         }
     }
 
+    // Random game and the player is waiting for his opponent, display the modal
+    if (GAMESTATUS === 'waiting-player' && GAMETYPE === 'random') {
+        $('#begining-random-modal').modal('show');
+    } else { // If not ...
+        if ($('#begining-random-modal').hasClass('show')) { // ... and the modal is open, close it
+            $('#begining-random-modal').modal('hide');
+        }
+    }
+
     socket.addEventListener('open', function(e) {
         console.log('open', e);
 
@@ -158,6 +167,10 @@ $(function() {
 
                 if ($('#begining-with-friend-modal').hasClass('show')) {
                     $('#begining-with-friend-modal').modal('hide');
+                }
+
+                if ($('#begining-random-modal').hasClass('show')) {
+                    $('#begining-random-modal').modal('hide');
                 }
             } else {
                 $('.opponent-connect').html('KO');

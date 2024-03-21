@@ -190,7 +190,7 @@
     <div class="modal fade" id="begining-with-friend-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="beginingWithFriendLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-header">
-                <h5 class="modal-title" id="staticBackdropLabel">jouer avec un ami</h5>
+                <h5 class="modal-title">Jouer avec un ami</h5>
             </div>
             <div class="modal-content">
                 <div class="modal-body">
@@ -199,6 +199,22 @@
                         Pour inviter quelqu'un à jouer, donnez-lui ce lien :<br>
                         {{ app.request.uri }}<br>
                         La première personne qui cliquera sur ce lien jouera avec vous.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="begining-random-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="beginingRandomLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h5 class="modal-title">Partie aléatoire</h5>
+            </div>
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div>{{ game.time / 60 }} + {{ game.increment }}</div>
+                    <div>
+                        En attente d'un adversaire.
                     </div>
                 </div>
             </div>
