@@ -48,7 +48,7 @@ $(function() {
     }
 
     // Game with friend and the player is waiting for his opponent, display the modal
-    if (GAMESTATUS === 'waiting-players' && GAMETYPE === 'with-friend') {
+    if (GAMESTATUS === 'waiting-player' && GAMETYPE === 'with-friend') {
         $('#begining-with-friend-modal').modal('show');
     } else { // If not ...
         if ($('#begining-with-friend-modal').hasClass('show')) { // ... and the modal is open, close it
@@ -155,6 +155,10 @@ $(function() {
             // update opponent status
             if (opponentFound) {
                 $('.opponent-connect').html('OK');
+
+                if ($('#begining-with-friend-modal').hasClass('show')) {
+                    $('#begining-with-friend-modal').modal('hide');
+                }
             } else {
                 $('.opponent-connect').html('KO');
             }

@@ -144,7 +144,7 @@
                     <div class="col-3 btn history-button" id="history-end"><i class="bi bi-chevron-double-right"></i></div>
                 </div>
 
-                <div id="playerturn-start" class="{{ game.status not in ['begining', 'waiting-players'] ? 'd-none' }}">
+                <div id="playerturn-start" class="{{ game.status not in ['begining', 'waiting-player'] ? 'd-none' }}">
                    <p>
                         {% if player.color == 'w' or player.color == 'white' %}
                             Vous jouez avec les blancs.<br>
@@ -191,14 +191,13 @@
         <div class="modal-dialog">
             <div class="modal-header">
                 <h5 class="modal-title" id="staticBackdropLabel">jouer avec un ami</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-content">
                 <div class="modal-body">
                     <div>{{ game.time / 60 }} + {{ game.increment }}</div>
                     <div>
                         Pour inviter quelqu'un à jouer, donnez-lui ce lien :<br>
-                        {{ dump(app.request.uri) }}<br>
+                        {{ app.request.uri }}<br>
                         La première personne qui cliquera sur ce lien jouera avec vous.
                     </div>
                 </div>
