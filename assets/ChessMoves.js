@@ -588,6 +588,16 @@ $(function() {
         console.log('error', e);
     });
 
+    $('#copy-game-link').on('click', function() {
+        let url = window.location.href;
+        navigator.clipboard.writeText(url).then(function() {
+            $('#copy-game-link').html('<i class="bi bi-check-lg"></i>');
+        }).catch(function(error) { // If copy fails, should never happen but we never know ...
+            $('#copy-game-link').html('<i class="bi bi-x-lg"></i>');
+            console.error('Copy error :', error);
+        });
+    })
+
     $('#board').off().on('click', '.chess-table', function() {
         // If player is watching history, disable the possibility to move
         if (HISTORYINVIEW) {
