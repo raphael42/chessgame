@@ -10,8 +10,8 @@
         const OPPONENTTIMELEFT = '{{ opponent.timeLeft }}';
         const IDGAME = '{{ game.id }}';
         const PIECESIMGURL = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
-        var GAMESTATUS = '{{ gameStatus }}'; // This one can be updated in JS, so don't set up as const
-        const GAMETYPE = '{{ gameType }}';
+        var GAMESTATUS = '{{ game.status }}'; // This one can be updated in JS, so don't set up as const
+        const GAMETYPE = '{{ game.type }}';
         const PLAYERTYPE = '{{ playerType }}';
         const SERVERNAME = '{{ app.request.host }}';
         const GAMEUNAVAILABLE = '{{ gameUnavailable }}';
@@ -144,7 +144,7 @@
                     <div class="col-3 btn history-button" id="history-end"><i class="bi bi-chevron-double-right"></i></div>
                 </div>
 
-                <div id="playerturn-start" class="{{ game.status not in ['begining', 'waiting-players'] ? 'd-none' }}">
+                <div id="playerturn-start" class="{{ game.status not in ['begining', 'waiting-player'] ? 'd-none' }}">
                    <p>
                         {% if player.color == 'w' or player.color == 'white' %}
                             Vous jouez avec les blancs.<br>
@@ -186,4 +186,43 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="begining-with-friend-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="beginingWithFriendLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Jouer avec un ami</h5>
+                </div>
+                <div class="modal-body">
+                    <div>{{ game.time / 60 }} + {{ game.increment }}</div>
+                    <div>
+                        Pour inviter quelqu'un à jouer, donnez-lui ce lien :<br>
+                        <p style="display:flex">
+                            <input type="text" class="form-control" value="{{ app.request.uri }}" readonly>
+                            <button id="copy-game-link" class="btn btn-primary" title="Copier le lien"><i class="bi bi-link-45deg"></i></button>
+                        </p>
+                        La première personne qui cliquera sur ce lien jouera avec vous.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="begining-random-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="beginingRandomLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Partie aléatoire</h5>
+                </div>
+                <div class="modal-body">
+                    <div>{{ game.time / 60 }} + {{ game.increment }}</div>
+                    <div>
+                        En attente d'un adversaire.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

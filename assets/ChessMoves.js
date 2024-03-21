@@ -27,26 +27,44 @@ var times, timer;
 placePieces(FEN);
 setUpTimer();
 
-if (chess.inCheck() === true) {
-    let kingposition = null;
-    if (chess.turn() === 'w') {
-        kingposition = getKingPosition(FEN, 'white');
-    } else {
-        kingposition = getKingPosition(FEN, 'black');
-    }
-
-    $('#' + kingposition).addClass('in-check');
-}
-
-if (GAMESTATUS !== 'finished') {
-    if (chess.turn() === 'w' && (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white')) {
-        $('#title').html('C\'est votre tour ! | ' + SERVERNAME);
-    } else {
-        $('#title').html('En attente de l\'adversaire | ' + SERVERNAME);
-    }
-}
-
 $(function() {
+    if (chess.inCheck() === true) {
+        let kingposition = null;
+        if (chess.turn() === 'w') {
+            kingposition = getKingPosition(FEN, 'white');
+        } else {
+            kingposition = getKingPosition(FEN, 'black');
+        }
+
+        $('#' + kingposition).addClass('in-check');
+    }
+
+    if (GAMESTATUS !== 'finished') {
+        if (chess.turn() === 'w' && (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white')) {
+            $('#title').html('C\'est votre tour ! | ' + SERVERNAME);
+        } else {
+            $('#title').html('En attente de l\'adversaire | ' + SERVERNAME);
+        }
+    }
+
+    // Game with friend and the player is waiting for his opponent, display the modal
+    if (GAMESTATUS === 'waiting-player' && GAMETYPE === 'with-friend') {
+        $('#begining-with-friend-modal').modal('show');
+    } else { // If not ...
+        if ($('#begining-with-friend-modal').hasClass('show')) { // ... and the modal is open, close it
+            $('#begining-with-friend-modal').modal('hide');
+        }
+    }
+
+    // Random game and the player is waiting for his opponent, display the modal
+    if (GAMESTATUS === 'waiting-player' && GAMETYPE === 'random') {
+        $('#begining-random-modal').modal('show');
+    } else { // If not ...
+        if ($('#begining-random-modal').hasClass('show')) { // ... and the modal is open, close it
+            $('#begining-random-modal').modal('hide');
+        }
+    }
+
     socket.addEventListener('open', function(e) {
         console.log('open', e);
 
@@ -146,6 +164,14 @@ $(function() {
             // update opponent status
             if (opponentFound) {
                 $('.opponent-connect').html('OK');
+
+                if ($('#begining-with-friend-modal').hasClass('show')) {
+                    $('#begining-with-friend-modal').modal('hide');
+                }
+
+                if ($('#begining-random-modal').hasClass('show')) {
+                    $('#begining-random-modal').modal('hide');
+                }
             } else {
                 $('.opponent-connect').html('KO');
             }
@@ -561,6 +587,16 @@ $(function() {
     socket.addEventListener('error', function(e) {
         console.log('error', e);
     });
+
+    $('#copy-game-link').on('click', function() {
+        let url = window.location.href;
+        navigator.clipboard.writeText(url).then(function() {
+            $('#copy-game-link').html('<i class="bi bi-check-lg"></i>');
+        }).catch(function(error) { // If copy fails, should never happen but we never know ...
+            $('#copy-game-link').html('<i class="bi bi-x-lg"></i>');
+            console.error('Copy error :', error);
+        });
+    })
 
     $('#board').off().on('click', '.chess-table', function() {
         // If player is watching history, disable the possibility to move

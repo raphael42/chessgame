@@ -138,14 +138,12 @@ class GameController extends AbstractController
 
         return $this->render('game.html.twig', [
             'game' => $game,
-            'gameStatus' => $game->getStatus(),
             'player' => $player,
             'opponent' => $opponent,
             'arrMovesForHtml' => $arrMovesForHtml,
             'messages' => $messages,
             'playerType' => $playerType,
             'gameUnavailable' => $gameUnavailable,
-            'gameType' => $game->getType(),
         ]);
     }
 }
