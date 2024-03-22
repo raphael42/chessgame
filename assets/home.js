@@ -19,7 +19,7 @@ $(function() {
                 let html = '' +
                 '<tr class="join-game" data-id="' + socketMessage.arrGames[i].id + '" data-url="' + socketMessage.arrGames[i].url + '">' +
                     '<td>' + socketMessage.arrGames[i].color + '</td>' +
-                    '<td>' + socketMessage.arrGames[i].time + ' + ' + socketMessage.arrGames[i].increment + '</td>' +
+                    '<td>' + (socketMessage.arrGames[i].time / 60) + ' + ' + socketMessage.arrGames[i].increment + '</td>' +
                     '<td>Amical</td>' +
                 '</tr>';
 
@@ -32,7 +32,7 @@ $(function() {
             let html = '' +
             '<tr class="join-game" data-id="' + socketMessage.id + '" data-url="' + socketMessage.url + '">' +
                 '<td>' + socketMessage.color + '</td>' +
-                '<td>' + socketMessage.time + ' + ' + socketMessage.increment + '</td>' +
+                '<td>' + (socketMessage.time / 60) + ' + ' + socketMessage.increment + '</td>' +
                 '<td>Amical</td>' +
             '</tr>';
 

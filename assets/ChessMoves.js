@@ -519,19 +519,35 @@ $(function() {
 
         $('#playerturn-start').addClass('d-none');
 
-        $('.history-section').find('.last-history-move').removeClass('last-history-move');
-        if (socketMessage.color === 'w') { // White play, make a new line
-            let htmlMoveRow = '' +
-            '<div class="row move-' + socketMessage.moveNumber + ' text-center">' +
-                '<div class="col-4">' + socketMessage.moveNumber + '</div>' +
-                '<div id="move-san-w-' + socketMessage.moveNumber + '" class="col-4 one-move-san last-history-move">' + socketMessage.san + '</div>' +
-                '<div id="move-san-b-' + socketMessage.moveNumber + '" class="col-4 one-move-san"></div>' +
-            '</div>';
+        // Not history in view, manage the last-history-move
+        if (!HISTORYINVIEW) {
+            $('.history-section').find('.last-history-move').removeClass('last-history-move');
+            if (socketMessage.color === 'w') { // White play, make a new line
+                let htmlMoveRow = '' +
+                '<div class="row move-' + socketMessage.moveNumber + ' text-center">' +
+                    '<div class="col-4">' + socketMessage.moveNumber + '</div>' +
+                    '<div id="move-san-w-' + socketMessage.moveNumber + '" class="col-4 one-move-san last-history-move">' + socketMessage.san + '</div>' +
+                    '<div id="move-san-b-' + socketMessage.moveNumber + '" class="col-4 one-move-san"></div>' +
+                '</div>';
 
-            $('.history-section').append(htmlMoveRow);
-        } else { // Black play, complete the line
-            $('.history-section').find('#move-san-b-' + socketMessage.moveNumber).html(socketMessage.san);
-            $('.history-section').find('#move-san-b-' + socketMessage.moveNumber).addClass('last-history-move');
+                $('.history-section').append(htmlMoveRow);
+            } else { // Black play, complete the line
+                $('.history-section').find('#move-san-b-' + socketMessage.moveNumber).html(socketMessage.san);
+                $('.history-section').find('#move-san-b-' + socketMessage.moveNumber).addClass('last-history-move');
+            }
+        } else { // If history in move, do not manage last-history-move
+            if (socketMessage.color === 'w') { // White play, make a new line
+                let htmlMoveRow = '' +
+                '<div class="row move-' + socketMessage.moveNumber + ' text-center">' +
+                    '<div class="col-4">' + socketMessage.moveNumber + '</div>' +
+                    '<div id="move-san-w-' + socketMessage.moveNumber + '" class="col-4 one-move-san">' + socketMessage.san + '</div>' +
+                    '<div id="move-san-b-' + socketMessage.moveNumber + '" class="col-4 one-move-san"></div>' +
+                '</div>';
+
+                $('.history-section').append(htmlMoveRow);
+            } else { // Black play, complete the line
+                $('.history-section').find('#move-san-b-' + socketMessage.moveNumber).html(socketMessage.san);
+            }
         }
 
         if (!HISTORYINVIEW) {

@@ -508,7 +508,7 @@ class MessageHandler implements MessageComponentInterface
             $this->gameEntity[$idGame]->setFen($msgArray['after']); // Save the new fen
             $this->gameEntity[$idGame]->setPgn($msgArray['pgn']); // Save the new pgn
             // Game still in begining status, update it
-            if ($this->gameEntity[$idGame]->getStatus() === 'begining') {
+            if (in_array($this->gameEntity[$idGame]->getStatus(), ['waiting-player', 'begining'])) {
                 $this->gameEntity[$idGame]->setStatus('inplay');
             }
             $this->em->persist($this->gameEntity[$idGame]);
