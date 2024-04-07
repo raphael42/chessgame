@@ -51,7 +51,7 @@ class MessageHandler implements MessageComponentInterface
         parse_str($queryString, $queryParams);
 
         // Client connected from home page, attach the connection and send a message with the list of games in waiting
-        if ($path === '/home') {
+        if ($path === '/ws/home') {
             // Get all randoms games waiting
             $games = $this->em->getRepository(Entity\Game::class)->findBy([
                 'type' => 'random',
@@ -136,7 +136,7 @@ class MessageHandler implements MessageComponentInterface
             // ELSE : game creator chose random, keep the value from DB, it is 'random'. We know the color but do not display it to the user
 
             foreach ($this->connections as $connection) {
-                if ($connection->httpRequest->getUri()->getPath() === '/home') {
+                if ($connection->httpRequest->getUri()->getPath() === '/ws/home') {
                     $msg = json_encode([
                         'method' => 'new_game',
                         'id' => $idGame,
@@ -211,7 +211,7 @@ class MessageHandler implements MessageComponentInterface
         // Game is random or ranked and is joined by 2 players, it is not available anymore. Send info to users connected in homepage
         if (isset($msgArray['method']) && $msgArray['method'] === 'unavailable') {
             foreach ($this->connections as $connection) {
-                if ($connection->httpRequest->getUri()->getPath() === '/home') {
+                if ($connection->httpRequest->getUri()->getPath() === '/ws/home') {
                     $msg = json_encode([
                         'method' => 'remove_game',
                         'id' => $idGame,

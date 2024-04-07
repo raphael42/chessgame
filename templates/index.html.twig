@@ -4,6 +4,7 @@
     <script>
         const PIECESIMGURL = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
         const GAMEURL = "{{ path('game', {'url': 'TOREPLACE'}) }}";
+        const SERVERNAME = '{{ app.request.host }}';
     </script>
 
     {{ encore_entry_link_tags('homeJs') }}
