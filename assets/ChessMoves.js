@@ -21,7 +21,11 @@ const queryString = jsonToQueryString({
     gameStatus: GAMESTATUS,
 });
 
-const socket = new WebSocket('wss://' + SERVERNAME + ':3001/ws/game?' + queryString);
+if (ENV === 'dev') {
+    var socket = new WebSocket('ws://' + SERVERNAME + ':3001/ws/game?' + queryString);
+} else {
+    var socket = new WebSocket('wss://' + SERVERNAME + ':3001/ws/game?' + queryString);
+}
 
 var turn = null;
 var times, timer;

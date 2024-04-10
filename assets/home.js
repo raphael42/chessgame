@@ -1,7 +1,11 @@
 import $ from 'jquery';
 require('bootstrap');
 
-const socket = new WebSocket('wss://' + SERVERNAME + ':3001/ws/home');
+if (ENV === 'dev') {
+    var socket = new WebSocket('ws://' + SERVERNAME + ':3001/ws/home');
+} else {
+    var socket = new WebSocket('wss://' + SERVERNAME + ':3001/ws/home');
+}
 
 $(function() {
     socket.addEventListener('open', function(e) {
