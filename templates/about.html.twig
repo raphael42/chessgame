@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ app.request.host }} | À propos{% endblock %}
+
+{% block body %}
+    <div class="text-center">
+        <h1>À propos de {{ app.request.host }}</h1>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <p>
+                Bienvenue sur {{ app.request.host }}, une plateforme de jeu d'échecs gratuite, où stratégie et tactique se rencontrent pour une expérience de jeu captivante et stimulante. Ici, vous pouvez jouez avec un ami, contre un adversaire aléatoire et bientot contre un ordinateur de plusieurs niveaux.
+            </p>
+
+            <p>
+                Je me présente en quelques mots. Je suis un développeur back-end avec plusieurs années d'expériences et je voulais faire un projet à la fois fun et techniquement challengent pour améliorer continuellement mes compétences et me tenir à jours des technologies récentes que l'on a pas toujours le temps de voir en milieu professionnel. Le front n'étant pas mon point fort, ni mon domaine préféré, je m'excuse par avance pour le design minimaliste.
+            </p>
+
+            J'améliore continuellement ce site afin d'ajouter des fonctionnalités supplémentaires. Voici la roadmap :
+            <ul>
+                <li>Jouer contre l'ordinateur</li>
+                <li>Section "Regarder" afin de pouvoir regarder les parties des autres joueurs en live</li>
+                <li>Création du compte client afin d'enregistrer l'historique des parties des joueurs</li>
+                <li>Création des "ranked" et d'un système de Elo</li>
+            </ul>
+            Lien vers mon <a target="_blank" href="https://github.com/raphael42/chessgame">github</a>
+        </div>
+    </div>
+{% endblock %}
