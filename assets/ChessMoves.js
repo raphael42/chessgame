@@ -353,7 +353,7 @@ $(function() {
         // Move
         // Display the move only if the player is not watching the history
         if (!HISTORYINVIEW) {
-            if (socketMessage.flag === 'k') { // king side castelling
+            if (socketMessage.flags === 'k') { // king side castelling
                 if (socketMessage.color === 'w') {
                     var img = $('#h1').html();
                     $('#h1').empty();
@@ -365,7 +365,7 @@ $(function() {
                     $('#f8').html(img);
                     setupDraggable('#f8 img');
                 }
-            } else if (socketMessage.flag === 'q') { // queen side castelling
+            } else if (socketMessage.flags === 'q') { // queen side castelling
                 if (socketMessage.color === 'w') {
                     var img = $('#a1').html();
                     $('#a1').empty();
@@ -377,7 +377,7 @@ $(function() {
                     $('#d8').html(img);
                     setupDraggable('#d8 img');
                 }
-            } else if (socketMessage.flag === 'e') { // en passant capture
+            } else if (socketMessage.flags === 'e') { // en passant capture
                 if (socketMessage.color === 'w') {
                     var tmp = (socketMessage.to).split('');
                     var idPawnCatured = tmp[0] + (parseInt(tmp[1]) - 1);
