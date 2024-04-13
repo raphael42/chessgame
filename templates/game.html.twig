@@ -15,6 +15,7 @@
         const PLAYERTYPE = '{{ playerType }}';
         const SERVERNAME = '{{ app.request.host }}';
         const GAMEUNAVAILABLE = '{{ gameUnavailable }}';
+        const ENV = '{{ env }}';
     </script>
 
     {{ encore_entry_link_tags('gameJs') }}
@@ -127,9 +128,6 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-12 col-sm-12">
-            <div>
-                <span id="timer-opponent"></span>
-            </div>
             <div>
                 <span id="timer-opponent"></span>
             </div>
