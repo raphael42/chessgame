@@ -15,6 +15,10 @@ if (PGN !== null) {
 var turn = null;
 placePieces(FEN);
 
+if (PLAYERCOLOR === 'b' || PLAYERCOLOR === 'black') {
+    AiPlay();
+}
+
 $(function() {
     if (chess.inCheck() === true) {
         let kingposition = null;
@@ -47,9 +51,9 @@ $(function() {
         }
 
         // If the user is a spectator, disable moves
-        if (PLAYERTYPE === 'spectator') {
-            return;
-        }
+        // if (PLAYERTYPE === 'spectator') {
+        //     return;
+        // }
 
         const self = $(this);
         var idSquare = $(this).attr('id');
@@ -131,13 +135,12 @@ $(function() {
             var tmp3 = squareIdTo.split('');
             var idToLine = parseInt(tmp3[1]);
 
-            var promotion = null;
             if (squareFromInfos !== null && squareFromInfos['type'] === 'p' && ((PLAYERCOLOR === 'white' && squareFromInfos['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (PLAYERCOLOR === 'black' && squareFromInfos['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
                 promotionPiece(function(promotion) {
                     processMove(squareIdFrom, squareIdTo, promotion);
                 });
             } else {
-                processMove(squareIdFrom, squareIdTo, promotion);
+                processMove(squareIdFrom, squareIdTo, null);
             }
         }
 
@@ -149,7 +152,8 @@ $(function() {
     });
 
     // Set up draggable only if the game is not finished and the player is not a spectator
-    if (GAMESTATUS !== 'finished' && PLAYERTYPE !== 'spectator') {
+    // if (GAMESTATUS !== 'finished' && PLAYERTYPE !== 'spectator') {
+    if (GAMESTATUS !== 'finished') {
         setupDraggable();
     }
 
@@ -161,9 +165,9 @@ $(function() {
             }
 
             // If the user is a spectator, disable moves
-            if (PLAYERTYPE === 'spectator') {
-                return;
-            }
+            // if (PLAYERTYPE === 'spectator') {
+            //     return;
+            // }
 
             // If player is watching history, disable the possibility to move
             if (HISTORYINVIEW) {
@@ -400,9 +404,9 @@ $(function() {
         }
 
         // If the user is a spectator, disable resigns
-        if (PLAYERTYPE === 'spectator') {
-            return;
-        }
+        // if (PLAYERTYPE === 'spectator') {
+        //     return;
+        // }
 
         let isConfirmed = confirm('Vous êtes sur le point d\'abandonner. Voulez-vous confirmer ?');
         if (!isConfirmed) {
@@ -423,26 +427,10 @@ $(function() {
         }
 
         // If the user is a spectator, disable takeback
-        if (PLAYERTYPE === 'spectator') {
-            return;
-        }
+        // if (PLAYERTYPE === 'spectator') {
+        //     return;
+        // }
 
-        $('#takeback-display').removeClass('d-none');
-
-        let message = 'Takeback sent';
-        $('.tchat').append('<div>' + message + '</div>');
-    });
-    $('#takeback-no').on('click', function() {
-        $('#takeback-opponent-response').addClass('d-none');
-
-        let message = 'Takeback declined';
-        $('.tchat').append('<div>' + message + '</div>');
-    });
-    $('#takeback-yes').on('click', function() {
-        $('#takeback-opponent-response').addClass('d-none');
-
-        let message = 'Takeback accepted';
-        $('.tchat').append('<div>' + message + '</div>');
 
         // PLAYERCOLOR in one letter format
         let playerColorFormat = 'b';
@@ -519,9 +507,9 @@ function setupDraggable(jQueryElement) {
             }
 
             // If the user is a spectator, disable moves
-            if (PLAYERTYPE === 'spectator') {
-                return;
-            }
+            // if (PLAYERTYPE === 'spectator') {
+            //     return;
+            // }
 
             $('.chess-table.clicked-premove').removeClass('clicked-premove');
             const self = $(this);
@@ -718,6 +706,16 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
 
         $('#title').html('En attente de l\'adversaire | ' + SERVERNAME);
 
+        // Computer play
+        let playerTurn = chess.turn(); // Which player turn it is
+        if (
+            GAMESTATUS !== 'finished' &&
+            ((PLAYERCOLOR === 'white' && playerTurn === 'b') ||
+            (PLAYERCOLOR === 'black' && playerTurn === 'w'))
+        ) { // And isnnot finished, it's not the player turn, then make an AI move
+            AiPlay();
+        }
+
         return true;
     }
 
@@ -726,6 +724,28 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
     });
 
     return false;
+}
+
+function AiPlay() {
+    setTimeout(() => {
+        let allPossibleMoves = chess.moves({
+            verbose: true
+        });
+
+        const randomElement = allPossibleMoves[Math.floor(Math.random() * allPossibleMoves.length)];
+
+        var tmp2 = (randomElement.from).split('');
+        var idFromLine = parseInt(tmp2[1]);
+
+        var tmp3 = (randomElement.to).split('');
+        var idToLine = parseInt(tmp3[1]);
+
+        if (randomElement['piece'] === 'p' && ((randomElement === 'w' && idFromLine === 7 && idToLine === 8) || (randomElement === 'b' && idFromLine === 2 && idToLine === 1))) {
+            processMove(randomElement.from, randomElement.to, 'q'); // Always queen as promotion for now
+        } else {
+            processMove(randomElement.from, randomElement.to, null);
+        }
+    }, '2000');
 }
 
 function promotionPiece(callback) {

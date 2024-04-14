@@ -37,18 +37,18 @@ class GameAIController extends AbstractController
         // Use a variable to flush only one time
         $flushNeeded = false;
 
+        $player = $entityManager->getRepository(Entity\Player::class)->findOneBy([
+            'game_creator' => true,
+            'game' => $game->getId(),
+        ]);
+
+        $opponent = $entityManager->getRepository(Entity\Player::class)->findOneBy([
+            'game_creator' => false,
+            'game' => $game->getId(),
+        ]);
+
         // The current player is the game creator
         if (isset($gameSession['gameCreator']) && $gameSession['gameCreator'] === true) {
-            $player = $entityManager->getRepository(Entity\Player::class)->findOneBy([
-                'game_creator' => true,
-                'game' => $game->getId(),
-            ]);
-
-            $opponent = $entityManager->getRepository(Entity\Player::class)->findOneBy([
-                'game_creator' => false,
-                'game' => $game->getId(),
-            ]);
-
             $playerType = $player->getColor();
 
             // Player infos not save in DB, it's the first connexion of the game creator player. Save infos to DB, and save the playerType in session
@@ -63,41 +63,40 @@ class GameAIController extends AbstractController
                 $gameSession['playerType'] = $playerType;
                 $session->set('gameDatas', $gameSession);
             }
-        } else { // The current player is not the game creator. It's even the opponent, or a spectator
-            $player = $entityManager->getRepository(Entity\Player::class)->findOneBy([
-                'game_creator' => false,
-                'game' => $game->getId(),
-            ]);
 
-            $opponent = $entityManager->getRepository(Entity\Player::class)->findOneBy([
-                'game_creator' => true,
-                'game' => $game->getId(),
-            ]);
-
-            // Player infos not save in DB, it's the first connexion of the opponent of the game creator player. Save infos to DB, and save the playerType in session
-            if ($player->getIp() === null) {
-                $playerType = $player->getColor();
-                $gameSession['playerType'] = $playerType;
-                $session->set('gameDatas', $gameSession);
-
-                $player->setIp($_SERVER['REMOTE_ADDR']);
-                $player->setUserAgent($_SERVER['HTTP_USER_AGENT']);
-                $entityManager->persist($player);
+            // Opponent is AI, set the server ip in opponent IP
+            if ($opponent->getIp() === null) {
+                $opponent->setIp($_SERVER['SERVER_ADDR'] ?? '127.0.0.1');
+                $opponent->setUserAgent($_SERVER['HTTP_USER_AGENT']);
+                $entityManager->persist($opponent);
 
                 $flushNeeded = true;
-            } else { // Infos already saved in DB, check playerType session. If not exist or not the player color, it's a spectator
-                if (empty($gameSession) || !isset($gameSession['id']) || is_null($gameSession['id']) || $gameSession['id'] !== $game->getId() || !isset($gameSession['playerType'])) { // No playerType session, it's a spectator
-                    $gameSession['playerType'] = 'spectator';
-                    $session->set('gameDatas', $gameSession);
-
-                    // If spectator, the main player is white
-                    $tmpPlayer = $player;
-                    $player = $opponent;
-                    $opponent = $tmpPlayer;
-                } elseif (!empty($gameSession) && !is_null($gameSession['id']) && $gameSession['id'] === $game->getId() && $gameSession['playerType'] === $player->getColor()) { // Opponent of the game creator player is reconnecting
-                    $playerType = $player->getColor();
-                }
             }
+        } else { // The current player is not the game creator. It's a spectator. Do it later
+            // Player infos not save in DB, it's the first connexion of the opponent of the game creator player. Save infos to DB, and save the playerType in session
+            // if ($player->getIp() === null) {
+            //     $playerType = $player->getColor();
+            //     $gameSession['playerType'] = $playerType;
+            //     $session->set('gameDatas', $gameSession);
+
+            //     $player->setIp($_SERVER['SERVER_ADDR']);
+            //     $player->setUserAgent($_SERVER['HTTP_USER_AGENT']);
+            //     $entityManager->persist($player);
+
+            //     $flushNeeded = true;
+            // } else { // Infos already saved in DB, check playerType session. If not exist or not the player color, it's a spectator
+            //     if (empty($gameSession) || !isset($gameSession['id']) || is_null($gameSession['id']) || $gameSession['id'] !== $game->getId() || !isset($gameSession['playerType'])) { // No playerType session, it's a spectator
+            //         $gameSession['playerType'] = 'spectator';
+            //         $session->set('gameDatas', $gameSession);
+
+            //         // If spectator, the main player is white
+            //         $tmpPlayer = $player;
+            //         $player = $opponent;
+            //         $opponent = $tmpPlayer;
+            //     } elseif (!empty($gameSession) && !is_null($gameSession['id']) && $gameSession['id'] === $game->getId() && $gameSession['playerType'] === $player->getColor()) { // Opponent of the game creator player is reconnecting
+            //         $playerType = $player->getColor();
+            //     }
+            // }
         }
 
         $moves = $entityManager->getRepository(Entity\Moves::class)->findBy([
@@ -120,16 +119,10 @@ class GameAIController extends AbstractController
         }
 
         // Game status is waiting players and we get the ip of the two players, then set begining status
-        $gameUnavailable = false; // Use to remove from homepage the game from waiting list
         if ($game->getStatus() === 'waiting-player' && $player->getIp() !== null && $opponent->getIp() !== null) {
             $game->setStatus('begining');
             $entityManager->persist($game);
             $flushNeeded = true;
-
-            // Only if random. Later for ranked too
-            if ($game->getType() === 'random') {
-                $gameUnavailable = true;
-            }
         }
 
         if ($flushNeeded) {
@@ -143,7 +136,6 @@ class GameAIController extends AbstractController
             'arrMovesForHtml' => $arrMovesForHtml,
             'messages' => $messages,
             'playerType' => $playerType,
-            'gameUnavailable' => $gameUnavailable,
         ]);
     }
 }
