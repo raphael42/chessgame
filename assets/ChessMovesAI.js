@@ -16,7 +16,7 @@ var turn = null;
 placePieces(FEN);
 
 if (PLAYERCOLOR === 'b' || PLAYERCOLOR === 'black') {
-    AiPlay();
+    AiPlay(true);
 }
 
 $(function() {
@@ -438,22 +438,7 @@ $(function() {
             playerColorFormat = 'w';
         }
 
-        // If it's the PLAYERCOLOR turn, we need to remove only one move, the opponent one
-        // If it's NOT the PLAYERCOLOR turn, we need to remove 2 moves, the PLAYERCOLOR turn and next the opponent one
-        let onlyOne = true;
-        if (chess.turn() !== playerColorFormat) {
-            let undo = chess.undo();
-            let fenSplit = undo.before.split(' ');
-            let moveNumber = fenSplit[5];
-            // If undo a white move, remove an history line
-            if (undo.color === 'w') {
-                $('.move-' + moveNumber).remove();
-            } else { // If undo a black move, empty the move history square
-                $('#move-san-b-' + moveNumber).empty();
-            }
-            onlyOne = false;
-        }
-
+        // Always revert 2 moves, the computer one, and the player one
         let undo = chess.undo();
         let fenSplit = undo.before.split(' ');
         let moveNumber = fenSplit[5];
@@ -462,6 +447,16 @@ $(function() {
             $('.move-' + moveNumber).remove();
         } else { // If undo a black move, empty the move history square
             $('#move-san-b-' + moveNumber).empty();
+        }
+
+        let undo2 = chess.undo();
+        let fenSplit2 = undo2.before.split(' ');
+        let moveNumber2 = fenSplit2[5];
+        // If undo a white move, remove an history line
+        if (undo2.color === 'w') {
+            $('.move-' + moveNumber2).remove();
+        } else { // If undo a black move, empty the move history square
+            $('#move-san-b-' + moveNumber2).empty();
         }
 
         placePieces(chess.fen());
@@ -712,8 +707,8 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             GAMESTATUS !== 'finished' &&
             ((PLAYERCOLOR === 'white' && playerTurn === 'b') ||
             (PLAYERCOLOR === 'black' && playerTurn === 'w'))
-        ) { // And isnnot finished, it's not the player turn, then make an AI move
-            AiPlay();
+        ) { // And is not finished, it's not the player turn, then make an AI move
+            AiPlay(false);
         }
 
         return true;
@@ -726,8 +721,14 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
     return false;
 }
 
-function AiPlay() {
+function AiPlay(firstMove) {
+    $('#takeback').prop('disabled', true);
+
     setTimeout(() => {
+        if (GAMESTATUS === 'finished') {
+            return;
+        }
+
         let allPossibleMoves = chess.moves({
             verbose: true
         });
@@ -744,6 +745,11 @@ function AiPlay() {
             processMove(randomElement.from, randomElement.to, 'q'); // Always queen as promotion for now
         } else {
             processMove(randomElement.from, randomElement.to, null);
+        }
+
+        // If it's the first move, let the takeback disabled
+        if (!firstMove) {
+            $('#takeback').prop('disabled', false);
         }
     }, '2000');
 }
