@@ -15,6 +15,47 @@ if (PGN !== null) {
 var turn = null;
 placePieces(FEN);
 
+// if (PLAYERCOLOR === 'b' || PLAYERCOLOR === 'black') {
+//     var piecesAiRanking = {
+//         'p': 10,
+//         'n': 30,
+//         'b': 30,
+//         'r': 50,
+//         'q': 90,
+//         'k': 900,
+//         'P': -10,
+//         'N': -30,
+//         'B': -30,
+//         'R': -50,
+//         'Q': -90,
+//         'K': -900,
+//     };
+// } else {
+//     var piecesAiRanking = {
+//         'p': -10,
+//         'n': -30,
+//         'b': -30,
+//         'r': -50,
+//         'q': -90,
+//         'k': -900,
+//         'P': 10,
+//         'N': 30,
+//         'B': 30,
+//         'R': 50,
+//         'Q': 90,
+//         'K': 900,
+//     };
+// }
+
+var piecesAiRanking = {
+    'p': 10,
+    'n': 30,
+    'b': 30,
+    'r': 50,
+    'q': 90,
+    'k': 900,
+};
+
 if (PLAYERCOLOR === 'b' || PLAYERCOLOR === 'black') {
     AiPlay(true);
 }
@@ -733,7 +774,26 @@ function AiPlay(firstMove) {
             verbose: true
         });
 
-        const randomElement = allPossibleMoves[Math.floor(Math.random() * allPossibleMoves.length)];
+        var scores = calculateScore(chess.fen());
+        console.log(scores);
+
+        var captureBestMove = null;
+        for (let i in allPossibleMoves) {
+            if (typeof allPossibleMoves[i].captured !== 'undefined') { // One possible move can capture a piece
+                if (captureBestMove !== null) { // We already have a move that will capture a piece
+                    if (piecesAiRanking[allPossibleMoves[i].captured] > piecesAiRanking[captureBestMove.captured]) { // We found a better move
+                        captureBestMove = allPossibleMoves[i];
+                    }
+                } else { // No move yet, save this move
+                    captureBestMove = allPossibleMoves[i];
+                }
+            }
+        }
+
+        var randomElement = allPossibleMoves[Math.floor(Math.random() * allPossibleMoves.length)];
+        if (captureBestMove !== null) {
+            randomElement = captureBestMove;
+        }
 
         var tmp2 = (randomElement.from).split('');
         var idFromLine = parseInt(tmp2[1]);
@@ -752,6 +812,27 @@ function AiPlay(firstMove) {
             $('#takeback').prop('disabled', false);
         }
     }, '2000');
+}
+
+function calculateScore(fen) {
+    let fenSplit = fen.split(' ');
+    let fenPieces = fenSplit[0];
+    let fenPiecesSplit = fenPieces.split('');
+
+    let whiteScore = 0;
+    let blackScore = 0;
+    for (let i in fenPiecesSplit) { // Each characters of the fen
+        if (typeof piecesAiRanking[fenPiecesSplit[i]] !== 'undefined') { // Piece found in the ranking array, add to the black
+            blackScore += piecesAiRanking[fenPiecesSplit[i]];
+        } else if (typeof piecesAiRanking[fenPiecesSplit[i].toLowerCase()] !== 'undefined') { // Piece was not found previously, found now while lowercasing, it's an uppercase piece (white)
+            whiteScore += piecesAiRanking[fenPiecesSplit[i].toLowerCase()];
+        }
+    }
+
+    return {
+        'w': whiteScore - blackScore,
+        'b': blackScore - whiteScore,
+    };
 }
 
 function promotionPiece(callback) {
