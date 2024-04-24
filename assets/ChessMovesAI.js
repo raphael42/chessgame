@@ -6,6 +6,10 @@ require('bootstrap');
 
 var HISTORYINDEX = null;
 var HISTORYINVIEW = false;
+var AICOLOR = 'w';
+if (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white') {
+    AICOLOR = 'b';
+}
 
 const chess = new Chess(FEN);
 if (PGN !== null) {
@@ -765,34 +769,97 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
 function AiPlay(firstMove) {
     $('#takeback').prop('disabled', true);
 
-    setTimeout(() => {
+    // setTimeout(() => {
         if (GAMESTATUS === 'finished') {
             return;
         }
+
+        var actualPlayerScore = calculateScore(chess.fen(), PLAYERCOLOR.charAt(0));
+        console.log(actualPlayerScore);
 
         let allPossibleMoves = chess.moves({
             verbose: true
         });
 
-        var scores = calculateScore(chess.fen());
-        console.log(scores);
+        var saveScoresAI = [];
 
-        var captureBestMove = null;
+        // Test all the AI possible moves
         for (let i in allPossibleMoves) {
-            if (typeof allPossibleMoves[i].captured !== 'undefined') { // One possible move can capture a piece
-                if (captureBestMove !== null) { // We already have a move that will capture a piece
-                    if (piecesAiRanking[allPossibleMoves[i].captured] > piecesAiRanking[captureBestMove.captured]) { // We found a better move
-                        captureBestMove = allPossibleMoves[i];
-                    }
-                } else { // No move yet, save this move
-                    captureBestMove = allPossibleMoves[i];
+            // Create new Chess object for the tests
+            const chessTest = new Chess(chess.fen());
+
+            // Process one test
+            chessTest.move({
+                from: allPossibleMoves[i].from,
+                to: allPossibleMoves[i].to,
+            });
+
+            // After one AI move, try again all the player possible moves
+            let allPossibleMovesPlayer = chessTest.moves({
+                verbose: true
+            });
+
+            var saveScoresPlayer = [];
+            for (let j in allPossibleMovesPlayer) {
+                const chessTest2 = new Chess(chessTest.fen());
+                chessTest2.move({
+                    from: allPossibleMovesPlayer[j].from,
+                    to: allPossibleMovesPlayer[j].to,
+                });
+
+                var playerScoreAfterMove = calculateScore(chessTest2.fen(), PLAYERCOLOR.charAt(0));
+                saveScoresPlayer.push({
+                    'from': allPossibleMovesPlayer[j].from,
+                    'to': allPossibleMovesPlayer[j].to,
+                    'playerScore': playerScoreAfterMove,
+                });
+            }
+
+            let bestPlayerMove = null;
+            for (let j in saveScoresPlayer) {
+                if (bestPlayerMove === null || saveScoresPlayer[j].playerScore > bestPlayerMove.playerScore) {
+                    bestPlayerMove = saveScoresPlayer[j];
                 }
+            }
+
+            // Push in an array the AI move and the best score the player can get after that.
+            // We choose next the worst "best score" the player after the AI move to select it
+            saveScoresAI.push({
+                'from': allPossibleMoves[i].from,
+                'to': allPossibleMoves[i].to,
+                'piece': allPossibleMoves[i].piece,
+                'color': allPossibleMoves[i].color,
+                'playerScore': bestPlayerMove.playerScore,
+            });
+
+
+
+            // // Calculate the score of the move tested. Save the score after that
+            // var aiScoreAfterMove = calculateScore(chessTest.fen(), AICOLOR);
+
+            // // Save in an array the move made and the score we get
+            // saveScoresAI.push({
+            //     'from': allPossibleMoves[i].from,
+            //     'to': allPossibleMoves[i].to,
+            //     'score': aiScoreAfterMove,
+            // });
+        }
+
+        console.log(saveScoresAI);
+
+        // Best move for the AI is the one where the best player move after the AI one is the lowest
+        let bestMove = null;
+        for (let i in saveScoresAI) {
+            if (bestMove === null || saveScoresAI[i].playerScore < bestMove.playerScore) {
+                bestMove = saveScoresAI[i];
             }
         }
 
+        console.log(bestMove);
+
         var randomElement = allPossibleMoves[Math.floor(Math.random() * allPossibleMoves.length)];
-        if (captureBestMove !== null) {
-            randomElement = captureBestMove;
+        if (bestMove !== null) {
+            randomElement = bestMove;
         }
 
         var tmp2 = (randomElement.from).split('');
@@ -801,7 +868,7 @@ function AiPlay(firstMove) {
         var tmp3 = (randomElement.to).split('');
         var idToLine = parseInt(tmp3[1]);
 
-        if (randomElement['piece'] === 'p' && ((randomElement === 'w' && idFromLine === 7 && idToLine === 8) || (randomElement === 'b' && idFromLine === 2 && idToLine === 1))) {
+        if (randomElement.piece === 'p' && ((randomElement.color === 'w' && idFromLine === 7 && idToLine === 8) || (randomElement.color === 'b' && idFromLine === 2 && idToLine === 1))) {
             processMove(randomElement.from, randomElement.to, 'q'); // Always queen as promotion for now
         } else {
             processMove(randomElement.from, randomElement.to, null);
@@ -811,10 +878,10 @@ function AiPlay(firstMove) {
         if (!firstMove) {
             $('#takeback').prop('disabled', false);
         }
-    }, '2000');
+    // }, '2000');
 }
 
-function calculateScore(fen) {
+function calculateScore(fen, color) {
     let fenSplit = fen.split(' ');
     let fenPieces = fenSplit[0];
     let fenPiecesSplit = fenPieces.split('');
@@ -827,6 +894,14 @@ function calculateScore(fen) {
         } else if (typeof piecesAiRanking[fenPiecesSplit[i].toLowerCase()] !== 'undefined') { // Piece was not found previously, found now while lowercasing, it's an uppercase piece (white)
             whiteScore += piecesAiRanking[fenPiecesSplit[i].toLowerCase()];
         }
+    }
+
+    if (color === 'w') {
+        return whiteScore - blackScore
+    }
+
+    if (color === 'b') {
+        return blackScore - whiteScore
     }
 
     return {
