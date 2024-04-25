@@ -822,6 +822,11 @@ function AiPlay(firstMove) {
                 }
             }
 
+            let isCheckMate = false;
+            if (bestPlayerMove === null && chessTest.isCheckmate() === true) {
+                isCheckMate = true;
+            }
+
             // Push in an array the AI move and the best score the player can get after that.
             // We choose next the worst "best score" the player after the AI move to select it
             saveScoresAI.push({
@@ -829,7 +834,7 @@ function AiPlay(firstMove) {
                 'to': allPossibleMoves[i].to,
                 'piece': allPossibleMoves[i].piece,
                 'color': allPossibleMoves[i].color,
-                'playerScore': bestPlayerMove.playerScore,
+                'playerScore': isCheckMate ? -900 : bestPlayerMove.playerScore,
             });
 
 
