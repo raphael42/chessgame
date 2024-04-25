@@ -769,121 +769,85 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
 function AiPlay(firstMove) {
     $('#takeback').prop('disabled', true);
 
-    // setTimeout(() => {
+    setTimeout(() => {
         if (GAMESTATUS === 'finished') {
             return;
         }
 
-        var actualPlayerScore = calculateScore(chess.fen(), PLAYERCOLOR.charAt(0));
-        console.log(actualPlayerScore);
-
-        let allPossibleMoves = chess.moves({
+        let aiPossibleMoves = chess.moves({
             verbose: true
         });
 
-        var saveScoresAI = [];
+        var bestAiMove = null;
 
         // Test all the AI possible moves
-        for (let i in allPossibleMoves) {
-            // Create new Chess object for the tests
-            const chessTest = new Chess(chess.fen());
+        for (let i in aiPossibleMoves) {
+            // Create new Chess object for the ai move
+            const chessAiMove = new Chess(chess.fen());
 
-            // Process one test
-            chessTest.move({
-                from: allPossibleMoves[i].from,
-                to: allPossibleMoves[i].to,
+            // Process one AI test move
+            chessAiMove.move({
+                from: aiPossibleMoves[i].from,
+                to: aiPossibleMoves[i].to,
             });
 
             // After one AI move, try again all the player possible moves
-            let allPossibleMovesPlayer = chessTest.moves({
+            let playerPossibleMoves = chessAiMove.moves({
                 verbose: true
             });
 
-            var saveScoresPlayer = [];
-            for (let j in allPossibleMovesPlayer) {
-                const chessTest2 = new Chess(chessTest.fen());
-                chessTest2.move({
-                    from: allPossibleMovesPlayer[j].from,
-                    to: allPossibleMovesPlayer[j].to,
+            var bestPlayerScore = null;
+            for (let j in playerPossibleMoves) {
+                const chessPlayerMove = new Chess(chessAiMove.fen());
+                chessPlayerMove.move({
+                    from: playerPossibleMoves[j].from,
+                    to: playerPossibleMoves[j].to,
                 });
 
-                var playerScoreAfterMove = calculateScore(chessTest2.fen(), PLAYERCOLOR.charAt(0));
-                saveScoresPlayer.push({
-                    'from': allPossibleMovesPlayer[j].from,
-                    'to': allPossibleMovesPlayer[j].to,
-                    'playerScore': playerScoreAfterMove,
-                });
-            }
+                var playerScoreAfterMove = calculateScore(chessPlayerMove.fen(), PLAYERCOLOR.charAt(0));
 
-            let bestPlayerMove = null;
-            for (let j in saveScoresPlayer) {
-                if (bestPlayerMove === null || saveScoresPlayer[j].playerScore > bestPlayerMove.playerScore) {
-                    bestPlayerMove = saveScoresPlayer[j];
+                // Save the best score the Player can get after the AI move
+                if (bestPlayerScore === null || playerScoreAfterMove > bestPlayerScore) {
+                    bestPlayerScore = playerScoreAfterMove;
                 }
             }
 
-            let isCheckMate = false;
-            if (bestPlayerMove === null && chessTest.isCheckmate() === true) {
-                isCheckMate = true;
+            // CheckMate after the AI move, set super low score to choose it
+            if (chessAiMove.isCheckmate() === true) {
+                bestPlayerScore = -900;
             }
 
-            // Push in an array the AI move and the best score the player can get after that.
-            // We choose next the worst "best score" the player after the AI move to select it
-            saveScoresAI.push({
-                'from': allPossibleMoves[i].from,
-                'to': allPossibleMoves[i].to,
-                'piece': allPossibleMoves[i].piece,
-                'color': allPossibleMoves[i].color,
-                'playerScore': isCheckMate ? -900 : bestPlayerMove.playerScore,
-            });
-
-
-
-            // // Calculate the score of the move tested. Save the score after that
-            // var aiScoreAfterMove = calculateScore(chessTest.fen(), AICOLOR);
-
-            // // Save in an array the move made and the score we get
-            // saveScoresAI.push({
-            //     'from': allPossibleMoves[i].from,
-            //     'to': allPossibleMoves[i].to,
-            //     'score': aiScoreAfterMove,
-            // });
-        }
-
-        console.log(saveScoresAI);
-
-        // Best move for the AI is the one where the best player move after the AI one is the lowest
-        let bestMove = null;
-        for (let i in saveScoresAI) {
-            if (bestMove === null || saveScoresAI[i].playerScore < bestMove.playerScore) {
-                bestMove = saveScoresAI[i];
+            // Choose the worst "best score" the player can get after the AI move.
+            if (bestAiMove === null || bestAiMove.playerScore > bestPlayerScore) {
+                bestAiMove = {
+                    'from': aiPossibleMoves[i].from,
+                    'to': aiPossibleMoves[i].to,
+                    'piece': aiPossibleMoves[i].piece,
+                    'color': aiPossibleMoves[i].color,
+                    'playerScore': bestPlayerScore,
+                };
             }
         }
 
-        console.log(bestMove);
+        // var randomElement = aiPossibleMoves[Math.floor(Math.random() * aiPossibleMoves.length)];
 
-        var randomElement = allPossibleMoves[Math.floor(Math.random() * allPossibleMoves.length)];
-        if (bestMove !== null) {
-            randomElement = bestMove;
-        }
-
-        var tmp2 = (randomElement.from).split('');
+        var tmp2 = (bestAiMove.from).split('');
         var idFromLine = parseInt(tmp2[1]);
 
-        var tmp3 = (randomElement.to).split('');
+        var tmp3 = (bestAiMove.to).split('');
         var idToLine = parseInt(tmp3[1]);
 
-        if (randomElement.piece === 'p' && ((randomElement.color === 'w' && idFromLine === 7 && idToLine === 8) || (randomElement.color === 'b' && idFromLine === 2 && idToLine === 1))) {
-            processMove(randomElement.from, randomElement.to, 'q'); // Always queen as promotion for now
+        if (bestAiMove.piece === 'p' && ((bestAiMove.color === 'w' && idFromLine === 7 && idToLine === 8) || (bestAiMove.color === 'b' && idFromLine === 2 && idToLine === 1))) {
+            processMove(bestAiMove.from, bestAiMove.to, 'q'); // Always queen as promotion for now
         } else {
-            processMove(randomElement.from, randomElement.to, null);
+            processMove(bestAiMove.from, bestAiMove.to, null);
         }
 
         // If it's the first move, let the takeback disabled
         if (!firstMove) {
             $('#takeback').prop('disabled', false);
         }
-    // }, '2000');
+    }, '500');
 }
 
 function calculateScore(fen, color) {
