@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 
 use App\Form\CreateGameWithFriend;
 use App\Form\CreateGameRandom;
+use App\Form\CreateGameAI;
 use App\Entity;
 
 class HomeController extends AbstractController
@@ -51,9 +52,31 @@ class HomeController extends AbstractController
             return $this->redirectToRoute('game', ['url' => $url]);
         }
 
+        $formAI = $this->createForm(CreateGameAI::class);
+        $formAI->handleRequest($request);
+        if ($formAI->isSubmitted() && $formAI->isValid()) {
+            $data = $formAI->getData();
+            $data['type'] = 'against-ai'; // Game type is against AI, set it
+
+            $data['timePerPlayer'] = null; // No time management, at least for now
+            $data['secondsIncrement'] = 0; // No increment, for now
+
+            $url = time().bin2hex(random_bytes(10));
+            $gameId = $this->createNewGame($url, $data, $entityManager);
+
+            $session = new Session();
+            $session->set('gameDatas', [
+                'gameCreator' => true,
+                'id' => $gameId,
+            ]);
+
+            return $this->redirectToRoute('gameAi', ['url' => $url]);
+        }
+
         return $this->render('index.html.twig', [
             'formWithFriend' => $formWithFriend->createView(),
             'formRandom' => $formRandom->createView(),
+            'formAI' => $formAI->createView(),
         ]);
     }
 
@@ -61,12 +84,14 @@ class HomeController extends AbstractController
     {
         $dateTimeNow = new \DateTime();
 
+        $timePerPlayer = isset($data['timePerPlayer']) ? $data['timePerPlayer'] * 60 : null;
+
         // BOF create game
         $gameEntity = new Entity\Game();
         $gameEntity->setUrl($url);
         $gameEntity->setFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
         $gameEntity->setIncrement($data['secondsIncrement']);
-        $gameEntity->setTime($data['timePerPlayer'] * 60);
+        $gameEntity->setTime($timePerPlayer);
         $gameEntity->setDateInsert($dateTimeNow);
         $gameEntity->setStatus('waiting-player');
         $gameEntity->setType($data['type']);
@@ -78,7 +103,7 @@ class HomeController extends AbstractController
         $playerCreatorEntity = new Entity\Player();
         $color = $data['color'];
         // $timePerPlayer = \DateTime::createFromFormat('H:i:s', '00:'.(string) $data['timePerPlayer'].':00');
-        $timePerPlayer = $data['timePerPlayer'] * 60;
+        $timePerPlayer = $timePerPlayer;
         if ($color === 'random') {
             $test = rand(0, 1);
             $color = ($test === 0) ? 'white' : 'black';

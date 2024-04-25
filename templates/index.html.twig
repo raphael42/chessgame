@@ -55,7 +55,7 @@
         <div class="col-lg-3 col-md-4 col-sm-12 create-game-section">
             <button class="btn-dark btn" type="button" data-bs-toggle="modal" data-bs-target="#game-random-modal">Créer une partie</button>
             <button class="btn-dark btn mb-3 mt-3" type="button" data-bs-toggle="modal" data-bs-target="#game-with-friend-modal">Jouer avec un ami</button>
-            <button class="btn-dark btn" disabled>Jouer contre l'ordinateur</button>
+            <button class="btn-dark btn" type="button" data-bs-toggle="modal" data-bs-target="#game-ai-modal">Jouer contre l'ordinateur</button>
         </div>
     </div>
 
@@ -89,4 +89,18 @@
         </div>
     </div>
 
+    <!-- Modal game against AI -->
+    <div class="modal fade" id="game-ai-modal" tabindex="-1" aria-labelledby="game-aoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Jouer contre l'ordinateur</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {{ form(formAI) }}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
