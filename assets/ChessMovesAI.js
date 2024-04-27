@@ -778,7 +778,8 @@ function AiPlay(firstMove) {
             verbose: true
         });
 
-        var bestAiMove = null;
+        var bestAiMove = [];
+        var bestSavePlayerScore = null;
 
         // Test all the AI possible moves
         for (let i in aiPossibleMoves) {
@@ -806,6 +807,11 @@ function AiPlay(firstMove) {
 
                 var playerScoreAfterMove = calculateScore(chessPlayerMove.fen(), PLAYERCOLOR.charAt(0));
 
+                // CheckMate after the Player move, set super hight score to not choose it later
+                if (chessPlayerMove.isCheckmate() === true) {
+                    playerScoreAfterMove = 900;
+                }
+
                 // Save the best score the Player can get after the AI move
                 if (bestPlayerScore === null || playerScoreAfterMove > bestPlayerScore) {
                     bestPlayerScore = playerScoreAfterMove;
@@ -817,30 +823,51 @@ function AiPlay(firstMove) {
                 bestPlayerScore = -900;
             }
 
-            // Choose the worst "best score" the player can get after the AI move.
-            if (bestAiMove === null || bestAiMove.playerScore > bestPlayerScore) {
-                bestAiMove = {
+            if (bestAiMove.length === 0) {
+                bestAiMove.push({
                     'from': aiPossibleMoves[i].from,
                     'to': aiPossibleMoves[i].to,
                     'piece': aiPossibleMoves[i].piece,
                     'color': aiPossibleMoves[i].color,
                     'playerScore': bestPlayerScore,
-                };
+                });
+                bestSavePlayerScore = bestPlayerScore;
+            } else { // Choose the worst "best score" the player can get after the AI move.
+                // Player score saved is higther than this one, empty the array
+                if (bestSavePlayerScore > bestPlayerScore) {
+                    bestSavePlayerScore = bestPlayerScore;
+                    bestAiMove = [];
+                    bestAiMove.push({
+                        'from': aiPossibleMoves[i].from,
+                        'to': aiPossibleMoves[i].to,
+                        'piece': aiPossibleMoves[i].piece,
+                        'color': aiPossibleMoves[i].color,
+                        'playerScore': bestPlayerScore,
+                    });
+                } else if (bestSavePlayerScore === bestPlayerScore) { // Score is equal, save it to the array to choose a random move after
+                    bestAiMove.push({
+                        'from': aiPossibleMoves[i].from,
+                        'to': aiPossibleMoves[i].to,
+                        'piece': aiPossibleMoves[i].piece,
+                        'color': aiPossibleMoves[i].color,
+                        'playerScore': bestPlayerScore,
+                    });
+                }
             }
         }
 
-        // var randomElement = aiPossibleMoves[Math.floor(Math.random() * aiPossibleMoves.length)];
+        var randomElement = bestAiMove[Math.floor(Math.random() * bestAiMove.length)];
 
-        var tmp2 = (bestAiMove.from).split('');
+        var tmp2 = (randomElement.from).split('');
         var idFromLine = parseInt(tmp2[1]);
 
-        var tmp3 = (bestAiMove.to).split('');
+        var tmp3 = (randomElement.to).split('');
         var idToLine = parseInt(tmp3[1]);
 
-        if (bestAiMove.piece === 'p' && ((bestAiMove.color === 'w' && idFromLine === 7 && idToLine === 8) || (bestAiMove.color === 'b' && idFromLine === 2 && idToLine === 1))) {
-            processMove(bestAiMove.from, bestAiMove.to, 'q'); // Always queen as promotion for now
+        if (randomElement.piece === 'p' && ((randomElement.color === 'w' && idFromLine === 7 && idToLine === 8) || (randomElement.color === 'b' && idFromLine === 2 && idToLine === 1))) {
+            processMove(randomElement.from, randomElement.to, 'q'); // Always queen as promotion for now
         } else {
-            processMove(bestAiMove.from, bestAiMove.to, null);
+            processMove(randomElement.from, randomElement.to, null);
         }
 
         // If it's the first move, let the takeback disabled
