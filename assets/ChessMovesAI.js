@@ -782,7 +782,7 @@ function AiPlay(firstMove) {
         var bestSavePlayerScore = null;
 
         // Test all the AI possible moves
-        for (let i in aiPossibleMoves) {
+        firstLoop:for (let i in aiPossibleMoves) {
             // Create new Chess object for the ai move
             const chessAiMove = new Chess(chess.fen());
 
@@ -810,6 +810,11 @@ function AiPlay(firstMove) {
                 // CheckMate after the Player move, set super hight score to not choose it later
                 if (chessPlayerMove.isCheckmate() === true) {
                     playerScoreAfterMove = 900;
+                }
+
+                // If the move the player can perform has highter score than the one actually saved, the move for the AI is worst so go next to make the script faster
+                if (bestSavePlayerScore !== null && bestSavePlayerScore < playerScoreAfterMove) {
+                    continue firstLoop;
                 }
 
                 // Save the best score the Player can get after the AI move
