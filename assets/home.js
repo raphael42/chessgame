@@ -116,6 +116,9 @@ $(function() {
     if (url.searchParams.get('game') === 'create-friend-game') {
         $('#game-with-friend-modal').modal('show');
     }
+    if (url.searchParams.get('game') === 'create-computer-game') {
+        $('#game-ai-modal').modal('show');
+    }
 
     $('.tbody-waiting-games').off().on('click', '.join-game', function() {
         // Element is disabled, return and do not redirect

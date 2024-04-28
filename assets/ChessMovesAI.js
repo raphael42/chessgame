@@ -920,6 +920,7 @@ function AiPlay(firstMove) {
             chessAiMove.move({
                 from: aiPossibleMoves[i].from,
                 to: aiPossibleMoves[i].to,
+                promotion: (typeof aiPossibleMoves[i].promotion !== 'undefined') ? 'q' : null, // Promotion always queen to make it simple
             });
 
             // After one AI move, try again all the player possible moves
@@ -933,6 +934,7 @@ function AiPlay(firstMove) {
                 chessPlayerMove.move({
                     from: playerPossibleMoves[j].from,
                     to: playerPossibleMoves[j].to,
+                    promotion: (typeof playerPossibleMoves[j].promotion !== 'undefined') ? 'q' : null, // Promotion always queen to make it simple
                 });
 
                 var playerScoreAfterMove = calculateScore(chessPlayerMove.fen(), PLAYERCOLOR.charAt(0));
