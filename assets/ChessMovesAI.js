@@ -752,34 +752,34 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             $('.in-check').removeClass('in-check');
         }
         if (moving.flags === 'k') { // king side castelling
-            if (PLAYERCOLOR === 'white') {
+            if (moving.color === 'w') {
                 var img = $('#h1').html();
                 $('#h1').empty();
                 $('#f1').html(img);
                 setupDraggable('#f1 img');
-            } else if (PLAYERCOLOR === 'black') {
+            } else if (moving.color === 'b') {
                 var img = $('#h8').html();
                 $('#h8').empty();
                 $('#f8').html(img);
                 setupDraggable('#f8 img');
             }
         } else if (moving.flags === 'q') { // queen side castelling
-            if (PLAYERCOLOR === 'white') {
+            if (moving.color === 'w') {
                 var img = $('#a1').html();
                 $('#a1').empty();
                 $('#d1').html(img);
                 setupDraggable('#d1 img');
-            } else if (PLAYERCOLOR === 'black') {
+            } else if (moving.color === 'b') {
                 var img = $('#a8').html();
                 $('#a8').empty();
                 $('#d8').html(img);
                 setupDraggable('#d8 img');
             }
         } else if (moving.flags === 'e') { // en passant capture
-            if (PLAYERCOLOR === 'white') {
+            if (moving.color === 'w') {
                 var tmp = (moving.to).split('');
                 var idPawnCatured = tmp[0] + (parseInt(tmp[1]) - 1);
-            } else if (PLAYERCOLOR === 'black') {
+            } else if (moving.color === 'b') {
                 var tmp = (moving.to).split('');
                 var idPawnCatured = tmp[0] + (parseInt(tmp[1]) + 1);
             }
@@ -794,10 +794,14 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         $('#' + squareIdFrom + ' img').detach().css({top: 0, left: 0}).appendTo('#' + squareIdTo);
 
         if (promotion !== null) {
+            let color = 'white';
+            if (moving.color === 'b') {
+                color = 'black';
+            }
             let src = PIECESIMGURL;
             src = src.replace('chessboard', piecesPromotion[promotion]);
-            src = src.replace('playerColor', PLAYERCOLOR);
-            $('#' + squareIdTo).html('<img class="piece ' + PLAYERCOLOR + '" src="' + src + '" alt>');
+            src = src.replace('playerColor', color);
+            $('#' + squareIdTo).html('<img class="piece ' + color + '" src="' + src + '" alt>');
             setupDraggable('#' + squareIdTo + ' img');
         }
 
@@ -834,7 +838,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                 } else {
                     lastMoveHistory['message'] = 'Black win ! White is checkmate';
                 }
-                gameIsOver('win', PLAYERCOLOR, lastMoveHistory['message']);
+                gameIsOver('win', moving.color, lastMoveHistory['message']);
             } else if (chess.isDraw()) {
                 lastMoveHistory['gameStatus'] = 'draw';
                 if (chess.isStalemate()) {
@@ -850,7 +854,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                     lastMoveHistory['gameReason'] = 'fiftyMoves';
                     lastMoveHistory['message'] = 'Draw ! Fifty moves without progressions';
                 }
-                gameIsOver('d', PLAYERCOLOR, lastMoveHistory['message']);
+                gameIsOver('d', moving.color, lastMoveHistory['message']);
             }
         }
 
@@ -1011,16 +1015,30 @@ function AiPlay(firstMove) {
 function calculateScore(fen, color) {
     let fenSplit = fen.split(' ');
     let fenPieces = fenSplit[0];
-    let fenPiecesSplit = fenPieces.split('');
+    let fenLinesSplit = fenPieces.split('/');
+
+    let column = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    let columnKey = 0;
+    let line = 8;
 
     let whiteScore = 0;
     let blackScore = 0;
-    for (let i in fenPiecesSplit) { // Each characters of the fen
-        if (typeof piecesAiRanking[fenPiecesSplit[i]] !== 'undefined') { // Piece found in the ranking array, add to the black
-            blackScore += piecesAiRanking[fenPiecesSplit[i]];
-        } else if (typeof piecesAiRanking[fenPiecesSplit[i].toLowerCase()] !== 'undefined') { // Piece was not found previously, found now while lowercasing, it's an uppercase piece (white)
-            whiteScore += piecesAiRanking[fenPiecesSplit[i].toLowerCase()];
+    for (let i in fenLinesSplit) {
+        let onePiece = fenLinesSplit[i].split('');
+        columnKey = 0;
+        for (let j in onePiece) {
+            if ($.inArray(onePiece[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) { // It's a piece
+                if (onePiece[j] == onePiece[j].toUpperCase()) { // If uppsercase, it's a white piece
+                    whiteScore += piecesAiRanking[onePiece[j].toLowerCase()] + whitePiecePositionRanking[(onePiece[j]).toLowerCase()][column[columnKey] + line];
+                } else {// If not, it's a black piece
+                    blackScore += piecesAiRanking[onePiece[j]] + blackPiecePositionRanking[(onePiece[j])][column[columnKey] + line];
+                }
+                columnKey += 1;
+            } else { // It's empty square => a number
+                columnKey += parseInt(onePiece[j]);
+            }
         }
+        line--;
     }
 
     if (color === 'w') {
