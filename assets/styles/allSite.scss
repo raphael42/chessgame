@@ -36,6 +36,7 @@
             width: 80px;
             height: 80px;
             cursor: pointer;
+            position: relative;
 
             @media (max-width: 1300px) {
                 width: 64px;
@@ -47,7 +48,22 @@
                 height: 53px;
             }
 
+            .absolute-top-right {
+                position: absolute;
+                top: 0;
+                right: 0;
+                font-size: 0.8rem;
+            }
+
+            .absolute-bottom-left {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                font-size: 0.8rem;
+            }
+
             .piece {
+                z-index: 2;
                 width: 80px;
                 height: 80px;
 
@@ -92,11 +108,11 @@
                 }
 
                 &.possible-move {
-                    &:not(:empty) {
+                    &:has(img) {
                         background: radial-gradient(transparent 0%, transparent 79%, #8baf73 80%), #f7dfc5;
                     }
 
-                    &:empty {
+                    &:not(:has(img)) {
                         &:before {
                             content: "";
                             width: 25px;
@@ -155,11 +171,11 @@
                 }
 
                 &.possible-move {
-                    &:not(:empty) {
+                    &:has(img) {
                         background: radial-gradient(transparent 0%, transparent 79%, #646f40 80%), #c67945;
                     }
 
-                    &:empty {
+                    &:not(:has(img)) {
                         &:before {
                             content: "";
                             width: 25px;
