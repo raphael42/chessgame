@@ -345,6 +345,9 @@ $(function() {
                 return;
             }
 
+            // Set back z-index to the element dropped
+            $(ui.helper[0]).css('z-index', 2);
+
             let playerTurn = chess.turn(); // Which player turn it is
             if (
                 (PLAYERCOLOR === 'white' && playerTurn === 'b') ||
@@ -676,6 +679,9 @@ function setupDraggable(jQueryElement) {
             // if (PLAYERTYPE === 'spectator') {
             //     return;
             // }
+
+            // Set highter z-index to the element dragged
+            $(ui.helper[0]).css('z-index', 3);
 
             $('.chess-table.clicked-premove').removeClass('clicked-premove');
             const self = $(this);
