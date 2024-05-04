@@ -408,6 +408,9 @@ $(function() {
                 if ($('#' + socketMessage.from).find('img').length > 0) {
                     $('#' + socketMessage.from + ' img').remove();
                 }
+                if ($('#' + socketMessage.to).find('img').length > 0) {
+                    $('#' + socketMessage.to + ' img').remove();
+                }
                 $('#' + socketMessage.to).append('<img class="piece ' + tmpColor + '" src="' + src + '" alt>');
             }
 
@@ -460,6 +463,11 @@ $(function() {
         } else {
             // Display the move only if the player is not watching the history
             if (!HISTORYINVIEW) {
+                // Square to has a piece, remove it
+                if ($('#' + socketMessage.to).find('img').length > 0) {
+                    $('#' + socketMessage.to + ' img').remove();
+                }
+
                 $('#' + socketMessage.from + ' img').detach().css({top: 0, left: 0}).appendTo('#' + socketMessage.to);
             }
 
@@ -1365,15 +1373,19 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             $('#' + squareIdTo + ' img').remove();
         }
 
-        // css top and left are set because when dropping piece, a strange thing happen
-        $('#' + squareIdFrom + ' img').detach().css({top: 0, left: 0}).appendTo('#' + squareIdTo);
-
         if (promotion !== null) {
+            if ($('#' + squareIdFrom).find('img').length > 0) {
+                $('#' + squareIdFrom + ' img').remove();
+            }
+
             let src = PIECESIMGURL;
             src = src.replace('chessboard', piecesPromotion[promotion]);
             src = src.replace('playerColor', PLAYERCOLOR);
             $('#' + squareIdTo).append('<img class="piece ' + PLAYERCOLOR + '" src="' + src + '" alt>');
             setupDraggable('#' + squareIdTo + ' img');
+        } else {
+            // css top and left are set because when dropping piece, a strange thing happen
+            $('#' + squareIdFrom + ' img').detach().css({top: 0, left: 0}).appendTo('#' + squareIdTo);
         }
 
         let historyVerbose = chess.history({verbose: true});

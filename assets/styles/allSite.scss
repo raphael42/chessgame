@@ -5,29 +5,8 @@
     justify-content: center;
 
     .one-column {
-        flex: 0 1 auto;
-
-        .chess-column-letter {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .chess-line-number {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 80px;
-            width: 20px;
-
-            @media (max-width: 1300px) {
-                height: 64px;
-            }
-
-            @media (max-width: 767px) {
-                height: 53px;
-            }
-        }
+        display: flex;
+        flex-direction: column;
 
         .chess-table {
             display: flex;
@@ -44,8 +23,8 @@
             }
 
             @media (max-width: 767px) {
-                width: 53px;
-                height: 53px;
+                width: 12.4vw;
+                height: 12.4vw;
             }
 
             .absolute-top-right {
@@ -64,18 +43,8 @@
 
             .piece {
                 z-index: 2;
-                width: 80px;
-                height: 80px;
-
-                @media (max-width: 1300px) {
-                    width: 64px;
-                    height: 64px;
-                }
-
-                @media (max-width: 767px) {
-                    width: 53px;
-                    height: 53px;
-                }
+                width: 100%;
+                height: 100%;
             }
 
             &.case-white {
