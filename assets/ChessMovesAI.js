@@ -798,9 +798,6 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             $('#' + squareIdTo + ' img').remove();
         }
 
-        // css top and left are set because when dropping piece, a strange thing happen
-        $('#' + squareIdFrom + ' img').detach().css({top: 0, left: 0}).appendTo('#' + squareIdTo);
-
         if (promotion !== null) {
             let color = 'white';
             if (moving.color === 'b') {
@@ -811,6 +808,9 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             src = src.replace('playerColor', color);
             $('#' + squareIdTo).append('<img class="piece ' + color + '" src="' + src + '" alt>');
             setupDraggable('#' + squareIdTo + ' img');
+        } else {
+            // css top and left are set because when dropping piece, a strange thing happen
+            $('#' + squareIdFrom + ' img').detach().css({top: 0, left: 0}).appendTo('#' + squareIdTo);
         }
 
         let historyVerbose = chess.history({verbose: true});
