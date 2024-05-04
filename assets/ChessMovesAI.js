@@ -799,6 +799,10 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         }
 
         if (promotion !== null) {
+            if ($('#' + squareIdFrom).find('img').length > 0) {
+                $('#' + squareIdFrom + ' img').remove();
+            }
+
             let color = 'white';
             if (moving.color === 'b') {
                 color = 'black';
