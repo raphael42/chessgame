@@ -5,29 +5,8 @@
     justify-content: center;
 
     .one-column {
-        flex: 0 1 auto;
-
-        .chess-column-letter {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .chess-line-number {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 80px;
-            width: 20px;
-
-            @media (max-width: 1300px) {
-                height: 64px;
-            }
-
-            @media (max-width: 767px) {
-                height: 53px;
-            }
-        }
+        display: flex;
+        flex-direction: column;
 
         .chess-table {
             display: flex;
@@ -36,6 +15,7 @@
             width: 80px;
             height: 80px;
             cursor: pointer;
+            position: relative;
 
             @media (max-width: 1300px) {
                 width: 64px;
@@ -43,23 +23,28 @@
             }
 
             @media (max-width: 767px) {
-                width: 53px;
-                height: 53px;
+                width: 12.4vw;
+                height: 12.4vw;
+            }
+
+            .absolute-top-right {
+                position: absolute;
+                top: 0;
+                right: 0;
+                font-size: 0.8rem;
+            }
+
+            .absolute-bottom-left {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                font-size: 0.8rem;
             }
 
             .piece {
-                width: 80px;
-                height: 80px;
-
-                @media (max-width: 1300px) {
-                    width: 64px;
-                    height: 64px;
-                }
-
-                @media (max-width: 767px) {
-                    width: 53px;
-                    height: 53px;
-                }
+                z-index: 2;
+                width: 100%;
+                height: 100%;
             }
 
             &.case-white {
@@ -92,11 +77,11 @@
                 }
 
                 &.possible-move {
-                    &:not(:empty) {
+                    &:has(img) {
                         background: radial-gradient(transparent 0%, transparent 79%, #8baf73 80%), #f7dfc5;
                     }
 
-                    &:empty {
+                    &:not(:has(img)) {
                         &:before {
                             content: "";
                             width: 25px;
@@ -155,11 +140,11 @@
                 }
 
                 &.possible-move {
-                    &:not(:empty) {
+                    &:has(img) {
                         background: radial-gradient(transparent 0%, transparent 79%, #646f40 80%), #c67945;
                     }
 
-                    &:empty {
+                    &:not(:has(img)) {
                         &:before {
                             content: "";
                             width: 25px;

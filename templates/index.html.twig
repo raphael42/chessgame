@@ -37,19 +37,29 @@
                     <div class="one-column">
                         {% for line in 8..1 %}
                             {% if key is even %}
-                                <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-white' : 'case-black' }}"></div>
+                                <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-white' : 'case-black' }}">
+                                    {% if column == 'h' %}
+                                        <span class="absolute-top-right">{{ line }}</span>
+                                    {% endif %}
+
+                                    {% if line == 1 %}
+                                        <span class="absolute-bottom-left">{{ column }}</span>
+                                    {% endif %}
+                                </div>
                             {% else %}
-                                <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-black' : 'case-white' }}"></div>
+                                <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-black' : 'case-white' }}">
+                                    {% if column == 'h' %}
+                                        <span class="absolute-top-right">{{ line }}</span>
+                                    {% endif %}
+
+                                    {% if line == 1 %}
+                                        <span class="absolute-bottom-left">{{ column }}</span>
+                                    {% endif %}
+                                </div>
                             {% endif %}
                         {% endfor %}
-                        <div class="chess-column-letter"><span>{{ column }}</span></div>
                     </div>
                 {% endfor %}
-                <div class="one-column">
-                    {% for line in 8..1 %}
-                        <div class="chess-line-number"><span>{{ line }}</span></div>
-                    {% endfor %}
-                </div>
             </div>
         </div>
         <div class="col-lg-3 col-md-4 col-sm-12 create-game-section">

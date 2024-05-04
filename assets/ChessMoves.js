@@ -355,26 +355,26 @@ $(function() {
         if (!HISTORYINVIEW) {
             if (socketMessage.flags === 'k') { // king side castelling
                 if (socketMessage.color === 'w') {
-                    var img = $('#h1').html();
-                    $('#h1').empty();
-                    $('#f1').html(img);
+                    let pieceImg = $('#h1').find('img');
+                    $('#h1 img').remove();
+                    $('#f1').append(pieceImg);
                     setupDraggable('#f1 img');
                 } else if (socketMessage.color === 'b') {
-                    var img = $('#h8').html();
-                    $('#h8').empty();
-                    $('#f8').html(img);
+                    let pieceImg = $('#h8').find('img');
+                    $('#h8 img').remove();
+                    $('#f8').append(pieceImg);
                     setupDraggable('#f8 img');
                 }
             } else if (socketMessage.flags === 'q') { // queen side castelling
                 if (socketMessage.color === 'w') {
-                    var img = $('#a1').html();
-                    $('#a1').empty();
-                    $('#d1').html(img);
+                    let pieceImg = $('#a1').find('img');
+                    $('#a1 img').remove();
+                    $('#d1').append(pieceImg);
                     setupDraggable('#d1 img');
                 } else if (socketMessage.color === 'b') {
-                    var img = $('#a8').html();
-                    $('#a8').empty();
-                    $('#d8').html(img);
+                    let pieceImg = $('#a8').find('img');
+                    $('#a8 img').remove();
+                    $('#d8').append(pieceImg);
                     setupDraggable('#d8 img');
                 }
             } else if (socketMessage.flags === 'e') { // en passant capture
@@ -385,7 +385,9 @@ $(function() {
                     var tmp = (socketMessage.to).split('');
                     var idPawnCatured = tmp[0] + (parseInt(tmp[1]) + 1);
                 }
-                $('#' + idPawnCatured).empty();
+                if ($('#' + idPawnCatured).find('img').length > 0) {
+                    $('#' + idPawnCatured + ' img').remove();
+                }
             }
         }
 
@@ -403,8 +405,13 @@ $(function() {
                 src = src.replace('chessboard', piecesPromotion[socketMessage.promotion]);
                 let tmpColor = socketMessage.color === 'w' ? 'white' : 'black';
                 src = src.replace('playerColor', tmpColor);
-                $('#' + socketMessage.from).empty();
-                $('#' + socketMessage.to).html('<img class="piece ' + tmpColor + '" src="' + src + '" alt>');
+                if ($('#' + socketMessage.from).find('img').length > 0) {
+                    $('#' + socketMessage.from + ' img').remove();
+                }
+                if ($('#' + socketMessage.to).find('img').length > 0) {
+                    $('#' + socketMessage.to + ' img').remove();
+                }
+                $('#' + socketMessage.to).append('<img class="piece ' + tmpColor + '" src="' + src + '" alt>');
             }
 
             $('.in-check').removeClass('in-check');
@@ -456,9 +463,12 @@ $(function() {
         } else {
             // Display the move only if the player is not watching the history
             if (!HISTORYINVIEW) {
-                var img = $('#' + socketMessage.from).html();
-                $('#' + socketMessage.from).empty();
-                $('#' + socketMessage.to).html(img);
+                // Square to has a piece, remove it
+                if ($('#' + socketMessage.to).find('img').length > 0) {
+                    $('#' + socketMessage.to + ' img').remove();
+                }
+
+                $('#' + socketMessage.from + ' img').detach().css({top: 0, left: 0}).appendTo('#' + socketMessage.to);
             }
 
             $('.in-check').removeClass('in-check');
@@ -1324,26 +1334,26 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         }
         if (moving.flags === 'k') { // king side castelling
             if (PLAYERCOLOR === 'white') {
-                var img = $('#h1').html();
-                $('#h1').empty();
-                $('#f1').html(img);
+                let pieceImg = $('#h1').find('img');
+                $('#h1 img').remove();
+                $('#f1').append(pieceImg);
                 setupDraggable('#f1 img');
             } else if (PLAYERCOLOR === 'black') {
-                var img = $('#h8').html();
-                $('#h8').empty();
-                $('#f8').html(img);
+                let pieceImg = $('#h8').find('img');
+                $('#h8 img').remove();
+                $('#f8').append(pieceImg);
                 setupDraggable('#f8 img');
             }
         } else if (moving.flags === 'q') { // queen side castelling
             if (PLAYERCOLOR === 'white') {
-                var img = $('#a1').html();
-                $('#a1').empty();
-                $('#d1').html(img);
+                let pieceImg = $('#a1').find('img');
+                $('#a1 img').remove();
+                $('#d1').append(pieceImg);
                 setupDraggable('#d1 img');
             } else if (PLAYERCOLOR === 'black') {
-                var img = $('#a8').html();
-                $('#a8').empty();
-                $('#d8').html(img);
+                let pieceImg = $('#a8').find('img');
+                $('#a8 img').remove();
+                $('#d8').append(pieceImg);
                 setupDraggable('#d8 img');
             }
         } else if (moving.flags === 'e') { // en passant capture
@@ -1354,22 +1364,28 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                 var tmp = (moving.to).split('');
                 var idPawnCatured = tmp[0] + (parseInt(tmp[1]) + 1);
             }
-            $('#' + idPawnCatured).empty();
+            if ($('#' + idPawnCatured).find('img').length > 0) {
+                $('#' + idPawnCatured + ' img').remove();
+            }
         }
 
-        if ($('#' + squareIdTo).html() !== '') {
-            $('#' + squareIdTo).empty();
+        if ($('#' + squareIdTo).find('img').length > 0) {
+            $('#' + squareIdTo + ' img').remove();
         }
-
-        // css top and left are set because when dropping piece, a strange thing happen
-        $('#' + squareIdFrom + ' img').detach().css({top: 0, left: 0}).appendTo('#' + squareIdTo);
 
         if (promotion !== null) {
+            if ($('#' + squareIdFrom).find('img').length > 0) {
+                $('#' + squareIdFrom + ' img').remove();
+            }
+
             let src = PIECESIMGURL;
             src = src.replace('chessboard', piecesPromotion[promotion]);
             src = src.replace('playerColor', PLAYERCOLOR);
-            $('#' + squareIdTo).html('<img class="piece ' + PLAYERCOLOR + '" src="' + src + '" alt>');
+            $('#' + squareIdTo).append('<img class="piece ' + PLAYERCOLOR + '" src="' + src + '" alt>');
             setupDraggable('#' + squareIdTo + ' img');
+        } else {
+            // css top and left are set because when dropping piece, a strange thing happen
+            $('#' + squareIdFrom + ' img').detach().css({top: 0, left: 0}).appendTo('#' + squareIdTo);
         }
 
         let historyVerbose = chess.history({verbose: true});
@@ -1504,8 +1520,9 @@ function getKingPosition(fen, color) {
 function placePieces(fen, noLastMove) {
     // First remove all pieces if there is some
     $('.chess-table').each(function() {
-        if ($(this).html() !== '') {
-            $(this).empty();
+        let pieceImg = $(this).find('img');
+        if (pieceImg.length > 0) {
+            pieceImg.remove();
         }
     });
 
@@ -1556,7 +1573,7 @@ function placePieces(fen, noLastMove) {
         if (chessboard[k].indexOf('white') == -1){
             color = 'black';
         }
-        $('#' + k).html('<img class="piece ' + color + '" src="' + src + '" alt>');
+        $('#' + k).append('<img class="piece ' + color + '" src="' + src + '" alt>');
     }
 
     // Set in green color the last move

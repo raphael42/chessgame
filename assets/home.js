@@ -104,7 +104,7 @@ $(function() {
         if (chessboard[k].indexOf('white') == -1) {
             color = 'black';
         }
-        $('#' + k).html('<img class="piece ' + color + '" src="' + src + '" alt>');
+        $('#' + k).append('<img class="piece ' + color + '" src="' + src + '" alt>');
     }
     // EOF fill the show chessboard
 
