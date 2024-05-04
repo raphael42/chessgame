@@ -4,6 +4,11 @@
     display: flex;
     justify-content: center;
 
+    @media (max-width: 767px) {
+        margin-top : 1rem;
+        margin-bottom : 1rem;
+    }
+
     .one-column {
         display: flex;
         flex-direction: column;
