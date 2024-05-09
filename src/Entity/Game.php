@@ -54,6 +54,9 @@ class Game
     #[ORM\Column(length: 20)]
     private ?string $creator_color_chose = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $ai_level = null;
+
     public function __construct()
     {
         $this->moves = new ArrayCollection();
@@ -253,6 +256,18 @@ class Game
     public function setCreatorColorChose(string $creator_color_chose): static
     {
         $this->creator_color_chose = $creator_color_chose;
+
+        return $this;
+    }
+
+    public function getAiLevel(): ?int
+    {
+        return $this->ai_level;
+    }
+
+    public function setAiLevel(?int $ai_level): static
+    {
+        $this->ai_level = $ai_level;
 
         return $this;
     }
