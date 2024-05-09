@@ -1,1 +1,3 @@
 User-agent: *
+Disallow:
+Sitemap: https://chess-league.com/sitemap-chess-league.xml
