@@ -146,4 +146,11 @@ class GameController extends AbstractController
             'gameUnavailable' => $gameUnavailable,
         ]);
     }
+
+    public function gameawaitfunction($url)
+    {
+        return $this->render('game-await.html.twig', [
+            'url' => $url,
+        ]);
+    }
 }
