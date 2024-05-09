@@ -16,6 +16,7 @@
         const SERVERNAME = '{{ app.request.host }}';
         const GAMEUNAVAILABLE = '{{ gameUnavailable }}';
         const ENV = '{{ env }}';
+        const GAMEAWAITURL = "{{ absolute_url(path('gameAwait', {'url': game.url})) }}";
     </script>
 
     {{ encore_entry_link_tags('gameJs') }}
@@ -216,7 +217,7 @@
                     <div>
                         Pour inviter quelqu'un à jouer, donnez-lui ce lien :<br>
                         <p style="display:flex">
-                            <input type="text" class="form-control" value="{{ app.request.uri }}" readonly>
+                            <input type="text" class="form-control" value="{{ absolute_url(path('gameAwait', {'url': game.url})) }}" readonly>
                             <button id="copy-game-link" class="btn btn-primary" title="Copier le lien"><i class="bi bi-link-45deg"></i></button>
                         </p>
                         La première personne qui cliquera sur ce lien jouera avec vous.

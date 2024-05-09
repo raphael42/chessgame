@@ -6,6 +6,10 @@ game:
     path: game/{url}
     controller: App\Controller\GameController::gamefunction
 
+gameAwait:
+    path: game-await/{url}
+    controller: App\Controller\GameController::gameawaitfunction
+
 gameAi:
     path: game-ai/{url}
     controller: App\Controller\GameAIController::gameaifunction

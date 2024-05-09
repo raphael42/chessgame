@@ -1,0 +1,8 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="text-center">
+        <h1>Jouer avec un ami</h1>
+        <a href="{{ path('game', {'url': url}) }}" class="btn btn-primary" title="Rejoindre la partie"><i class="bi bi-play-fill"></i>Rejoindre la partie</a>
+    </div>
+{% endblock %}

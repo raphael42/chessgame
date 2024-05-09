@@ -146,4 +146,30 @@ class GameController extends AbstractController
             'gameUnavailable' => $gameUnavailable,
         ]);
     }
+
+    public function gameawaitfunction($url, EntityManagerInterface $entityManager)
+    {
+        $game = $entityManager->getRepository(Entity\Game::class)->findOneBy([
+            'url' => $url,
+        ]);
+
+        $player1 = $entityManager->getRepository(Entity\Player::class)->findOneBy([
+            'game_creator' => true,
+            'game' => $game->getId(),
+        ]);
+
+        $player2 = $entityManager->getRepository(Entity\Player::class)->findOneBy([
+            'game_creator' => false,
+            'game' => $game->getId(),
+        ]);
+
+        // 2 players found, go to the game page
+        if ($player1->getIp() !== null && $player2->getIp() !== null) {
+            return $this->redirectToRoute('game', ['url' => $url]);
+        }
+
+        return $this->render('game-await.html.twig', [
+            'url' => $url,
+        ]);
+    }
 }

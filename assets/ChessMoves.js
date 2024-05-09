@@ -620,8 +620,7 @@ $(function() {
     });
 
     $('#copy-game-link').on('click', function() {
-        let url = window.location.href;
-        navigator.clipboard.writeText(url).then(function() {
+        navigator.clipboard.writeText(GAMEAWAITURL).then(function() {
             $('#copy-game-link').html('<i class="bi bi-check-lg"></i>');
         }).catch(function(error) { // If copy fails, should never happen but we never know ...
             $('#copy-game-link').html('<i class="bi bi-x-lg"></i>');
