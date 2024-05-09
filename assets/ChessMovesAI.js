@@ -940,7 +940,7 @@ function AiPlay(firstMove) {
                 verbose: true
             });
 
-            var bestPlayerScore = null;
+            let bestPlayerScore = null;
             for (let j in playerPossibleMoves) {
                 const chessPlayerMove = new Chess(chessAiMove.fen());
                 chessPlayerMove.move({
@@ -949,7 +949,12 @@ function AiPlay(firstMove) {
                     promotion: (typeof playerPossibleMoves[j].promotion !== 'undefined') ? 'q' : null, // Promotion always queen to make it simple
                 });
 
-                var playerScoreAfterMove = calculateScore(chessPlayerMove.fen(), PLAYERCOLOR.charAt(0));
+                let playerScoreAfterMove = null;
+                if (AILEVEL === '1') {
+                    playerScoreAfterMove = calculateScoreNoSquare(chessPlayerMove.fen(), PLAYERCOLOR.charAt(0));
+                } else {
+                    playerScoreAfterMove = calculateScore(chessPlayerMove.fen(), PLAYERCOLOR.charAt(0));
+                }
 
                 // CheckMate after the Player move, set super hight score to not choose it later
                 if (chessPlayerMove.isCheckmate() === true) {
@@ -1053,6 +1058,35 @@ function calculateScore(fen, color) {
             }
         }
         line--;
+    }
+
+    if (color === 'w') {
+        return whiteScore - blackScore
+    }
+
+    if (color === 'b') {
+        return blackScore - whiteScore
+    }
+
+    return {
+        'w': whiteScore - blackScore,
+        'b': blackScore - whiteScore,
+    };
+}
+
+function calculateScoreNoSquare(fen, color) {
+    let fenSplit = fen.split(' ');
+    let fenPieces = fenSplit[0];
+    let fenPiecesSplit = fenPieces.split('');
+
+    let whiteScore = 0;
+    let blackScore = 0;
+    for (let i in fenPiecesSplit) { // Each characters of the fen
+        if (typeof piecesAiRanking[fenPiecesSplit[i]] !== 'undefined') { // Piece found in the ranking array, add to the black
+            blackScore += piecesAiRanking[fenPiecesSplit[i]];
+        } else if (typeof piecesAiRanking[fenPiecesSplit[i].toLowerCase()] !== 'undefined') { // Piece was not found previously, found now while lowercasing, it's an uppercase piece (white)
+            whiteScore += piecesAiRanking[fenPiecesSplit[i].toLowerCase()];
+        }
     }
 
     if (color === 'w') {

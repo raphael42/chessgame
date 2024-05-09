@@ -18,12 +18,27 @@ class CreateGameAI extends AbstractType
         $builder
             ->add('color', ChoiceType::class, [
                 'label' => 'Choisissez votre couleur',
-                'choices' => array(
+                'choices' => [
                     'Blanc' => 'white',
                     'Noir' => 'black',
                     'Aléatoire' => 'random',
-                ),
+                ],
                 'expanded' => true,
+            ])
+            ->add('level', ChoiceType::class, [
+                'label' => 'Niveau de l\'ordinateur',
+                'choices' => [
+                    'Débutant' => 1,
+                    'Intermédiaire' => 2,
+                    'Avancé' => 3,
+                ],
+                'expanded' => true,
+                'choice_attr' => function($choice, $key, $value) {
+                    if ($value == 3) {
+                        return ['disabled' => 'disabled']; // Disable Avancé for now
+                    }
+                    return []; // If others difficulties, do nothing
+                },
             ])
             // ->add('timePerPlayer', IntegerType::class, [
             //     'label' => 'Temps par joueur (en minutes)',
