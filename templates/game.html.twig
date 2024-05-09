@@ -1,5 +1,8 @@
 {% extends './base.html.twig' %}
 
+{% block meta_robots %}noindex{% endblock %}
+{% block canonical %}{{ app.request.schemeAndHttpHost ~ '/game' }}{% endblock %}
+
 {% block javascripts %}
     <script>
         const FEN = '{{ game.fen }}';

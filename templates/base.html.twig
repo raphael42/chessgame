@@ -6,11 +6,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="description" content="">
         <meta name="author" content="Raphael Bellon">
-        <meta name="robots" content="all">
+        <meta name="robots" content="{% block meta_robots %}all{% endblock %}">
 
         <title id="title">{% block title %}{{ app.request.host }} | Jeu d'échecs gratuit{% endblock %}</title>
 
         <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon-rook.png') }}">
+        <link rel="canonical" href="{% block canonical %}{{ app.request.schemeAndHttpHost ~ app.request.pathInfo }}{% endblock %}">
 
         {% block stylesheets %}{% endblock %}
         {{ encore_entry_link_tags('allSite') }}

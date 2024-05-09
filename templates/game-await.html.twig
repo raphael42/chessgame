@@ -1,5 +1,8 @@
 {% extends 'base.html.twig' %}
 
+{% block meta_robots %}noindex{% endblock %}
+{% block canonical %}{{ app.request.schemeAndHttpHost ~ '/game-await' }}{% endblock %}
+
 {% block body %}
     <div class="text-center">
         <h1>Jouer avec un ami</h1>
