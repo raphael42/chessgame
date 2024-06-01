@@ -949,26 +949,76 @@ function AiPlay(firstMove) {
                     promotion: (typeof playerPossibleMoves[j].promotion !== 'undefined') ? 'q' : null, // Promotion always queen to make it simple
                 });
 
-                let playerScoreAfterMove = null;
-                if (AILEVEL === '1') {
-                    playerScoreAfterMove = calculateScoreNoSquare(chessPlayerMove.fen(), PLAYERCOLOR.charAt(0));
+                // Hard difficulty, go deeper in the tested moves
+                if (AILEVEL === '2') {
+                    // After one AI move, and one Player move, try again all AI moves
+                    let aiPossibleMoves2 = chessPlayerMove.moves({
+                        verbose: true
+                    });
+
+                    for (let k in aiPossibleMoves2) {
+                        const chessAiMove2 = new Chess(chessPlayerMove.fen());
+                        chessAiMove2.move({
+                            from: aiPossibleMoves2[k].from,
+                            to: aiPossibleMoves2[k].to,
+                            promotion: (typeof aiPossibleMoves2[k].promotion !== 'undefined') ? 'q' : null, // Promotion always queen to make it simple
+                        });
+
+                        let playerPossibleMoves2 = chessAiMove2.moves({
+                            verbose: true
+                        });
+
+                        let bestPlayerScore2 = null;
+                        for (let l in playerPossibleMoves2) {
+                            const chessPlayerMove2 = new Chess(chessAiMove2.fen());
+                            chessPlayerMove2.move({
+                                from: playerPossibleMoves2[l].from,
+                                to: playerPossibleMoves2[l].to,
+                                promotion: (typeof playerPossibleMoves2[l].promotion !== 'undefined') ? 'q' : null, // Promotion always queen to make it simple
+                            });
+
+                            let playerScoreAfterMove2 = null;
+                            playerScoreAfterMove2 = calculateScore(chessPlayerMove2.fen(), PLAYERCOLOR.charAt(0));
+
+                            // CheckMate after the Player move, set super hight score to not choose it later
+                            if (chessPlayerMove2.isCheckmate() === true) {
+                                playerScoreAfterMove2 = 900;
+                            }
+
+                            // If the move the player can perform has highter score than the one actually saved, the move for the AI is worst so go next to make the script faster
+                            if (bestSavePlayerScore !== null && bestSavePlayerScore < playerScoreAfterMove2) {
+                                continue firstLoop;
+                            }
+
+                            // Save the best score the Player can get after the AI move
+                            if (bestPlayerScore2 === null || playerScoreAfterMove2 > bestPlayerScore2) {
+                                bestPlayerScore = playerScoreAfterMove;
+                                bestPlayerScore2 = playerScoreAfterMove2;
+                            }
+                        }
+                    }
                 } else {
-                    playerScoreAfterMove = calculateScore(chessPlayerMove.fen(), PLAYERCOLOR.charAt(0));
-                }
+                    let playerScoreAfterMove = null;
+                    if (AILEVEL === '1') {
+                        playerScoreAfterMove = calculateScoreNoSquare(chessPlayerMove.fen(), PLAYERCOLOR.charAt(0));
+                    } else {
+                        playerScoreAfterMove = calculateScore(chessPlayerMove.fen(), PLAYERCOLOR.charAt(0));
+                    }
 
-                // CheckMate after the Player move, set super hight score to not choose it later
-                if (chessPlayerMove.isCheckmate() === true) {
-                    playerScoreAfterMove = 900;
-                }
+                    // CheckMate after the Player move, set super hight score to not choose it later
+                    if (chessPlayerMove.isCheckmate() === true) {
+                        playerScoreAfterMove = 900;
+                    }
 
-                // If the move the player can perform has highter score than the one actually saved, the move for the AI is worst so go next to make the script faster
-                if (bestSavePlayerScore !== null && bestSavePlayerScore < playerScoreAfterMove) {
-                    continue firstLoop;
-                }
+                    // If the move the player can perform has highter score than the one actually saved, the move for the AI is worst so go next to make the script faster
+                    if (bestSavePlayerScore !== null && bestSavePlayerScore < playerScoreAfterMove) {
+                        continue firstLoop;
+                    }
 
-                // Save the best score the Player can get after the AI move
-                if (bestPlayerScore === null || playerScoreAfterMove > bestPlayerScore) {
-                    bestPlayerScore = playerScoreAfterMove;
+                    // Save the best score the Player can get after the AI move
+                    if (bestPlayerScore === null || playerScoreAfterMove > bestPlayerScore) {
+                        bestPlayerScore = playerScoreAfterMove;
+                    }
                 }
             }
 

@@ -33,12 +33,6 @@ class CreateGameAI extends AbstractType
                     'Avancé' => 3,
                 ],
                 'expanded' => true,
-                'choice_attr' => function($choice, $key, $value) {
-                    if ($value == 3) {
-                        return ['disabled' => 'disabled']; // Disable Avancé for now
-                    }
-                    return []; // If others difficulties, do nothing
-                },
             ])
             // ->add('timePerPlayer', IntegerType::class, [
             //     'label' => 'Temps par joueur (en minutes)',
