@@ -28,7 +28,7 @@ about:
 
 login:
     path: login
-    controller: App\Controller\LoginController::loginfunction
+    controller: App\Controller\UserController::loginfunction
 
 controllers:
     resource:
