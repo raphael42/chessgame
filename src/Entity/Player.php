@@ -40,6 +40,9 @@ class Player
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $ip = null;
 
+    #[ORM\ManyToOne(inversedBy: 'players')]
+    private ?user $user = null;
+
     public function __construct()
     {
         $this->moves = new ArrayCollection();
@@ -196,6 +199,18 @@ class Player
     public function setIp(?string $ip): static
     {
         $this->ip = $ip;
+
+        return $this;
+    }
+
+    public function getUser(): ?user
+    {
+        return $this->user;
+    }
+
+    public function setUser(?user $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }
