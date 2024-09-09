@@ -28,7 +28,11 @@ about:
 
 login:
     path: login
-    controller: App\Controller\LoginController::loginfunction
+    controller: App\Controller\SecurityController::login
+
+logout:
+    path: logout
+    controller: App\Controller\SecurityController::logout
 
 register:
     path: register
