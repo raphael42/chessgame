@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -36,6 +37,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'boolean')]
     private $isVerified = false;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $date_insert = null;
+
+    #[ORM\Column(length: 100)]
+    private ?string $nickname = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $date_last_connection = null;
 
     public function __construct()
     {
@@ -150,6 +160,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsVerified(bool $isVerified): static
     {
         $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    public function getDateInsert(): ?\DateTimeInterface
+    {
+        return $this->date_insert;
+    }
+
+    public function setDateInsert(\DateTimeInterface $date_insert): static
+    {
+        $this->date_insert = $date_insert;
+
+        return $this;
+    }
+
+    public function getNickname(): ?string
+    {
+        return $this->nickname;
+    }
+
+    public function setNickname(string $nickname): static
+    {
+        $this->nickname = $nickname;
+
+        return $this;
+    }
+
+    public function getDateLastConnection(): ?\DateTimeInterface
+    {
+        return $this->date_last_connection;
+    }
+
+    public function setDateLastConnection(?\DateTimeInterface $date_last_connection): static
+    {
+        $this->date_last_connection = $date_last_connection;
 
         return $this;
     }
