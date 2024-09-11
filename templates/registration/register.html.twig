@@ -1,23 +1,34 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}{{ app.request.host }} | Créez votre compte{% endblock %}
 
 {% block body %}
-    {% for flash_error in app.flashes('verify_email_error') %}
-        <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
-    {% endfor %}
+    {% if app.flashes('verify_email_error') is not empty %}
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-2" style="font-size:1.5rem"></i>
+            {% for flash_error in app.flashes('verify_email_error') %}
+                <div>{{ flash_error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-    <h1>Register</h1>
+    <div class="text-center mb-4">
+        <h1>Créez votre compte</h1>
+    </div>
 
-    {{ form_errors(registrationForm) }}
+    <div class="row">
+        <div class="col-12 col-md-6 contact-icon">
+            <i class="bi bi-person-plus"></i>
+        </div>
+        <div class="col-12 col-md-6">
+            {{ form(registrationForm) }}
+        </div>
+    </div>
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.email) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
-        {{ form_row(registrationForm.agreeTerms) }}
+    <hr class="mb-5 mt-5">
 
-        <button type="submit" class="btn">Register</button>
-    {{ form_end(registrationForm) }}
+    <div class="text-center">
+        <h2 class="mb-3">Vous avez déjà un compte ?</h2>
+        <a class="btn btn-primary" href="{{ path('login') }}">Connectez-vous</a>
+    </div>
 {% endblock %}
