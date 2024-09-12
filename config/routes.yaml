@@ -27,8 +27,21 @@ about:
     controller: App\Controller\AboutController::aboutfunction
 
 login:
-    path: login
-    controller: App\Controller\LoginController::loginfunction
+    path: me-connecter
+    controller: App\Controller\SecurityController::login
+
+logout:
+    path: me-deconnecter
+    controller: App\Controller\SecurityController::logout
+
+register:
+    path: creer-mon-compte
+    controller: App\Controller\RegistrationController::registerfunction
+
+profile:
+    # path: mon-compte/{slug}
+    path: mon-compte
+    controller: App\Controller\UserAccountController::userAccountFunction
 
 controllers:
     resource:
