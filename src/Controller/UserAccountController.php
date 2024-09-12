@@ -10,8 +10,6 @@ class UserAccountController extends AbstractController
 {
     public function userAccountFunction(): Response
     {
-        return $this->render('account.html.twig', [
-            'controller_name' => 'UserAccountController',
-        ]);
+        return $this->render('account.html.twig', []);
     }
 }

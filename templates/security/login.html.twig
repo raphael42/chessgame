@@ -12,15 +12,6 @@
         </div>
     {% endif %}
 
-    {% if app.user %}
-        <div class="alert alert-success d-flex align-items-center" role="alert">
-            <i class="bi bi-info-circle-fill me-2" style="font-size:1.5rem"></i>
-            <div>
-                Vous êtes connectés en tant que {{ app.user.userIdentifier }}, <a href="{{ path('logout') }}">Me déconnecter</a>
-            </div>
-        </div>
-    {% endif %}
-
     <div class="text-center mb-4">
         <h1>Connectez-vous</h1>
     </div>
