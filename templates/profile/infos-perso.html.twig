@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ app.request.host }} | Mon compte - Informations personnelles{% endblock %}
+
+{% block style_container %}max-width:968px; margin: 32px auto;{% endblock %}
+
+{% block body %}
+    {% if status == 'infos-edited' %}
+        <div class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill me-2" style="font-size:1.5rem"></i>
+            <div>
+                Vos informations ont été modifiés
+            </div>
+        </div>
+    {% endif %}
+
+    {% if status == 'password-edited' %}
+        <div class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill me-2" style="font-size:1.5rem"></i>
+            <div>
+                Votre mot de passe a été modifié
+            </div>
+        </div>
+    {% endif %}
+
+    {% if status == 'error-current-password' %}
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="bi bi-x-circle-fill me-2" style="font-size:1.5rem"></i>
+            <div>
+                Votre mot de passe actuel est incorrect
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="text-center">
+        <h1>Informations personnelles</h1>
+    </div>
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <h2>Mes informations</h2>
+            {{ form(formPersonalInformations) }}
+        </div>
+        <div class="col-12 col-md-6">
+            <h2>Mon mot de passe</h2>
+            {{ form(formPasswordEdit) }}
+        </div>
+    </div>
+{% endblock %}

@@ -39,9 +39,12 @@ register:
     controller: App\Controller\RegistrationController::registerfunction
 
 profile:
-    # path: mon-compte/{slug}
     path: mon-compte
     controller: App\Controller\UserAccountController::userAccountFunction
+
+profileInfoPerso:
+    path: mon-compte/informations-personnelles
+    controller: App\Controller\UserAccountController::userAccountInfosPersoFunction
 
 controllers:
     resource:

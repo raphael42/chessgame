@@ -29,13 +29,22 @@
                     <a class="nav-link" href="{{ path('about') }}">À propos</a>
                 </li>
             </ul>
-            <div class="d-flex">
-                {% if app.user %}
-                    <a class="btn btn-outline-light" href="{{ path('profile') }}" tabindex="-1">Mon compte</a>
-                {% else %}
+            {% if app.user %}
+                <div class="d-flex dropdown">
+                    <a class="dropdown-toggle btn btn-outline-light" href="#" id="navbarAccountDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Mon compte
+                    </a>
+
+                    <ul class="dropdown-menu" aria-labelledby="navbarAccountDropdownMenuLink">
+                        <li><a class="dropdown-item" href="{{ path('profile') }}">Mon compte</a></li>
+                        <li><a class="dropdown-item" href="{{ path('logout') }}">Déconnexion</a></li>
+                    </ul>
+                </div>
+            {% else %}
+                <div class="d-flex">
                     <a class="btn btn-outline-light" href="{{ path('login') }}" tabindex="-1">Connexion</a>
-                {% endif %}
-            </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </nav>

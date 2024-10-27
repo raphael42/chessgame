@@ -236,3 +236,13 @@
         font-size: 5rem;
     }
 }
+
+.account-home {
+    justify-content: space-evenly;
+
+    .account-home-item {
+        border: 1px solid;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+}
