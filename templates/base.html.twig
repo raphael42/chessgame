@@ -22,7 +22,7 @@
             {% include "menu.html.twig" %}
         </header>
 
-        <div class="container-fluid mt-3">
+        <div class="container-fluid mt-3" style="{% block style_container %}{% endblock %}">
             {% block body %}{% endblock %}
         </div>
 

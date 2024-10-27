@@ -8,7 +8,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AboutController extends AbstractController
 {
-    #[Route('/about', name: 'app_about')]
     public function aboutfunction(): Response
     {
         return $this->render('about.html.twig', [
