@@ -16,6 +16,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
+
+use App\Form\PasswordRecovery;
+use App\Entity;
 
 class RegistrationController extends AbstractController
 {
@@ -93,5 +97,58 @@ class RegistrationController extends AbstractController
         $this->addFlash('success', 'Your email address has been verified.');
 
         return $this->redirectToRoute('register');
+    }
+
+    public function passwordRecoveryfunction(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+    {
+        $formPasswordRecovery = $this->createForm(PasswordRecovery::class);
+        $formPasswordRecovery->handleRequest($request);
+
+        if ($formPasswordRecovery->isSubmitted() && $formPasswordRecovery->isValid()) {
+            // For the moment, save the data in DB. Later, send an email
+            $data = $formPasswordRecovery->getData();
+
+            // Get the user with current email.
+            $user = $entityManager->getRepository(Entity\User::class)->findOneBy([
+                'email' => $data['email'],
+            ]);
+
+            // No user found, return status send like it worked to not give information that the email exists or not
+            if (is_null($user)) {
+                return $this->redirectToRoute('passwordRecovery', ['status' => 'send']);
+            }
+
+            // User found, continue the process
+            $dateTimeNow = new \DateTime();
+
+            $bytes = random_bytes(20);
+            $randomString = bin2hex($bytes);
+
+            $passwordRecoveryEntity = new Entity\PasswordRecovery();
+            $passwordRecoveryEntity->setToken($randomString);
+            $passwordRecoveryEntity->setDateInsert($dateTimeNow);
+            $passwordRecoveryEntity->setUser($user);
+
+            $entityManager->persist($passwordRecoveryEntity);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('passwordRecovery', ['status' => 'send']);
+
+            // TODO later : Send the email
+            // $email = (new Email())
+            // ->from('contact@freechess.fr')
+            // ->to('raphael.bellon42@gmail.com')
+            // ->subject('Symfony mailer!')
+            // ->text('Text integration')
+            // ->html('<p>Html integration</p>');
+
+            // $result = $mailer->send($email);
+            // dump($result);die;
+        }
+
+        return $this->render('security/password-recovery.html.twig', [
+            'formPasswordRecovery' => $formPasswordRecovery->createView(),
+            'status' => $_GET['status'] ?? null,
+        ]);
     }
 }
