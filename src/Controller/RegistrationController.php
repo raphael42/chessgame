@@ -19,6 +19,7 @@ use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 
 use App\Form\PasswordRecovery;
+use App\Form\PasswordChange;
 use App\Entity;
 
 class RegistrationController extends AbstractController
@@ -148,6 +149,30 @@ class RegistrationController extends AbstractController
 
         return $this->render('security/password-recovery.html.twig', [
             'formPasswordRecovery' => $formPasswordRecovery->createView(),
+            'status' => $_GET['status'] ?? null,
+        ]);
+    }
+
+    public function passwordChangefunction($url, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $passwordRecoveryEntity = $entityManager->getRepository(Entity\PasswordRecovery::class)->findOneBy([
+            'token' => $url,
+        ]);
+
+        // TODO : faire une page 404
+        if (is_null($passwordRecoveryEntity)) {
+            header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
+            die;
+        }
+
+        $formPasswordChange = $this->createForm(PasswordChange::class);
+        $formPasswordChange->handleRequest($request);
+
+        if ($formPasswordChange->isSubmitted() && $formPasswordChange->isValid()) {
+        }
+
+        return $this->render('security/password-change.html.twig', [
+            'formPasswordChange' => $formPasswordChange->createView(),
             'status' => $_GET['status'] ?? null,
         ]);
     }

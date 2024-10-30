@@ -14,7 +14,7 @@ class PasswordRecovery
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date_insert = null;
 
     #[ORM\Column(length: 100)]
@@ -23,6 +23,9 @@ class PasswordRecovery
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
+
+    #[ORM\Column]
+    private ?bool $done = null;
 
     public function getId(): ?int
     {
@@ -61,6 +64,18 @@ class PasswordRecovery
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function isDone(): ?bool
+    {
+        return $this->done;
+    }
+
+    public function setDone(bool $done): static
+    {
+        $this->done = $done;
 
         return $this;
     }

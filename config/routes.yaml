@@ -43,7 +43,7 @@ passwordRecovery:
     controller: App\Controller\RegistrationController::passwordRecoveryfunction
 
 passwordChange:
-    path: changement-mot-de-passe
+    path: changement-mot-de-passe/{url}
     controller: App\Controller\RegistrationController::passwordChangefunction
 
 profile:
