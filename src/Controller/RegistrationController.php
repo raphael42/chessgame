@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use App\Form\PasswordRecovery;
 use App\Form\PasswordChange;
@@ -129,6 +130,7 @@ class RegistrationController extends AbstractController
             $passwordRecoveryEntity->setToken($randomString);
             $passwordRecoveryEntity->setDateInsert($dateTimeNow);
             $passwordRecoveryEntity->setUser($user);
+            $passwordRecoveryEntity->setDone(false);
 
             $entityManager->persist($passwordRecoveryEntity);
             $entityManager->flush();
@@ -161,19 +163,43 @@ class RegistrationController extends AbstractController
 
         // TODO : faire une page 404
         if (is_null($passwordRecoveryEntity)) {
-            header($_SERVER["SERVER_PROTOCOL"]." 404 Not Found");
-            die;
+            throw new NotFoundHttpException('L\'élément n\'existe pas.');
+        }
+
+        $dateTimeNow = new \DateTime();
+        $diff = $dateTimeNow->diff($passwordRecoveryEntity->getDateInsert());
+
+        // If this recovery has already been done
+        if ($passwordRecoveryEntity->isDone()) {
+            throw new NotFoundHttpException('La demande a déjà été traité');
+        }
+
+        // If this recovery is too old, more than 4 hours
+        if ($diff->days > 0 || $diff->h > 4) {
+            // throw new NotFoundHttpException('La demande a expiré');
         }
 
         $formPasswordChange = $this->createForm(PasswordChange::class);
         $formPasswordChange->handleRequest($request);
-
         if ($formPasswordChange->isSubmitted() && $formPasswordChange->isValid()) {
+            $data = $formPasswordChange->getData();
+
+            $user = $passwordRecoveryEntity->getUser();
+
+            $passwordHash = password_hash($data['plainPassword'], PASSWORD_BCRYPT);
+            $user->setPassword($passwordHash);
+            $entityManager->persist($user);
+
+            $passwordRecoveryEntity->setDone(true);
+            $entityManager->persist($passwordRecoveryEntity);
+
+            $entityManager->flush();
+
+            return $this->redirectToRoute('login', ['status' => 'password-edited']);
         }
 
         return $this->render('security/password-change.html.twig', [
             'formPasswordChange' => $formPasswordChange->createView(),
-            'status' => $_GET['status'] ?? null,
         ]);
     }
 }
