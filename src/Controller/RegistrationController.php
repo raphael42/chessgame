@@ -155,7 +155,7 @@ class RegistrationController extends AbstractController
         ]);
     }
 
-    public function passwordChangefunction($url, Request $request, EntityManagerInterface $entityManager): Response
+    public function passwordChangefunction($url, Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
     {
         $passwordRecoveryEntity = $entityManager->getRepository(Entity\PasswordRecovery::class)->findOneBy([
             'token' => $url,
@@ -186,9 +186,12 @@ class RegistrationController extends AbstractController
 
             $user = $passwordRecoveryEntity->getUser();
 
-            $passwordHash = password_hash($data['plainPassword'], PASSWORD_BCRYPT);
-            $user->setPassword($passwordHash);
-            $entityManager->persist($user);
+            $user->setPassword(
+                $userPasswordHasher->hashPassword(
+                    $user,
+                    $formPasswordChange->get('plainPassword')->getData()
+                )
+            );
 
             $passwordRecoveryEntity->setDone(true);
             $entityManager->persist($passwordRecoveryEntity);

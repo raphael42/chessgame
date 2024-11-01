@@ -9,6 +9,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
@@ -23,7 +24,7 @@ class UserAccountController extends AbstractController
         return $this->render('profile/account.html.twig', []);
     }
 
-    public function userAccountInfosPersoFunction(#[CurrentUser] ?Entity\User $user, Request $request, EntityManagerInterface $entityManager): Response
+    public function userAccountInfosPersoFunction(#[CurrentUser] ?Entity\User $user, UserPasswordHasherInterface $userPasswordHasher, Request $request, EntityManagerInterface $entityManager): Response
     {
         $options = [
             'email' => $user->getEmail(),
@@ -54,8 +55,12 @@ class UserAccountController extends AbstractController
                 return $this->redirectToRoute('profileInfoPerso', ['status' => 'error-current-password']);
             }
 
-            $passwordHash = password_hash($data['plainPassword'], PASSWORD_BCRYPT);
-            $user->setPassword($passwordHash);
+            $user->setPassword(
+                $userPasswordHasher->hashPassword(
+                    $user,
+                    $formPasswordEdit->get('plainPassword')->getData()
+                )
+            );
 
             $entityManager->persist($user);
             $entityManager->flush();

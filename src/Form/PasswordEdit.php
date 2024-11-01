@@ -46,6 +46,7 @@ class PasswordEdit extends AbstractType
                     'attr' => ['autocomplete' => 'new-password'],
                 ],
                 'invalid_message' => 'Les mots de passe doivent être identiques.',
+                'mapped' => false,
             ])
 
 
