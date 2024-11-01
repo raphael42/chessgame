@@ -12,6 +12,15 @@
         </div>
     {% endif %}
 
+    {% if status == 'password-edited' %}
+        <div class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill me-2" style="font-size:1.5rem"></i>
+            <div>
+                Votre mot de passe a été modifié. Vous pouvez maintenant vous connecter.
+            </div>
+        </div>
+    {% endif %}
+
     <div class="text-center mb-4">
         <h1>Connectez-vous</h1>
     </div>
@@ -47,6 +56,9 @@
 
                 <button class="btn btn-primary mb-3" type="submit"> Me connecter</button>
             </form>
+            <div>
+                <a href="{{ path('passwordRecovery') }}"><small>Mot de passe oublié ?</small></a>
+            </div>
         </div>
     </div>
 

@@ -16,6 +16,12 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
+use App\Form\PasswordRecovery;
+use App\Form\PasswordChange;
+use App\Entity;
 
 class RegistrationController extends AbstractController
 {
@@ -93,5 +99,110 @@ class RegistrationController extends AbstractController
         $this->addFlash('success', 'Your email address has been verified.');
 
         return $this->redirectToRoute('register');
+    }
+
+    public function passwordRecoveryfunction(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+    {
+        $formPasswordRecovery = $this->createForm(PasswordRecovery::class);
+        $formPasswordRecovery->handleRequest($request);
+
+        if ($formPasswordRecovery->isSubmitted() && $formPasswordRecovery->isValid()) {
+            // For the moment, save the data in DB. Later, send an email
+            $data = $formPasswordRecovery->getData();
+
+            // Get the user with current email.
+            $user = $entityManager->getRepository(Entity\User::class)->findOneBy([
+                'email' => $data['email'],
+            ]);
+
+            // No user found, return status send like it worked to not give information that the email exists or not
+            if (is_null($user)) {
+                return $this->redirectToRoute('passwordRecovery', ['status' => 'send']);
+            }
+
+            // User found, continue the process
+            $dateTimeNow = new \DateTime();
+
+            $bytes = random_bytes(20);
+            $randomString = bin2hex($bytes);
+
+            $passwordRecoveryEntity = new Entity\PasswordRecovery();
+            $passwordRecoveryEntity->setToken($randomString);
+            $passwordRecoveryEntity->setDateInsert($dateTimeNow);
+            $passwordRecoveryEntity->setUser($user);
+            $passwordRecoveryEntity->setDone(false);
+
+            $entityManager->persist($passwordRecoveryEntity);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('passwordRecovery', ['status' => 'send']);
+
+            // TODO later : Send the email
+            // $email = (new Email())
+            // ->from('contact@freechess.fr')
+            // ->to('raphael.bellon42@gmail.com')
+            // ->subject('Symfony mailer!')
+            // ->text('Text integration')
+            // ->html('<p>Html integration</p>');
+
+            // $result = $mailer->send($email);
+            // dump($result);die;
+        }
+
+        return $this->render('security/password-recovery.html.twig', [
+            'formPasswordRecovery' => $formPasswordRecovery->createView(),
+            'status' => $_GET['status'] ?? null,
+        ]);
+    }
+
+    public function passwordChangefunction($url, Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
+    {
+        $passwordRecoveryEntity = $entityManager->getRepository(Entity\PasswordRecovery::class)->findOneBy([
+            'token' => $url,
+        ]);
+
+        // TODO : faire une page 404
+        if (is_null($passwordRecoveryEntity)) {
+            throw new NotFoundHttpException('L\'élément n\'existe pas.');
+        }
+
+        $dateTimeNow = new \DateTime();
+        $diff = $dateTimeNow->diff($passwordRecoveryEntity->getDateInsert());
+
+        // If this recovery has already been done
+        if ($passwordRecoveryEntity->isDone()) {
+            throw new NotFoundHttpException('La demande a déjà été traité');
+        }
+
+        // If this recovery is too old, more than 4 hours
+        if ($diff->days > 0 || $diff->h > 4) {
+            // throw new NotFoundHttpException('La demande a expiré');
+        }
+
+        $formPasswordChange = $this->createForm(PasswordChange::class);
+        $formPasswordChange->handleRequest($request);
+        if ($formPasswordChange->isSubmitted() && $formPasswordChange->isValid()) {
+            $data = $formPasswordChange->getData();
+
+            $user = $passwordRecoveryEntity->getUser();
+
+            $user->setPassword(
+                $userPasswordHasher->hashPassword(
+                    $user,
+                    $formPasswordChange->get('plainPassword')->getData()
+                )
+            );
+
+            $passwordRecoveryEntity->setDone(true);
+            $entityManager->persist($passwordRecoveryEntity);
+
+            $entityManager->flush();
+
+            return $this->redirectToRoute('login', ['status' => 'password-edited']);
+        }
+
+        return $this->render('security/password-change.html.twig', [
+            'formPasswordChange' => $formPasswordChange->createView(),
+        ]);
     }
 }

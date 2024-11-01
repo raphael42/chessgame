@@ -17,14 +17,11 @@ use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-class PasswordEdit extends AbstractType
+class PasswordChange extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options): void
+    public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('oldPassword', PasswordType::class, [
-                'label' => 'Mot de passe actuel',
-            ])
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,
                 'first_options'  => [
@@ -48,18 +45,8 @@ class PasswordEdit extends AbstractType
                 'invalid_message' => 'Les mots de passe doivent être identiques.',
                 'mapped' => false,
             ])
-
-
-            // ->add('agreeTerms', CheckboxType::class, [
-            //                     'mapped' => false,
-            //     'constraints' => [
-            //         new IsTrue([
-            //             'message' => 'You should agree to our terms.',
-            //         ]),
-            //     ],
-            // ])
             ->add('submit', SubmitType::class, [
-                'label' => 'Créez votre compte',
+                'label' => 'Envoyer',
             ])
         ;
     }

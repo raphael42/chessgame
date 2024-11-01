@@ -38,6 +38,14 @@ register:
     path: creer-mon-compte
     controller: App\Controller\RegistrationController::registerfunction
 
+passwordRecovery:
+    path: recuperation-mot-de-passe
+    controller: App\Controller\RegistrationController::passwordRecoveryfunction
+
+passwordChange:
+    path: changement-mot-de-passe/{url}
+    controller: App\Controller\RegistrationController::passwordChangefunction
+
 profile:
     path: mon-compte
     controller: App\Controller\UserAccountController::userAccountFunction
