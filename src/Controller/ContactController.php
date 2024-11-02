@@ -9,6 +9,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 use App\Form\Contact;
 use App\Entity;
@@ -38,16 +39,17 @@ class ContactController extends AbstractController
 
             return $this->redirectToRoute('contact', ['status' => 'send']);
 
-            // TODO later : Send the email
+            // TODO : ajouter un captcha avant ca
             // $email = (new Email())
-            // ->from('contact@freechess.fr')
+            // ->from('contact@chess-league.com')
             // ->to('raphael.bellon42@gmail.com')
-            // ->subject('Symfony mailer!')
-            // ->text('Text integration')
-            // ->html('<p>Html integration</p>');
+            // ->subject($data['subject'])
+            // ->text($data['message']);
 
-            // $result = $mailer->send($email);
-            // dump($result);die;
+            // try {
+            //     $mailer->send($email);
+            // } catch (TransportExceptionInterface $e) {
+            // }
         }
 
         return $this->render('contact.html.twig', [

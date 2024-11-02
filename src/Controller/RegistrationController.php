@@ -18,6 +18,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use \Mailjet\Resources;
 
 use App\Form\PasswordRecovery;
 use App\Form\PasswordChange;
@@ -135,18 +136,34 @@ class RegistrationController extends AbstractController
             $entityManager->persist($passwordRecoveryEntity);
             $entityManager->flush();
 
+            $mj = new \Mailjet\Client($_SERVER['MAILJET_API_KEY'], $_SERVER['MAILJET_API_SECRET'], true, ['version' => 'v3.1']);
+            $body = [
+                'Messages' => [
+                    [
+                        'From' => [
+                            'Email' => "contact@chess-league.com",
+                            'Name' => "Chess-League"
+                        ],
+                        'To' => [
+                            [
+                                'Email' => $user->getEmail(),
+                                'Name' => $user->getNickname(),
+                            ]
+                        ],
+                        'TemplateID' => 6436186,
+                        'TemplateLanguage' => true,
+                        'Subject' => "Récupération de votre mot de passe",
+                        'Variables' => [
+                            'nickname' => $user->getNickname(),
+                            'domaineName' => "Chess-League",
+                            'token' => $randomString,
+                        ],
+                    ]
+                ]
+            ];
+            $response = $mj->post(Resources::$Email, ['body' => $body]);
+
             return $this->redirectToRoute('passwordRecovery', ['status' => 'send']);
-
-            // TODO later : Send the email
-            // $email = (new Email())
-            // ->from('contact@freechess.fr')
-            // ->to('raphael.bellon42@gmail.com')
-            // ->subject('Symfony mailer!')
-            // ->text('Text integration')
-            // ->html('<p>Html integration</p>');
-
-            // $result = $mailer->send($email);
-            // dump($result);die;
         }
 
         return $this->render('security/password-recovery.html.twig', [
