@@ -10,6 +10,7 @@
         "doctrine/doctrine-bundle": "*",
         "doctrine/doctrine-migrations-bundle": "*",
         "doctrine/orm": "*",
+        "mailjet/mailjet-apiv3-php": "^1.6",
         "phpdocumentor/reflection-docblock": "^5.3",
         "react/socket": "^1.15",
         "symfony/asset": "6.4.*",
