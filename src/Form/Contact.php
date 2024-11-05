@@ -13,7 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
-use Symfony\Component\Validator\Constraints\IdenticalTo;
+use Symfony\Component\Validator\Constraints\Choice;
 
 class Contact extends AbstractType
 {
@@ -33,12 +33,15 @@ class Contact extends AbstractType
                 'label' => 'Votre message',
             ])
             ->add('captcha', TextType::class, [
-                'label' => 'Recopiez le texte : <img src="assets/img/captcha/'.$options['code_session'].'.png">',
+                'label' => 'Recopiez le texte : <img src="assets/img/captcha/'.$options['captchaSession'].'.png">',
                 'label_html' => true,
                 'constraints' => [
-                    new IdenticalTo([
-                        // 'value' => strtoupper($options['code_session']) || strtolower($options['code_session']),
-                        'value' => $options['code_session'],
+                    new Choice([
+                        'choices' => [
+                            strtolower($options['captchaCode']),
+                            strtoupper($options['captchaCode']),
+                        ],
+                        'message' => 'La valeur est incorrect'
                     ]),
                 ],
             ])
@@ -55,6 +58,7 @@ class Contact extends AbstractType
         ]);
 
         // Ajoute une option personnalisée
-        $resolver->setDefined(['code_session']);
+        $resolver->setDefined(['captchaCode']);
+        $resolver->setDefined(['captchaSession']);
     }
 }

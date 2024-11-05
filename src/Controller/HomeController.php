@@ -26,6 +26,7 @@ class HomeController extends AbstractController
             $url = time().bin2hex(random_bytes(10));
             $gameId = $this->createNewGame($url, $data, $entityManager);
 
+            // TODO : check if it creates new sessions, and maybe replace it by $session = $request->getSession();
             $session = new Session();
             $session->set('gameDatas', [
                 'gameCreator' => true,
@@ -43,6 +44,7 @@ class HomeController extends AbstractController
             $url = time().bin2hex(random_bytes(10));
             $gameId = $this->createNewGame($url, $data, $entityManager);
 
+            // TODO : check if it creates new sessions, and maybe replace it by $session = $request->getSession();
             $session = new Session();
             $session->set('gameDatas', [
                 'gameCreator' => true,
@@ -64,6 +66,7 @@ class HomeController extends AbstractController
             $url = time().bin2hex(random_bytes(10));
             $gameId = $this->createNewGame($url, $data, $entityManager);
 
+            // TODO : check if it creates new sessions, and maybe replace it by $session = $request->getSession();
             $session = new Session();
             $session->set('gameDatas', [
                 'gameCreator' => true,
