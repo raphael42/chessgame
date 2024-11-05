@@ -97,9 +97,15 @@ class ContactController extends AbstractController
             $contactFormEntity->setMessage($data['message']);
             $contactFormEntity->setDateInsert($dateTimeNow);
             $contactFormEntity->setStatus('waiting');
+            $contactFormEntity->setCaptchaCode($session->get('captchaCodeContact'));
+            $contactFormEntity->setCaptchaSession($session->get('captchaSessionContact'));
 
             $entityManager->persist($contactFormEntity);
             $entityManager->flush();
+
+            $session->remove('captchaCodeContact');
+            $session->remove('captchaSessionContact');
+            $session->remove('captchaContactTimeStamp');
 
             return $this->redirectToRoute('contact', ['status' => 'send']);
 
