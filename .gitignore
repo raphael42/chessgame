@@ -25,7 +25,6 @@
 
 ###> captcha images path ###
 /public/assets/img/captcha/*.png
-!/public/assets/img/captcha
 ###< captcha images path ###
 
 ###> sass command ###
