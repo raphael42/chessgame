@@ -33,7 +33,7 @@ class Contact extends AbstractType
                 'label' => 'Votre message',
             ])
             ->add('captcha', TextType::class, [
-                'label' => 'Recopiez le texte : <img src="assets/img/captcha/'.$options['captchaSession'].'.png">',
+                'label' => 'Recopiez le texte : <img src="/assets/img/captcha/'.$options['captchaSession'].'.png">',
                 'label_html' => true,
                 'constraints' => [
                     new Choice([
