@@ -19,6 +19,7 @@ class GameAIController extends AbstractController
 
         $idGame = $game->getId();
 
+        // TODO : check if it creates new sessions, and maybe replace it by $session = $request->getSession();
         $session = new Session();
         $session->start();
 

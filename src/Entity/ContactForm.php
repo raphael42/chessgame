@@ -32,6 +32,12 @@ class ContactForm
     #[ORM\Column(length: 100)]
     private ?string $status = null;
 
+    #[ORM\Column(length: 4, nullable: true)]
+    private ?string $captcha_code = null;
+
+    #[ORM\Column(length: 15, nullable: true)]
+    private ?string $captcha_session = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -105,6 +111,30 @@ class ContactForm
     public function setStatus(string $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getCaptchaCode(): ?string
+    {
+        return $this->captcha_code;
+    }
+
+    public function setCaptchaCode(?string $captcha_code): static
+    {
+        $this->captcha_code = $captcha_code;
+
+        return $this;
+    }
+
+    public function getCaptchaSession(): ?string
+    {
+        return $this->captcha_session;
+    }
+
+    public function setCaptchaSession(?string $captcha_session): static
+    {
+        $this->captcha_session = $captcha_session;
 
         return $this;
     }
