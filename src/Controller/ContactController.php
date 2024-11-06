@@ -10,15 +10,15 @@ use Symfony\Component\Mime\Email;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 use App\Form\Contact;
 use App\Entity;
 
 class ContactController extends AbstractController
 {
-    public function contactfunction(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+    public function contactfunction(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer, KernelInterface $kernel): Response
     {
-
         $session = $request->getSession();
 
         if (is_null($session->get('captchaCodeContact')) || is_null($session->get('captchaSessionContact')) || is_null($session->get('captchaContactTimeStamp')) || $session->get('captchaContactTimeStamp') < time() - 3600) {
@@ -71,7 +71,7 @@ class ContactController extends AbstractController
             imagestring($image, 5, 10, 5, $imgCodeWithSpaces, imagecolorallocate($image, 0, 0, 0));
 
             // Create and save the picture in the appropriate directory
-            imagepng($image, 'assets/img/captcha/'.$captchaSession.'.png');
+            imagepng($image, $kernel->getProjectDir() . '/public/assets/img/captcha/'.$captchaSession.'.png');
 
             // Now that image is saved, destroy it to not use memory place
             imagedestroy($image);
