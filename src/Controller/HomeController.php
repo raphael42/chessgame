@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Doctrine\ORM\EntityManagerInterface;
 
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
+
 use App\Form\CreateGameWithFriend;
 use App\Form\CreateGameRandom;
 use App\Form\CreateGameAI;
@@ -15,7 +17,7 @@ use App\Entity;
 
 class HomeController extends AbstractController
 {
-    public function index(Request $request, EntityManagerInterface $entityManager)
+    public function index(Request $request, EntityManagerInterface $entityManager, #[CurrentUser] ?Entity\User $user)
     {
         $formWithFriend = $this->createForm(CreateGameWithFriend::class);
         $formWithFriend->handleRequest($request);
@@ -24,10 +26,9 @@ class HomeController extends AbstractController
             $data['type'] = 'with-friend'; // Game type is with friend, set it
 
             $url = time().bin2hex(random_bytes(10));
-            $gameId = $this->createNewGame($url, $data, $entityManager);
+            $gameId = $this->createNewGame($url, $data, $entityManager, $user);
 
-            // TODO : check if it creates new sessions, and maybe replace it by $session = $request->getSession();
-            $session = new Session();
+            $session = $request->getSession();
             $session->set('gameDatas', [
                 'gameCreator' => true,
                 'id' => $gameId,
@@ -42,10 +43,9 @@ class HomeController extends AbstractController
             $data = $formRandom->getData();
 
             $url = time().bin2hex(random_bytes(10));
-            $gameId = $this->createNewGame($url, $data, $entityManager);
+            $gameId = $this->createNewGame($url, $data, $entityManager, $user);
 
-            // TODO : check if it creates new sessions, and maybe replace it by $session = $request->getSession();
-            $session = new Session();
+            $session = $request->getSession();
             $session->set('gameDatas', [
                 'gameCreator' => true,
                 'id' => $gameId,
@@ -64,10 +64,9 @@ class HomeController extends AbstractController
             $data['secondsIncrement'] = 0; // No increment, for now
 
             $url = time().bin2hex(random_bytes(10));
-            $gameId = $this->createNewGame($url, $data, $entityManager);
+            $gameId = $this->createNewGame($url, $data, $entityManager, $user);
 
-            // TODO : check if it creates new sessions, and maybe replace it by $session = $request->getSession();
-            $session = new Session();
+            $session = $request->getSession();
             $session->set('gameDatas', [
                 'gameCreator' => true,
                 'id' => $gameId,
@@ -83,7 +82,7 @@ class HomeController extends AbstractController
         ]);
     }
 
-    private function createNewGame(string $url, array $data, EntityManagerInterface $entityManager) : int
+    private function createNewGame(string $url, array $data, EntityManagerInterface $entityManager, ?Entity\User $user) : int
     {
         $dateTimeNow = new \DateTime();
 
@@ -117,6 +116,7 @@ class HomeController extends AbstractController
         $playerCreatorEntity->setGameCreator(true);
         $playerCreatorEntity->setTimeLeft($timePerPlayer);
         $playerCreatorEntity->setIdGame($gameEntity);
+        $playerCreatorEntity->setUser($user);
         $entityManager->persist($playerCreatorEntity);
 
         $playerGuestEntity = new Entity\Player();

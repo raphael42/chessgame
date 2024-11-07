@@ -6,12 +6,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\HttpFoundation\Request;
 
 use App\Entity;
 
 class GameController extends AbstractController
 {
-    public function gamefunction($url, EntityManagerInterface $entityManager)
+    public function gamefunction($url, Request $request, EntityManagerInterface $entityManager, #[CurrentUser] ?Entity\User $user)
     {
         $game = $entityManager->getRepository(Entity\Game::class)->findOneBy([
             'url' => $url,
@@ -19,9 +21,7 @@ class GameController extends AbstractController
 
         $idGame = $game->getId();
 
-        // TODO : check if it creates new sessions, and maybe replace it by $session = $request->getSession();
-        $session = new Session();
-        $session->start();
+        $session = $request->getSession();
 
         $playerType = 'spectator';
 
@@ -83,6 +83,9 @@ class GameController extends AbstractController
 
                 $player->setIp($_SERVER['REMOTE_ADDR']);
                 $player->setUserAgent($_SERVER['HTTP_USER_AGENT']);
+
+                // First opponent connexion, fill the user id it's set. The game creator has his field filled at the creation
+                $player->setUser($user);
                 $entityManager->persist($player);
 
                 $flushNeeded = true;

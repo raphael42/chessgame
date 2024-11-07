@@ -6,12 +6,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 use App\Entity;
 
 class GameAIController extends AbstractController
 {
-    public function gameaifunction($url, EntityManagerInterface $entityManager)
+    public function gameaifunction($url, Request $request, EntityManagerInterface $entityManager)
     {
         $game = $entityManager->getRepository(Entity\Game::class)->findOneBy([
             'url' => $url,
@@ -19,9 +20,7 @@ class GameAIController extends AbstractController
 
         $idGame = $game->getId();
 
-        // TODO : check if it creates new sessions, and maybe replace it by $session = $request->getSession();
-        $session = new Session();
-        $session->start();
+        $session = $request->getSession();
 
         $playerType = 'spectator';
 
@@ -69,6 +68,13 @@ class GameAIController extends AbstractController
             if ($opponent->getIp() === null) {
                 $opponent->setIp($_SERVER['SERVER_ADDR'] ?? '127.0.0.1');
                 $opponent->setUserAgent($_SERVER['HTTP_USER_AGENT']);
+
+                // AI user
+                $aiUser = $entityManager->getRepository(Entity\User::class)->findOneBy([
+                    'email' => 'ai@chess-league.com',
+                ]);
+                $opponent->setUser($aiUser);
+
                 $entityManager->persist($opponent);
 
                 $flushNeeded = true;
