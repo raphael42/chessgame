@@ -20,6 +20,10 @@ class Contact extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
+            ->add('lastname', HiddenType::class, [ // In reality, this field is an honeypot and should not be filled
+                'label' => 'Votre nom',
+                'required' => false,
+            ])
             ->add('name', TextType::class, [
                 'label' => 'Votre prénom',
             ])

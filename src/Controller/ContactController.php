@@ -88,6 +88,11 @@ class ContactController extends AbstractController
             // For the moment, save the data in DB. Later, send an email
             $data = $formContact->getData();
 
+            // lastname is in reality an honeypot. If the field is filled, faking that the form is sent
+            if (!is_null($data['lastname'])) {
+                return $this->redirectToRoute('contact', ['status' => 'send']);
+            }
+
             $dateTimeNow = new \DateTime();
 
             $contactFormEntity = new Entity\ContactForm();
