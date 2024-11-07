@@ -41,7 +41,7 @@ class Player
     private ?string $ip = null;
 
     #[ORM\ManyToOne(inversedBy: 'players')]
-    private ?user $user = null;
+    private ?User $user = null;
 
     public function __construct()
     {
