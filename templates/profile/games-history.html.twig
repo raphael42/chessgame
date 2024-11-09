@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ app.request.host }} | Mon compte - Historique des parties{% endblock %}
+
+{% block style_container %}max-width:968px; margin: 32px auto;{% endblock %}
+
+{% block body %}
+    <div class="text-center">
+        <h1>Historique des parties</h1>
+    </div>
+    <div class="row">
+        {% for oneGame in gamePlayers %}
+            <div class="col-3">
+                Img du board
+            </div>
+            <div class="col-9">
+                Info de la partie
+                {# <p>Type de jeu : {{ oneGame.game.type }}</p>
+                {% if oneGame.game.winner %}
+                    <p>Votre couleur : {{ oneGame.color }}</p>
+                {% endif %}
+                <p>Résultat : {{ oneGame.game.winner }}</p> #}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

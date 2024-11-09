@@ -54,6 +54,10 @@ profileInfoPerso:
     path: mon-compte/informations-personnelles
     controller: App\Controller\UserAccountController::userAccountInfosPersoFunction
 
+profileGameHistory:
+    path: mon-compte/historiques-parties
+    controller: App\Controller\UserAccountController::userAccountGameHistoryFunction
+
 controllers:
     resource:
         path: ../src/Controller/
