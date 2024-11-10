@@ -2,6 +2,7 @@ import $ from 'jquery';
 import 'jquery-ui/ui/widgets/draggable';
 import 'jquery-ui/ui/widgets/droppable';
 import { Chess } from 'chess.js';
+import { Fireworks } from 'fireworks-js';
 require('bootstrap');
 
 var HISTORYINDEX = null;
@@ -1233,4 +1234,46 @@ function gameIsOver(status, playerWinner, endReason) {
     }
 
     $('.piece.' + PLAYERCOLOR).draggable('destroy');
+
+    let launchFireworks = false;
+    if ((playerWinner === 'w' || playerWinner === 'white') && (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white')) {
+        launchFireworks = true;
+    }
+
+    if ((playerWinner === 'b' || playerWinner === 'black') && (PLAYERCOLOR === 'b' || PLAYERCOLOR === 'black')) {
+        launchFireworks = true;
+    }
+
+    if (launchFireworks) {
+        const container = document.querySelector('#fireworks-container');
+        const fireworks = new Fireworks(container, {
+            autoresize: false,
+            rocketsPoint: {
+                min: 50,
+                max: 50
+            },
+            hue: { min: 0, max: 345 },
+            delay: { min: 15, max: 30 },
+            speed: 2,
+            acceleration: 1.05,
+            friction: 0.98,
+            gravity: 1.5,
+            particles: 50,
+            trace: 3,
+            traceSpeed: 10,
+        });
+        fireworks.start();
+
+        // After 2 seconds, we set intensity to 0. It hides the firework
+        setTimeout(() => {
+            fireworks.updateOptions({
+                intensity: 0,
+            });
+
+            // After 3 seconds more, we stop the firework
+            setTimeout(() => {
+                fireworks.stop();
+            }, 3000);
+        }, 2000);
+    }
 }
