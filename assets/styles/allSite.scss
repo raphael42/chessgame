@@ -246,3 +246,13 @@
         text-decoration: none;
     }
 }
+
+#fireworks-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; // Allow to click throw the anipation
+    z-index: 99999; // Set fireworks at the top of everything
+}
