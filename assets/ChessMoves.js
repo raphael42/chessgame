@@ -303,6 +303,8 @@ $(function() {
                 } else { // If undo a black move, empty the move history square
                     $('#move-san-b-' + moveNumber).empty();
                 }
+            } else { // If we need to remove only the PLAYERCOLOR turn, we have to switch turn
+                switchTurn();
             }
 
             let undo = chess.undo();
@@ -1164,6 +1166,8 @@ $(function() {
                 $('#move-san-b-' + moveNumber).empty();
             }
             onlyOne = false;
+        } else {
+            switchTurn();
         }
 
         let undo = chess.undo();
