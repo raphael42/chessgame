@@ -933,6 +933,9 @@ $(function() {
 
         $('.last-history-move').removeClass('last-history-move');
 
+        // in-check class will be recalculate for each history except the start button
+        $('.in-check').removeClass('in-check');
+
         let chessHistory = chess.history({verbose: true});
 
         let elementId = $(this).attr('id');
