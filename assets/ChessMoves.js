@@ -32,6 +32,13 @@ var times, timer;
 placePieces(FEN);
 setUpTimer();
 
+$('#color-player').html(PLAYERCOLOR + ' | ');
+if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
+    $('#color-opponent').html('black | ');
+} else {
+    $('#color-opponent').html('white | ');
+}
+
 $(function() {
     if (chess.inCheck() === true) {
         let kingposition = null;
