@@ -97,6 +97,8 @@ $(function() {
     socket.addEventListener('message', function(e) {
         var socketMessage = JSON.parse(e.data);
 
+        console.log(socketMessage);
+
         // Disconnect
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'opponent_disconnect') {
             let playerFound = false;
@@ -1010,26 +1012,26 @@ $(function() {
             return;
         }
 
-        let isConfirmed = confirm('Vous êtes sur le point d\'abandonner. Voulez-vous confirmer ?');
-        if (!isConfirmed) {
-            return;
-        }
+        $('#resign-modal').modal('show');
+        $('#confirm-resign-modal').off().on('click', function() {
+            $('#resign-modal').modal('hide');
 
-        if (PLAYERCOLOR === 'white') {
-            gameIsOver('win', 'b', 'Black win ! White resign');
-        } else {
-            gameIsOver('win', 'w', 'White win ! Black resign');
-        }
+            if (PLAYERCOLOR === 'white') {
+                gameIsOver('win', 'b', 'Black win ! White resign');
+            } else {
+                gameIsOver('win', 'w', 'White win ! Black resign');
+            }
 
-        try {
-            socket.send(JSON.stringify({
-                'method': 'resign',
-                'idGame': IDGAME,
-                'color': PLAYERCOLOR,
-            }));
-        } catch (error) {
-            console.log('Socket error', error);
-        }
+            try {
+                socket.send(JSON.stringify({
+                    'method': 'resign',
+                    'idGame': IDGAME,
+                    'color': PLAYERCOLOR,
+                }));
+            } catch (error) {
+                console.log('Socket error', error);
+            }
+        });
     });
 
     $('#offer-draw').on('click', function() {
@@ -1043,29 +1045,29 @@ $(function() {
             return;
         }
 
-        let isConfirmed = confirm('Voulez-vous proposer un match nul à votre adversaire ?');
-        if (!isConfirmed) {
-            return;
-        }
+        $('#offerdraw-modal').modal('show');
+        $('#confirm-offerdraw-modal').off().on('click', function() {
+            $('#offerdraw-modal').modal('hide');
 
-        $('#offer-draw-display').removeClass('d-none');
+            $('#offer-draw-display').removeClass('d-none');
 
-        let message = 'Black offers draw';
-        if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
-            message = 'White offers draw';
-        }
+            let message = 'Black offers draw';
+            if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
+                message = 'White offers draw';
+            }
 
-        $('.tchat').append('<div>' + message + '</div>');
+            $('.tchat').append('<div>' + message + '</div>');
 
-        try {
-            socket.send(JSON.stringify({
-                'method': 'offer-draw',
-                'idGame': IDGAME,
-                'message': message,
-            }));
-        } catch (error) {
-            console.log('Socket error', error);
-        }
+            try {
+                socket.send(JSON.stringify({
+                    'method': 'offer-draw',
+                    'idGame': IDGAME,
+                    'message': message,
+                }));
+            } catch (error) {
+                console.log('Socket error', error);
+            }
+        });
     });
 
     $('#offer-draw-yes').on('click', function() {

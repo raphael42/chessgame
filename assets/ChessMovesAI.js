@@ -582,16 +582,16 @@ $(function() {
         //     return;
         // }
 
-        let isConfirmed = confirm('Vous êtes sur le point d\'abandonner. Voulez-vous confirmer ?');
-        if (!isConfirmed) {
-            return;
-        }
+        $('#resign-modal').modal('show');
+        $('#confirm-resign-modal').off().on('click', function() {
+            $('#resign-modal').modal('hide');
 
-        if (PLAYERCOLOR === 'white') {
-            gameIsOver('win', 'b', 'Black win ! White resign');
-        } else {
-            gameIsOver('win', 'w', 'White win ! Black resign');
-        }
+            if (PLAYERCOLOR === 'white') {
+                gameIsOver('win', 'b', 'Black win ! White resign');
+            } else {
+                gameIsOver('win', 'w', 'White win ! Black resign');
+            }
+        });
     });
 
     $('#takeback').on('click', function() {
