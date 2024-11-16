@@ -7,10 +7,6 @@ require('bootstrap');
 
 var HISTORYINDEX = null;
 var HISTORYINVIEW = false;
-var AICOLOR = 'w';
-if (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white') {
-    AICOLOR = 'b';
-}
 
 const chess = new Chess(FEN);
 if (PGN !== null) {
@@ -592,9 +588,9 @@ $(function() {
         }
 
         if (PLAYERCOLOR === 'white') {
-            gameIsOver('win', PLAYERCOLOR, 'Black win ! White resign');
+            gameIsOver('win', 'b', 'Black win ! White resign');
         } else {
-            gameIsOver('win', PLAYERCOLOR, 'White win ! Black resign');
+            gameIsOver('win', 'w', 'White win ! Black resign');
         }
     });
 
@@ -850,11 +846,12 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                 lastMoveHistory['gameStatus'] = 'checkmate';
                 lastMoveHistory['gameReason'] = 'checkmate';
                 if (moving.color === 'w') {
-                    lastMoveHistory['message'] = 'White win ! Black is checkmate';
+                    lastMoveHistory['message'] = 'White win ! Black is checkmate'
+                    gameIsOver('win', 'w', lastMoveHistory['message']);
                 } else {
                     lastMoveHistory['message'] = 'Black win ! White is checkmate';
+                    gameIsOver('win', 'b', lastMoveHistory['message']);
                 }
-                gameIsOver('win', moving.color, lastMoveHistory['message']);
             } else if (chess.isDraw()) {
                 lastMoveHistory['gameStatus'] = 'draw';
                 if (chess.isStalemate()) {
@@ -870,7 +867,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                     lastMoveHistory['gameReason'] = 'fiftyMoves';
                     lastMoveHistory['message'] = 'Draw ! Fifty moves without progressions';
                 }
-                gameIsOver('d', moving.color, lastMoveHistory['message']);
+                gameIsOver('d', null, lastMoveHistory['message']);
             }
         }
 
@@ -1226,15 +1223,7 @@ function switchTurn() {
 function gameIsOver(status, playerWinner, endReason) {
     GAMESTATUS = 'finished';
 
-    if (status === 'd') { // Draw
-        $('.tchat').append('<div>' + endReason + '</div>');
-    } else { // One player win
-        if (playerWinner === 'w' || playerWinner === 'white') {
-            $('.tchat').append('<div>' + endReason + '</div>');
-        } else {
-            $('.tchat').append('<div>' + endReason + '</div>');
-        }
-    }
+    $('.tchat').append('<div>' + endReason + '</div>');
 
     $('.piece.' + PLAYERCOLOR).draggable('destroy');
 
