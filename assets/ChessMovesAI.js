@@ -652,6 +652,26 @@ $(function() {
         $('#move-san-' + fenSplitForHistory[1] + '-' + fenSplitForHistory[5]).addClass('last-history-move');
 
         setupDraggable();
+
+        const data = {
+            'game-url': GAMEURL,
+            'fen': chess.fen(),
+            'pgn': chess.pgn(),
+        };
+        $.ajax({
+            url: AJAXAITAKEBACKURL,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            error: function(xhr, status, error) {
+                console.log(status + ' : ' + error);
+                var errorMessage = xhr.status + ': ' + xhr.statusText
+                console.log('Error - ' + errorMessage);
+            },
+            success: function(data) {
+                console.log(data);
+            }
+        });
     });
 });
 
@@ -896,29 +916,23 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             (PLAYERCOLOR === 'black' && playerTurn === 'w'))
         ) { // And is not finished, it's not the player turn, then make an AI move
             AiPlay();
-
-            // Send an ajax request for each turn (1 turn = 1 move from player + 1 move from AI)
-            const data = {
-                'game-url': GAMEURL,
-                'fen': chess.fen(),
-                'pgn': chess.pgn(),
-            };
-
-            $.ajax({
-                url: AJAXAIONEMOVEURL,
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(data),
-                error: function(xhr, status, error) {
-                    console.log(status + ' : ' + error);
-                    var errorMessage = xhr.status + ': ' + xhr.statusText
-                    console.log('Error - ' + errorMessage);
-                },
-                success: function(data) {
-                    console.log(data);
-                }
-            });
         }
+
+        lastMoveHistory['game-url'] = GAMEURL;
+        $.ajax({
+            url: AJAXAIONEMOVEURL,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(lastMoveHistory),
+            error: function(xhr, status, error) {
+                console.log(status + ' : ' + error);
+                var errorMessage = xhr.status + ': ' + xhr.statusText
+                console.log('Error - ' + errorMessage);
+            },
+            success: function(data) {
+                console.log(data);
+            }
+        });
 
         return true;
     }

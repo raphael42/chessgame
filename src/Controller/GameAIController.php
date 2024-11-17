@@ -152,44 +152,16 @@ class GameAIController extends AbstractController
         $content = $request->getContent();
         $data = json_decode($content, true);
 
-        if (!isset($data['game-url'])) {
-            $response = [
-                'success' => false,
-                'massage' => 'Variable game-url is mandatory',
-            ];
-            return new JsonResponse($response, 400);
-        }
+        // Mandatory variables
+        $requiredFields = ['game-url', 'winner-color', 'reason', 'fen', 'pgn'];
 
-        if (!isset($data['winner-color'])) {
-            $response = [
-                'success' => false,
-                'massage' => 'Variable winner-color is mandatory',
-            ];
-            return new JsonResponse($response, 400);
-        }
-
-        if (!isset($data['reason'])) {
-            $response = [
-                'success' => false,
-                'massage' => 'Variable reason is mandatory',
-            ];
-            return new JsonResponse($response, 400);
-        }
-
-        if (!isset($data['fen'])) {
-            $response = [
-                'success' => false,
-                'massage' => 'Variable fen is mandatory',
-            ];
-            return new JsonResponse($response, 400);
-        }
-
-        if (!isset($data['pgn'])) {
-            $response = [
-                'success' => false,
-                'massage' => 'Variable pgn is mandatory',
-            ];
-            return new JsonResponse($response, 400);
+        foreach ($requiredFields as $field) {
+            if (!isset($data[$field])) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Variable '.$field.' is mandatory',
+                ], 400);
+            }
         }
 
         $game = $entityManager->getRepository(Entity\Game::class)->findOneBy([
@@ -224,28 +196,85 @@ class GameAIController extends AbstractController
         $content = $request->getContent();
         $data = json_decode($content, true);
 
-        if (!isset($data['game-url'])) {
-            $response = [
-                'success' => false,
-                'massage' => 'Variable game-url is mandatory',
-            ];
-            return new JsonResponse($response, 400);
+        // Mandatory variables
+        $requiredFields = ['game-url', 'pgn', 'before', 'after', 'piece', 'from', 'to', 'san', 'lan', 'flags', 'moveNumber'];
+
+        foreach ($requiredFields as $field) {
+            if (!isset($data[$field])) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Variable '.$field.' is mandatory',
+                ], 400);
+            }
         }
 
-        if (!isset($data['fen'])) {
+        $game = $entityManager->getRepository(Entity\Game::class)->findOneBy([
+            'url' => $data['game-url'],
+        ]);
+
+        if (is_null($game)) {
             $response = [
                 'success' => false,
-                'massage' => 'Variable fen is mandatory',
+                'massage' => 'Game not found',
             ];
-            return new JsonResponse($response, 400);
+            return new JsonResponse($response, 404);
         }
 
-        if (!isset($data['pgn'])) {
-            $response = [
-                'success' => false,
-                'massage' => 'Variable pgn is mandatory',
-            ];
-            return new JsonResponse($response, 400);
+        $game->setStatus('inplay');
+        $game->setFen($data['after']);
+        $game->setPgn($data['pgn']);
+        $entityManager->persist($game);
+
+
+        $color = 'white';
+        if ($data['color'] === 'b') {
+            $color = 'black';
+        }
+        $player = $entityManager->getRepository(Entity\Player::class)->findOneBy([
+            'game' => $game->getId(),
+            'color' => $color,
+        ]);
+        $movesEntity = new Entity\Moves();
+        $movesEntity->setPlayer($player);
+        $movesEntity->setGame($game);
+        $movesEntity->setFenBefore($data['before']);
+        $movesEntity->setFenAfter($data['after']);
+        $movesEntity->setPiece($data['piece']);
+        $movesEntity->setSquareFrom($data['from']);
+        $movesEntity->setSquareTo($data['to']);
+        $movesEntity->setSan($data['san']);
+        $movesEntity->setLan($data['lan']);
+        $movesEntity->setFlags($data['flags']);
+        $movesEntity->setMoveNumber($data['moveNumber']);
+        if (isset($data['promotion'])) {
+            $movesEntity->setPromotion($data['promotion']);
+        }
+        $entityManager->persist($movesEntity);
+
+
+        $entityManager->flush();
+
+        $response = [
+            'success' => true,
+        ];
+        return new JsonResponse($response);
+    }
+
+    public function ajaxTakebackFunction(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $content = $request->getContent();
+        $data = json_decode($content, true);
+
+        // Mandatory variables
+        $requiredFields = ['game-url', 'pgn', 'fen'];
+
+        foreach ($requiredFields as $field) {
+            if (!isset($data[$field])) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Variable '.$field.' is mandatory',
+                ], 400);
+            }
         }
 
         $game = $entityManager->getRepository(Entity\Game::class)->findOneBy([
@@ -262,8 +291,23 @@ class GameAIController extends AbstractController
 
         $game->setFen($data['fen']);
         $game->setPgn($data['pgn']);
-
         $entityManager->persist($game);
+
+        $moves = $entityManager->getRepository(Entity\Moves::class)->findBy(
+            ['game' => $game],
+            ['id' => 'DESC']
+        );
+
+        $count = 0;
+        foreach ($moves as $oneMove) {
+            $entityManager->remove($oneMove); // Remove one Move
+
+            $count++;
+            if ($count >= 2) {
+                break;
+            }
+        }
+
         $entityManager->flush();
 
         $response = [

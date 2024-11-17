@@ -66,6 +66,10 @@ ajaxAIOneMove:
     path: ajax/ai-one-move
     controller: App\Controller\GameAIController::ajaxOneMoveFunction
 
+ajaxAITakeback:
+    path: ajax/ai-tackback
+    controller: App\Controller\GameAIController::ajaxTakebackFunction
+
 controllers:
     resource:
         path: ../src/Controller/
