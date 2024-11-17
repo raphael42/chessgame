@@ -587,9 +587,9 @@ $(function() {
             $('#resign-modal').modal('hide');
 
             if (PLAYERCOLOR === 'white') {
-                gameIsOver('win', 'b', 'Black win ! White resign');
+                gameIsOver('resign', 'b', 'Black win ! White resign');
             } else {
-                gameIsOver('win', 'w', 'White win ! Black resign');
+                gameIsOver('resign', 'w', 'White win ! Black resign');
             }
         });
     });
@@ -847,10 +847,10 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                 lastMoveHistory['gameReason'] = 'checkmate';
                 if (moving.color === 'w') {
                     lastMoveHistory['message'] = 'White win ! Black is checkmate'
-                    gameIsOver('win', 'w', lastMoveHistory['message']);
+                    gameIsOver(lastMoveHistory['gameReason'], 'w', lastMoveHistory['message']);
                 } else {
                     lastMoveHistory['message'] = 'Black win ! White is checkmate';
-                    gameIsOver('win', 'b', lastMoveHistory['message']);
+                    gameIsOver(lastMoveHistory['gameReason'], 'b', lastMoveHistory['message']);
                 }
             } else if (chess.isDraw()) {
                 lastMoveHistory['gameStatus'] = 'draw';
@@ -867,7 +867,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                     lastMoveHistory['gameReason'] = 'fiftyMoves';
                     lastMoveHistory['message'] = 'Draw ! Fifty moves without progressions';
                 }
-                gameIsOver('d', null, lastMoveHistory['message']);
+                gameIsOver(lastMoveHistory['gameReason'], 'd', lastMoveHistory['message']);
             }
         }
 
@@ -1220,7 +1220,7 @@ function switchTurn() {
 }
 
 
-function gameIsOver(status, playerWinner, endReason) {
+function gameIsOver(reason, playerWinner, endReason) {
     GAMESTATUS = 'finished';
 
     $('.tchat').append('<div>' + endReason + '</div>');
@@ -1228,11 +1228,11 @@ function gameIsOver(status, playerWinner, endReason) {
     $('.piece.' + PLAYERCOLOR).draggable('destroy');
 
     let launchFireworks = false;
-    if ((playerWinner === 'w' || playerWinner === 'white') && (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white')) {
+    if (playerWinner === 'w' && (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white')) {
         launchFireworks = true;
     }
 
-    if ((playerWinner === 'b' || playerWinner === 'black') && (PLAYERCOLOR === 'b' || PLAYERCOLOR === 'black')) {
+    if (playerWinner === 'b' && (PLAYERCOLOR === 'b' || PLAYERCOLOR === 'black')) {
         launchFireworks = true;
     }
 
@@ -1268,4 +1268,25 @@ function gameIsOver(status, playerWinner, endReason) {
             }, 3000);
         }, 2000);
     }
+
+    const data = {
+        'game-url': GAMEURL,
+        'winner-color': playerWinner,
+        'reason': reason,
+    };
+
+    $.ajax({
+        url: AJAXENDGAMEURL,
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(data),
+        error: function(xhr, status, error) {
+            console.log(status + ' : ' + error);
+            var errorMessage = xhr.status + ': ' + xhr.statusText
+            console.log('Error - ' + errorMessage);
+        },
+        success: function(data) {
+            console.log(data);
+        }
+    });
 }
