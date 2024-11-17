@@ -1276,7 +1276,7 @@ function gameIsOver(reason, playerWinner, endReason) {
     };
 
     $.ajax({
-        url: AJAXENDGAMEURL,
+        url: AJAXAIENDGAMEURL,
         method: 'POST',
         contentType: 'application/json',
         data: JSON.stringify(data),

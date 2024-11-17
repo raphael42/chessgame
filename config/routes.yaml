@@ -58,9 +58,9 @@ profileGameHistory:
     path: mon-compte/historiques-parties
     controller: App\Controller\UserAccountController::userAccountGameHistoryFunction
 
-ajaxEndGame:
-    path: ajax/end-game
-    controller: App\Controller\EndGameController::ajaxRequestFunction
+ajaxAIEndGame:
+    path: ajax/ai-end-game
+    controller: App\Controller\GameAIController::ajaxEndGameFunction
 
 controllers:
     resource:
