@@ -153,23 +153,43 @@ class GameAIController extends AbstractController
         $data = json_decode($content, true);
 
         if (!isset($data['game-url'])) {
-            // Return error
+            $response = [
+                'success' => false,
+                'massage' => 'Variable game-url is mandatory',
+            ];
+            return new JsonResponse($response, 400);
         }
 
         if (!isset($data['winner-color'])) {
-            // Return error
+            $response = [
+                'success' => false,
+                'massage' => 'Variable winner-color is mandatory',
+            ];
+            return new JsonResponse($response, 400);
         }
 
         if (!isset($data['reason'])) {
-            // Return error
+            $response = [
+                'success' => false,
+                'massage' => 'Variable reason is mandatory',
+            ];
+            return new JsonResponse($response, 400);
         }
 
         if (!isset($data['fen'])) {
-            // Return error
+            $response = [
+                'success' => false,
+                'massage' => 'Variable fen is mandatory',
+            ];
+            return new JsonResponse($response, 400);
         }
 
         if (!isset($data['pgn'])) {
-            // Return error
+            $response = [
+                'success' => false,
+                'massage' => 'Variable pgn is mandatory',
+            ];
+            return new JsonResponse($response, 400);
         }
 
         $game = $entityManager->getRepository(Entity\Game::class)->findOneBy([
@@ -177,7 +197,11 @@ class GameAIController extends AbstractController
         ]);
 
         if (is_null($game)) {
-            // Return error
+            $response = [
+                'success' => false,
+                'massage' => 'Game not found',
+            ];
+            return new JsonResponse($response, 404);
         }
 
         $game->setFen($data['fen']);
@@ -192,7 +216,6 @@ class GameAIController extends AbstractController
         $response = [
             'success' => true,
         ];
-
         return new JsonResponse($response);
     }
 
@@ -202,15 +225,27 @@ class GameAIController extends AbstractController
         $data = json_decode($content, true);
 
         if (!isset($data['game-url'])) {
-            // Return error
+            $response = [
+                'success' => false,
+                'massage' => 'Variable game-url is mandatory',
+            ];
+            return new JsonResponse($response, 400);
         }
 
         if (!isset($data['fen'])) {
-            // Return error
+            $response = [
+                'success' => false,
+                'massage' => 'Variable fen is mandatory',
+            ];
+            return new JsonResponse($response, 400);
         }
 
         if (!isset($data['pgn'])) {
-            // Return error
+            $response = [
+                'success' => false,
+                'massage' => 'Variable pgn is mandatory',
+            ];
+            return new JsonResponse($response, 400);
         }
 
         $game = $entityManager->getRepository(Entity\Game::class)->findOneBy([
@@ -218,7 +253,11 @@ class GameAIController extends AbstractController
         ]);
 
         if (is_null($game)) {
-            // Return error
+            $response = [
+                'success' => false,
+                'massage' => 'Game not found',
+            ];
+            return new JsonResponse($response, 404);
         }
 
         $game->setFen($data['fen']);
@@ -230,7 +269,6 @@ class GameAIController extends AbstractController
         $response = [
             'success' => true,
         ];
-
         return new JsonResponse($response);
     }
 }
