@@ -62,6 +62,10 @@ ajaxAIEndGame:
     path: ajax/ai-end-game
     controller: App\Controller\GameAIController::ajaxEndGameFunction
 
+ajaxAIOneMove:
+    path: ajax/ai-one-move
+    controller: App\Controller\GameAIController::ajaxOneMoveFunction
+
 controllers:
     resource:
         path: ../src/Controller/

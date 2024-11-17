@@ -164,6 +164,14 @@ class GameAIController extends AbstractController
             // Return error
         }
 
+        if (!isset($data['fen'])) {
+            // Return error
+        }
+
+        if (!isset($data['pgn'])) {
+            // Return error
+        }
+
         $game = $entityManager->getRepository(Entity\Game::class)->findOneBy([
             'url' => $data['game-url'],
         ]);
@@ -172,9 +180,49 @@ class GameAIController extends AbstractController
             // Return error
         }
 
+        $game->setFen($data['fen']);
+        $game->setPgn($data['pgn']);
         $game->setStatus('finished');
         $game->setWinner($data['winner-color']);
         $game->setEndReason($data['reason']);
+
+        $entityManager->persist($game);
+        $entityManager->flush();
+
+        $response = [
+            'success' => true,
+        ];
+
+        return new JsonResponse($response);
+    }
+
+    public function ajaxOneMoveFunction(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $content = $request->getContent();
+        $data = json_decode($content, true);
+
+        if (!isset($data['game-url'])) {
+            // Return error
+        }
+
+        if (!isset($data['fen'])) {
+            // Return error
+        }
+
+        if (!isset($data['pgn'])) {
+            // Return error
+        }
+
+        $game = $entityManager->getRepository(Entity\Game::class)->findOneBy([
+            'url' => $data['game-url'],
+        ]);
+
+        if (is_null($game)) {
+            // Return error
+        }
+
+        $game->setFen($data['fen']);
+        $game->setPgn($data['pgn']);
 
         $entityManager->persist($game);
         $entityManager->flush();

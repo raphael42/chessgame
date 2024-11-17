@@ -183,10 +183,6 @@ var blackPiecePositionRanking = {
     },
 }
 
-if (PLAYERCOLOR === 'b' || PLAYERCOLOR === 'black') {
-    AiPlay(true);
-}
-
 $(function() {
     if (chess.inCheck() === true) {
         let kingposition = null;
@@ -204,6 +200,7 @@ $(function() {
             $('#title').html('C\'est votre tour ! | ' + SERVERNAME);
         } else {
             $('#title').html('En attente de l\'adversaire | ' + SERVERNAME);
+            AiPlay();
         }
     }
 
@@ -896,7 +893,29 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             ((PLAYERCOLOR === 'white' && playerTurn === 'b') ||
             (PLAYERCOLOR === 'black' && playerTurn === 'w'))
         ) { // And is not finished, it's not the player turn, then make an AI move
-            AiPlay(false);
+            AiPlay();
+
+            // Send an ajax request for each turn (1 turn = 1 move from player + 1 move from AI)
+            const data = {
+                'game-url': GAMEURL,
+                'fen': chess.fen(),
+                'pgn': chess.pgn(),
+            };
+
+            $.ajax({
+                url: AJAXAIONEMOVEURL,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                error: function(xhr, status, error) {
+                    console.log(status + ' : ' + error);
+                    var errorMessage = xhr.status + ': ' + xhr.statusText
+                    console.log('Error - ' + errorMessage);
+                },
+                success: function(data) {
+                    console.log(data);
+                }
+            });
         }
 
         return true;
@@ -909,7 +928,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
     return false;
 }
 
-function AiPlay(firstMove) {
+function AiPlay() {
     $('#takeback').prop('disabled', true);
 
     setTimeout(() => {
@@ -1026,7 +1045,7 @@ function AiPlay(firstMove) {
         }
 
         // If it's the first move, let the takeback disabled
-        if (!firstMove) {
+        if (chess.moveNumber() > 1) {
             $('#takeback').prop('disabled', false);
         }
     }, '500');
@@ -1273,6 +1292,8 @@ function gameIsOver(reason, playerWinner, endReason) {
         'game-url': GAMEURL,
         'winner-color': playerWinner,
         'reason': reason,
+        'fen': chess.fen(),
+        'pgn': chess.pgn(),
     };
 
     $.ajax({
