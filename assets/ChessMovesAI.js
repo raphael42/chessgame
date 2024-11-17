@@ -631,6 +631,8 @@ $(function() {
         }
 
         placePieces(chess.fen());
+
+        $('.in-check').removeClass('in-check');
         if (chess.inCheck() === true) {
             if (chess.turn() === 'w') {
                 let kingposition = getKingPosition(chess.fen(), 'white');
