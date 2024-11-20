@@ -220,7 +220,9 @@ class GameAIController extends AbstractController
             return new JsonResponse($response, 404);
         }
 
-        $game->setStatus('inplay');
+        if ($game->getStatus() !== 'finished') {
+            $game->setStatus('inplay');
+        }
         $game->setFen($data['after']);
         $game->setPgn($data['pgn']);
         $entityManager->persist($game);
