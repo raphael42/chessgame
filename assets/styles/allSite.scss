@@ -1,5 +1,65 @@
 @import "~bootstrap/scss/bootstrap";
 
+.board-account-history {
+    display: flex;
+    justify-content: center;
+
+    @media (max-width: 767px) {
+        margin-top : 1rem;
+        margin-bottom : 1rem;
+    }
+
+    .one-column {
+        display: flex;
+        flex-direction: column;
+
+        .chess-table {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            position: relative;
+
+            .piece {
+                z-index: 2;
+                width: 100%;
+                height: 100%;
+            }
+
+            &.case-white {
+                background-color: #f7dfc5;
+
+                &.last-move {
+                    background-color: #cdd26b;
+                }
+
+                &.in-check {
+                    background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #f7dfc5 89%, #f7dfc5 100%);
+                    &.clicked {
+                        background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #8baf73 89%, #8baf73 100%);
+                    }
+                }
+            }
+
+            &.case-black {
+                background-color: #c67945;
+
+                &.last-move {
+                    background-color: #aba239;
+                }
+
+                &.in-check {
+                    background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #c67945 89%, #c67945 100%);
+                    &.clicked {
+                        background : radial-gradient(ellipse at center, red 0%, #e70000 25%, #646f40 89%, #646f40 100%);
+                    }
+                }
+            }
+        }
+    }
+}
+
 #board {
     display: flex;
     justify-content: center;
@@ -255,4 +315,10 @@
     height: 100vh;
     pointer-events: none; // Allow to click throw the anipation
     z-index: 99999; // Set fireworks at the top of everything
+}
+
+// Set decorations same as parent. Useful for <a>
+.no-decoration {
+    color: inherit;
+    text-decoration: inherit;
 }

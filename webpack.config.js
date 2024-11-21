@@ -24,6 +24,7 @@ Encore
     .addEntry('gameJs', './assets/ChessMoves.js')
     .addEntry('gameAiJs', './assets/ChessMovesAI.js')
     .addEntry('homeJs', './assets/home.js')
+    .addEntry('gameHistoryJs', './assets/personal-space/gameHistory.js')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()

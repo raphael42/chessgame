@@ -4,23 +4,89 @@
 
 {% block style_container %}max-width:968px; margin: 32px auto;{% endblock %}
 
+{% block javascripts %}
+    <script>
+        const PIECESIMGURL = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
+        let GAMESLIST = [];
+        {% for oneGame in gamePlayers %}
+            GAMESLIST.push({
+                'id': '{{ oneGame.game.id }}',
+                'fen': '{{ oneGame.game.fen }}',
+                'pgn': '{{ oneGame.game.pgn }}',
+            })
+        {% endfor %}
+        // EOF fill the show chessboard
+    </script>
+
+    {{ encore_entry_link_tags('gameHistoryJs') }}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ encore_entry_script_tags('gameHistoryJs') }}
+{% endblock %}
+
 {% block body %}
+    <div class="mb-4">
+        <a href="{{ path('profile') }}" class="no-decoration" title="Mon compte">
+            Mon compte <i class="bi bi-chevron-right" style="line-height: 1;"></i>
+        </a>
+    </div>
+
     <div class="text-center">
         <h1>Historique des parties</h1>
     </div>
     <div class="row">
         {% for oneGame in gamePlayers %}
-            <div class="col-3">
-                Img du board
-            </div>
-            <div class="col-9">
-                Info de la partie
-                {# <p>Type de jeu : {{ oneGame.game.type }}</p>
-                {% if oneGame.game.winner %}
-                    <p>Votre couleur : {{ oneGame.color }}</p>
-                {% endif %}
-                <p>Résultat : {{ oneGame.game.winner }}</p> #}
-            </div>
+            {% set gameUrl = path('game', {'url': oneGame.game.url}) %}
+            {% if oneGame.game.type == 'against-ai' %}
+                {% set gameUrl = path('gameAi', {'url': oneGame.game.url}) %}
+            {% endif %}
+
+            <a href="{{ gameUrl }}" class="col-12">
+                <div class="row" style="height: 17rem">
+                    <div class="col-3">
+                        <div class="board-account-history">
+                            {% if oneGame.color == 'white' %}
+                                {% for key, column in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] %}
+                                    <div class="one-column">
+                                        {% for line in 8..1 %}
+                                            {% if key is even %}
+                                                <div id="{{ oneGame.game.id ~ '-' ~ column ~ line }}" class="chess-table {{ line is even ? 'case-white' : 'case-black' }}">
+                                                </div>
+                                            {% else %}
+                                                <div id="{{ oneGame.game.id ~ '-' ~ column ~ line }}" class="chess-table {{ line is even ? 'case-black' : 'case-white' }}">
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                {% for key, column in ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'] %}
+                                    <div class="one-column">
+                                        {% for line in 1..8 %}
+                                            {% if key is even %}
+                                                <div id="{{ oneGame.game.id ~ '-' ~ column ~ line }}" class="chess-table {{ line is even ? 'case-white' : 'case-black' }}">
+                                                </div>
+                                            {% else %}
+                                                <div id="{{ oneGame.game.id ~ '-' ~ column ~ line }}" class="chess-table {{ line is even ? 'case-black' : 'case-white' }}">
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-9">
+                        Info de la partie
+                        {# <p>Type de jeu : {{ oneGame.game.type }}</p>
+                        {% if oneGame.game.winner %}
+                            <p>Votre couleur : {{ oneGame.color }}</p>
+                        {% endif %}
+                        <p>Résultat : {{ oneGame.game.winner }}</p> #}
+                    </div>
+                </div>
+            </a>
         {% endfor %}
     </div>
 {% endblock %}

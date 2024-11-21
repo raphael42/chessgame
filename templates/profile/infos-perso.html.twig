@@ -5,6 +5,11 @@
 {% block style_container %}max-width:968px; margin: 32px auto;{% endblock %}
 
 {% block body %}
+    <div class="mb-4">
+        <a href="{{ path('profile') }}" class="no-decoration" title="Mon compte">
+            Mon compte <i class="bi bi-chevron-right" style="line-height: 1;"></i>
+        </a>
+    </div>
     {% if status == 'infos-edited' %}
         <div class="alert alert-success d-flex align-items-center" role="alert">
             <i class="bi bi-check-circle-fill me-2" style="font-size:1.5rem"></i>
@@ -32,7 +37,7 @@
         </div>
     {% endif %}
 
-    <div class="text-center">
+    <div class="text-center mb-5">
         <h1>Informations personnelles</h1>
     </div>
     <div class="row">
