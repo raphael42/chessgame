@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import { Chess } from 'chess.js';
 require('bootstrap');
 
 $(function() {
@@ -58,8 +59,15 @@ $(function() {
         }
 
         // Set in green color the last move
-        if (typeof noLastMove === 'undefined' || noLastMove !== true) {
+        const chess = new Chess(fen);
+        if (pgn !== null) {
+            chess.loadPgn(pgn);
 
+            let chessHistory = chess.history({verbose: true});
+            let lastMove = chessHistory[chessHistory.length - 1];
+
+            $('#' + idGame + '-' + lastMove.from).addClass('last-move');
+            $('#' + idGame + '-' + lastMove.to).addClass('last-move');
         }
     }
 });
