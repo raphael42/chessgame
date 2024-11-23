@@ -22,6 +22,11 @@
 {% endblock %}
 
 {% block stylesheets %}
+    <style>
+        .height240 {
+            height: 15rem;
+        }
+    </style>
     {{ encore_entry_script_tags('gameHistoryJs') }}
 {% endblock %}
 
@@ -44,8 +49,8 @@
             {% endif %}
 
             <a href="{{ gameUrl }}" class="col-12 mb-4 no-decoration">
-                <div class="row">
-                    <div class="col-3">
+                <div class="row height240">
+                    <div class="col-4 game-history-board">
                         <div class="board-account-history">
                             {% if oneGame.color == 'white' %}
                                 {% for key, column in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] %}
@@ -78,59 +83,64 @@
                             {% endif %}
                         </div>
                     </div>
-                    <div class="col-9 bg-body-tertiary border rounded-3">
+                    <div class="col-md-8 col-12 bg-body-tertiary border rounded-3 d-flex flex-column justify-content-between">
                         {% set timeDisplay = '∞' %}
                         {% if oneGame.game.time is not null %}
                             {% set timeDisplay = oneGame.game.time / 60 ~ ' + ' ~ oneGame.game.increment %}
                         {% endif %}
 
-                        <h2>{{ timeDisplay }} | {{ game_type[oneGame.game.type] }}</h2>
-                        <div>{{ oneGame.game.dateInsert|date('d/m/Y H:i:s') }}</div>
+                        <div>
+                            <h2 class="mb-0">{{ timeDisplay }} | {{ game_type[oneGame.game.type] }}</h2>
+                            <p class="mb-0">{{ oneGame.game.dateInsert|date('d/m/Y H:i:s') }}</p>
+                        </div>
 
-                        {% if oneGame.game.status == 'finished' %}
-                            {% if oneGame.game.winner == 'd' %} {# draw #}
-                                {% if oneGame.game.endReason == 'playersAgreement' %}
-                                    <div>Match nul par accord mutuel</div>
-                                {% elseif oneGame.game.endReason == 'stalemate' %}
-                                    <div>Match nul : jeu bloqué</div>
-                                {% elseif oneGame.game.endReason == 'threefoldRepetition' %}
-                                    <div>Match nul : 3 déplacements consécutifs</div>
-                                {% elseif oneGame.game.endReason == 'insufficientMaterial' %}
-                                    <div>Match nul : nombre de pièces insuffisantes</div>
-                                {% elseif oneGame.game.endReason == 'fiftyMoves' %}
-                                    <div>Match nul : 50 coups joués sans progrès</div>
-                                {% endif %}
-                            {% else %} {# winner #}
-                                {% set reason = 'Échec et mat' %}
-                                {% if oneGame.game.endReason == 'timeout' %}
-                                    {% set reason = 'Temps écoulé' %}
-                                {% elseif oneGame.game.endReason == 'resign' %}
-                                    {% set reason = 'Abandon' %}
-                                {% endif %}
+                        <div class="text-center">
+                            {% if oneGame.game.status == 'finished' %}
+                                {% if oneGame.game.winner == 'd' %} {# draw #}
+                                    {% if oneGame.game.endReason == 'playersAgreement' %}
+                                        <p>Match nul par accord mutuel</p>
+                                    {% elseif oneGame.game.endReason == 'stalemate' %}
+                                        <p>Match nul : jeu bloqué</p>
+                                    {% elseif oneGame.game.endReason == 'threefoldRepetition' %}
+                                        <p>Match nul : 3 déplacements consécutifs</p>
+                                    {% elseif oneGame.game.endReason == 'insufficientMaterial' %}
+                                        <p>Match nul : nombre de pièces insuffisantes</p>
+                                    {% elseif oneGame.game.endReason == 'fiftyMoves' %}
+                                        <p>Match nul : 50 coups joués sans progrès</p>
+                                    {% endif %}
+                                {% else %} {# winner #}
+                                    {% set reason = 'Échec et mat' %}
+                                    {% if oneGame.game.endReason == 'timeout' %}
+                                        {% set reason = 'Temps écoulé' %}
+                                    {% elseif oneGame.game.endReason == 'resign' %}
+                                        {% set reason = 'Abandon' %}
+                                    {% endif %}
 
-                                {% if (oneGame.color == 'white' or oneGame.color == 'w') and oneGame.game.winner == 'w' %} {# victory while playing white #}
-                                    <div class="text-success">Victoire des Blancs : {{ reason }}</div>
-                                {% elseif (oneGame.color == 'black' or oneGame.color == 'b') and oneGame.game.winner == 'b' %} {# victory while playing black #}
-                                    <div class="text-success">Victoire des Noirs : {{ reason }}</div>
-                                {% elseif (oneGame.color == 'white' or oneGame.color == 'w') and oneGame.game.winner == 'b' %} {# lose while playing white #}
-                                    <div class="text-danger">Victoire des Noirs : {{ reason }}</div>
-                                {% else %} {# lose while playing black #}
-                                    <div class="text-danger">Victoire des Blancs : {{ reason }}</div>
+                                    {% if (oneGame.color == 'white' or oneGame.color == 'w') and oneGame.game.winner == 'w' %} {# victory while playing white #}
+                                        <p class="text-success">Victoire des Blancs : {{ reason }}</p>
+                                    {% elseif (oneGame.color == 'black' or oneGame.color == 'b') and oneGame.game.winner == 'b' %} {# victory while playing black #}
+                                        <p class="text-success">Victoire des Noirs : {{ reason }}</p>
+                                    {% elseif (oneGame.color == 'white' or oneGame.color == 'w') and oneGame.game.winner == 'b' %} {# lose while playing white #}
+                                        <p class="text-danger">Victoire des Noirs : {{ reason }}</p>
+                                    {% else %} {# lose while playing black #}
+                                        <p class="text-danger">Victoire des Blancs : {{ reason }}</p>
+                                    {% endif %}
                                 {% endif %}
+                            {% else %}
+                                <p>{{ game_status[oneGame.game.status] }}</p>
                             {% endif %}
-                            <div>{{ game_status[oneGame.game.status] }}</div>
-                        {% else %}
-                            <div>{{ game_status[oneGame.game.status] }}</div>
-                        {% endif %}
+                        </div>
 
-                        {% if ' 4. ' in oneGame.game.pgn %}
-                            {% set pgnSplited = oneGame.game.pgn|split(' 4. ') %}
-                            {% set fenSplited = oneGame.game.fen|split(' ') %}
+                        <div>
+                            {% if ' 4. ' in oneGame.game.pgn %}
+                                {% set pgnSplited = oneGame.game.pgn|split(' 4. ') %}
+                                {% set fenSplited = oneGame.game.fen|split(' ') %}
 
-                            <div>{{ pgnSplited[0] }} ... {{ fenSplited[5] }} moves</div>
-                        {% else %}
-                            <div>{{ oneGame.game.pgn }}</div>
-                        {% endif %}
+                                <p class="mb-0">{{ pgnSplited[0] }} ... {{ fenSplited[5] }} moves</p>
+                            {% else %}
+                                <p class="mb-0">{{ oneGame.game.pgn }}</p>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </a>

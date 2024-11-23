@@ -2,7 +2,7 @@
 
 .board-account-history {
     display: flex;
-    justify-content: center;
+    justify-content: right;
 
     @media (max-width: 767px) {
         margin-top : 1rem;
@@ -321,4 +321,10 @@
 .no-decoration {
     color: inherit;
     text-decoration: inherit;
+}
+
+.game-history-board {
+    @media (max-width: 767px) {
+        display: none;
+    }
 }
