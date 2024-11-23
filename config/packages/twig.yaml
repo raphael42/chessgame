@@ -3,6 +3,8 @@ twig:
     form_themes: ['bootstrap_5_layout.html.twig']
     globals:
         env: '%kernel.environment%'
+        game_type: '%game_type%'
+        game_status: '%game_status%'
 
 when@test:
     twig:

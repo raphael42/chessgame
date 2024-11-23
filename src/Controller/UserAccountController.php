@@ -77,9 +77,14 @@ class UserAccountController extends AbstractController
 
     public function userAccountGameHistoryFunction(#[CurrentUser] ?Entity\User $user, Request $request, EntityManagerInterface $entityManager): Response
     {
-        $gamePlayers = $entityManager->getRepository(Entity\Player::class)->findBy([
-            'user' => $user,
-        ]);
+        $gamePlayers = $entityManager->getRepository(Entity\Player::class)->findBy(
+            [
+                'user' => $user,
+            ],
+            [
+                'id' => 'DESC',
+            ],
+        );
 
         return $this->render('profile/games-history.html.twig', [
             'gamePlayers' => $gamePlayers

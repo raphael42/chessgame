@@ -4,6 +4,15 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    game_type:
+        random: Aléatoire
+        with-friend: Avec un ami
+        against-ai: Contre l'IA
+    game_status:
+        waiting-player: En attente de l'adversaire
+        begining: En cours
+        inplay: En cours
+        finished: Terminé
 
 services:
     # default configuration for services in *this* file
