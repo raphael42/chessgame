@@ -144,6 +144,13 @@
                     </div>
                 </div>
             </a>
+        {% else %}
+            <div class="alert alert-info d-flex align-items-center" role="alert">
+                <i class="bi bi-info-circle me-2" style="font-size:1.5rem"></i>
+                <div>
+                    Aucunes parties jouées
+                </div>
+            </div>
         {% endfor %}
     </div>
 {% endblock %}
