@@ -35,6 +35,8 @@ class RegistrationController extends AbstractController
 
     public function registerfunction(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): Response
     {
+        $session = $request->getSession();
+
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
@@ -55,6 +57,8 @@ class RegistrationController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
+            $session->set('createdAccountEmail', $form->get('email')->getData());
+
             // generate a signed url and email it to the user
             // $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
             //     (new TemplatedEmail())
@@ -65,7 +69,7 @@ class RegistrationController extends AbstractController
             // );
             // do anything else you need here, like send an email
 
-            return $this->redirectToRoute('login');
+            return $this->redirectToRoute('login', ['status' => 'account-created']);
         }
 
         return $this->render('registration/register.html.twig', [

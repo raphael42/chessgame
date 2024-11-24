@@ -21,6 +21,15 @@
         </div>
     {% endif %}
 
+    {% if status == 'account-created' %}
+        <div class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill me-2" style="font-size:1.5rem"></i>
+            <div>
+                Votre compte joueur a été créé. Vous pouvez maintenant vous connecter.
+            </div>
+        </div>
+    {% endif %}
+
     <div class="text-center mb-4">
         <h1>Connectez-vous</h1>
     </div>
