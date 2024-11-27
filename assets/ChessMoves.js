@@ -1686,7 +1686,11 @@ function startTimer(playerTurn, playerTime, opponentTime) {
             $('#timer-opponent').text(getTime(times['opponent']));
 
             if (times[turn] == 0) {
-                navigator.vibrate(1000);
+                const canVibrate = window.navigator.vibrate;
+                if (canVibrate) {
+                    window.navigator.vibrate(1000);
+                }
+
                 clearInterval(timer);
                 timer = false;
 
