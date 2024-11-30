@@ -538,7 +538,7 @@ $(function() {
                 if (tmp2 === 2 && socketMessage.color === 'b') {
                     startTimer('player');
                 } else {
-                    updateTime('opponent', socketMessage.timer); // update time because of lantency
+                    $('#timer-opponent').text(getTime(socketMessage.timer)); // update time because of lantency
                     switchTurn();
                 }
             }
@@ -1641,12 +1641,6 @@ function switchTurn() {
     }
 }
 
-function updateTime(playerTurn, time) {
-    $('#timer-' + playerTurn).text(getTime(time));
-
-    return;
-}
-
 function setUpTimer(playerTime, opponentTime) {
     let playerTimeToUse = PLAYERTIMELEFT;
     if (typeof playerTime !== 'undefined' && playerTime !== null) {
@@ -1679,48 +1673,50 @@ function startTimer(playerTurn, playerTime, opponentTime) {
     turn = playerTurn;
 
     if (GAMESTATUS !== 'finished') {
-        timer = setInterval(function() {
-            times[turn]--;
+        timer = setInterval(updateTimer, 1000);
+    }
+}
 
-            $('#timer-player').text(getTime(times['player']));
-            $('#timer-opponent').text(getTime(times['opponent']));
+function updateTimer() {
+    times[turn]--;
 
-            if (times[turn] == 0) {
-                const canVibrate = window.navigator.vibrate;
-                if (canVibrate) {
-                    window.navigator.vibrate(1000);
-                }
+    $('#timer-player').text(getTime(times['player']));
+    $('#timer-opponent').text(getTime(times['opponent']));
 
-                clearInterval(timer);
-                timer = false;
+    if (times[turn] == 0) {
+        const canVibrate = window.navigator.vibrate;
+        if (canVibrate) {
+            window.navigator.vibrate(1000);
+        }
 
-                if ((turn === 'player' && PLAYERCOLOR === 'white') || (turn === 'opponent' && PLAYERCOLOR === 'black')) {
-                    socket.send(JSON.stringify({
-                        'method': 'timeout',
-                        'color': PLAYERCOLOR,
-                        'idGame': IDGAME,
-                    }));
+        clearInterval(timer);
+        timer = false;
 
-                    if (PLAYERCOLOR === 'white') {
-                        gameIsOver('win', 'w', 'White win ! Black timer is over');
-                    } else {
-                        gameIsOver('win', 'b', 'Black win ! White timer is over');
-                    }
-                } else if ((turn === 'player' && PLAYERCOLOR === 'black') || (turn === 'opponent' && PLAYERCOLOR === 'white')) {
-                    socket.send(JSON.stringify({
-                        'method': 'timeout',
-                        'color': PLAYERCOLOR,
-                        'idGame': IDGAME,
-                    }));
+        if ((turn === 'player' && PLAYERCOLOR === 'white') || (turn === 'opponent' && PLAYERCOLOR === 'black')) {
+            socket.send(JSON.stringify({
+                'method': 'timeout',
+                'color': PLAYERCOLOR,
+                'idGame': IDGAME,
+            }));
 
-                    if (PLAYERCOLOR === 'white') {
-                        gameIsOver('win', 'w', 'White win ! Black timer is over');
-                    } else {
-                        gameIsOver('win', 'b', 'Black win ! White timer is over');
-                    }
-                }
+            if (PLAYERCOLOR === 'white') {
+                gameIsOver('win', 'w', 'White win ! Black timer is over');
+            } else {
+                gameIsOver('win', 'b', 'Black win ! White timer is over');
             }
-        }, 1000);
+        } else if ((turn === 'player' && PLAYERCOLOR === 'black') || (turn === 'opponent' && PLAYERCOLOR === 'white')) {
+            socket.send(JSON.stringify({
+                'method': 'timeout',
+                'color': PLAYERCOLOR,
+                'idGame': IDGAME,
+            }));
+
+            if (PLAYERCOLOR === 'white') {
+                gameIsOver('win', 'w', 'White win ! Black timer is over');
+            } else {
+                gameIsOver('win', 'b', 'Black win ! White timer is over');
+            }
+        }
     }
 }
 
