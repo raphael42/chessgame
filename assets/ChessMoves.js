@@ -208,18 +208,18 @@ $(function() {
                 if (fenSplit[1] === 'b') { // Black turn
                     if (PLAYERCOLOR === 'black') {
                         // Set up player timer
-                        startTimer(false, 'player');
+                        startTimer(false, 'player', socketMessage.blackMicrotimeSpend);
                     } else {
                         // Set up opponent timer
-                        startTimer(false, 'opponent');
+                        startTimer(false, 'opponent', socketMessage.blackMicrotimeSpend);
                     }
                 } else { // White turn
                     if (PLAYERCOLOR === 'white') {
                         // Set up player timer
-                        startTimer(false, 'player');
+                        startTimer(false, 'player', socketMessage.whiteMicrotimeSpend);
                     } else {
                         // Set up opponent timer
-                        startTimer(false, 'opponent');
+                        startTimer(false, 'opponent', socketMessage.whiteMicrotimeSpend);
                     }
                 }
             }
@@ -1688,11 +1688,14 @@ function loop() {
 }
 
 // Fonction pour démarrer ou reprendre le timer
-function startTimer(doIncrement, playerType) {
+function startTimer(doIncrement, playerType, time) {
     if (playerType === 'player') {
         if (!isRunningPlayer) {
             if (doIncrement) {
                 remainingTimeOpponent += (parseInt(INCREMENT) * 1000);
+            }
+            if (typeof time !== 'undefined') {
+                remainingTimePlayer = time * 1000;
             }
             endTimePlayer = Date.now() + remainingTimePlayer; // Réajuste le temps de fin en fonction du temps restant
             isRunningPlayer = true;
@@ -1702,6 +1705,9 @@ function startTimer(doIncrement, playerType) {
         if (!isRunningOpponent) {
             if (doIncrement) {
                 remainingTimePlayer += (parseInt(INCREMENT) * 1000);
+            }
+            if (typeof time !== 'undefined') {
+                remainingTimeOpponent = time * 1000;
             }
             endTimeOpponent = Date.now() + remainingTimeOpponent; // Réajuste le temps de fin en fonction du temps restant
             isRunningOpponent = true;
