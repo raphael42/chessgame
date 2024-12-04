@@ -437,6 +437,15 @@ class MessageHandler implements MessageComponentInterface
             $this->gameEntity[$idGame]->setEndReason('timeout');
 
             $this->em->persist($this->gameEntity[$idGame]);
+
+            if ($msgArray['color'] === 'white' || $msgArray['color'] === 'w') { // Whites win, set black timer to 0
+                $this->playerBlackEntity[$idGame]->setTimeLeft(0);
+                $this->em->persist($this->playerBlackEntity[$idGame]);
+            } else { // Balcks win, set white timer to 0
+                $this->playerWhiteEntity[$idGame]->setTimeLeft(0);
+                $this->em->persist($this->playerWhiteEntity[$idGame]);
+            }
+
             $this->em->flush();
 
             foreach ($this->connections as $connection) {
