@@ -97,7 +97,7 @@ $(function() {
     socket.addEventListener('message', function(e) {
         var socketMessage = JSON.parse(e.data);
 
-        // console.log(socketMessage);
+        console.log(socketMessage);
 
         // Disconnect
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'opponent_disconnect') {
@@ -1636,15 +1636,13 @@ function updateTimerPlayer() {
 
     if (remainingTimePlayer <= 0) {
         $("#timer-player").text("00:00");
-        stopTimer('player');
-        stopTimer('opponent');
 
         // Player turn and player color is white, blacks win
         if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
-            gameIsOver('win', 'b', 'Black win ! White timer is over');
+            gameIsOver('win', 'b', 'Black win ! White timer is over', 'timeout');
         // Player turn and player color is black, whites win
         } else if (PLAYERCOLOR === 'black' || PLAYERCOLOR === 'b') {
-            gameIsOver('win', 'w', 'White win ! Black timer is over');
+            gameIsOver('win', 'w', 'White win ! Black timer is over', 'timeout');
         }
     } else {
         $("#timer-player").text(formatTime(remainingTimePlayer));
@@ -1657,16 +1655,14 @@ function updateTimerOpponent() {
 
     if (remainingTimeOpponent <= 0) {
         $("#timer-opponent").text("00:00");
-        stopTimer('player');
-        stopTimer('opponent');
 
         // Opponent turn and player color is white, blacks win
         if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
-            gameIsOver('win', 'w', 'White win ! Black timer is over');
+            gameIsOver('win', 'w', 'White win ! Black timer is over', 'timeout');
 
         // Opponent turn and player color is black, whites win
         } else if (PLAYERCOLOR === 'black' || PLAYERCOLOR === 'b') {
-            gameIsOver('win', 'b', 'Black win ! White timer is over');
+            gameIsOver('win', 'b', 'Black win ! White timer is over', 'timeout');
         }
     } else {
         $("#timer-player").text(formatTime(remainingTimePlayer));
@@ -1675,7 +1671,7 @@ function updateTimerOpponent() {
 }
 
 function loop() {
-    console.log('loop');
+    // console.log('loop');
     // console.log(isRunningPlayer);
     // console.log(isRunningOpponent);
     if (isRunningPlayer) {
@@ -1689,6 +1685,11 @@ function loop() {
 
 // Fonction pour démarrer ou reprendre le timer
 function startTimer(doIncrement, playerType, time) {
+    // Game is finished, do not launch timer again
+    if (GAMESTATUS === 'finished') {
+        return;
+    }
+
     if (playerType === 'player') {
         if (!isRunningPlayer) {
             if (doIncrement) {
@@ -1755,6 +1756,9 @@ function gameIsOver(status, playerWinner, endReason, socketMessage) {
     }
 
     GAMESTATUS = 'finished';
+
+    stopTimer('player');
+    stopTimer('opponent');
 
     const canVibrate = window.navigator.vibrate;
     if (canVibrate) {
