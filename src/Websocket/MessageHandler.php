@@ -432,13 +432,18 @@ class MessageHandler implements MessageComponentInterface
 
         // Game is timeout
         if (isset($msgArray['method']) && $msgArray['method'] === 'timeout') {
+            $colorWinner = 'white';
+            if ($msgArray['colorWinner'] === 'b' || $msgArray['colorWinner'] === 'black') {
+                $colorWinner = 'black';
+            }
+
             $this->gameEntity[$idGame]->setStatus('finished');
-            $this->gameEntity[$idGame]->setWinner($msgArray['color']);
+            $this->gameEntity[$idGame]->setWinner($colorWinner);
             $this->gameEntity[$idGame]->setEndReason('timeout');
 
             $this->em->persist($this->gameEntity[$idGame]);
 
-            if ($msgArray['color'] === 'white' || $msgArray['color'] === 'w') { // Whites win, set black timer to 0
+            if ($colorWinner === 'white') { // Whites win, set black timer to 0
                 $this->playerBlackEntity[$idGame]->setTimeLeft(0);
                 $this->em->persist($this->playerBlackEntity[$idGame]);
             } else { // Balcks win, set white timer to 0
