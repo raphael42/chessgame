@@ -28,10 +28,21 @@ if (ENV === 'dev') {
     var socket = new WebSocket('wss://' + SERVERNAME + ':3001/ws/game?' + queryString);
 }
 
-var turn = null;
-var times, timer;
 placePieces(FEN);
-// setUpTimer();
+
+// Timer variables
+const totalTimePlayer = PLAYERTIMELEFT * 1000; // Player time * 1000 to convert it to milliseconds
+const totalTimeOpponent = OPPONENTTIMELEFT * 1000; // Opponent time * 1000 to convert it to milliseconds
+let endTimePlayer = Date.now() + totalTimePlayer; // Player datetime when timer has to stop
+let endTimeOpponent = Date.now() + totalTimeOpponent; // Opponent datetime when timer has to stop
+let remainingTimePlayer = totalTimePlayer; // Player timeleft in milliseconds
+let remainingTimeOpponent = totalTimeOpponent; // Opponent timeleft in milliseconds
+let isRunningPlayer = false; // Player timer state. True if the player timer player is running. False otherwise
+let isRunningOpponent = false; // Opponent timer state. True if the opponent timer is running. False otherwise
+let animationFrame = null; // Reference to requestAnimationFrame
+
+$("#timer-player").text(formatTime(totalTimePlayer));
+$("#timer-opponent").text(formatTime(totalTimeOpponent));
 
 $('#color-player').html(PLAYERCOLOR + ' | ');
 if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
@@ -204,7 +215,7 @@ $(function() {
 
             let fenSplit = chess.fen().split(' ');
             let fenTurnNumber = parseInt(fenSplit[5]);
-            if (fenTurnNumber >= 2 && typeof times === 'undefined') { // Timer must have started and is not started
+            if (fenTurnNumber >= 2) { // Timer must have started and is not started
                 if (fenSplit[1] === 'b') { // Black turn
                     if (PLAYERCOLOR === 'black') {
                         // Set up player timer
@@ -1610,18 +1621,11 @@ function placePieces(fen, noLastMove) {
     }
 }
 
+//
 // timer functions
-const totalTimePlayer = PLAYERTIMELEFT * 1000; // Temps total en millisecondes (10 minutes)
-const totalTimeOpponent = OPPONENTTIMELEFT * 1000; // Temps total en millisecondes (10 minutes)
-let endTimePlayer = Date.now() + totalTimePlayer; // Moment où le timer doit se terminer
-let endTimeOpponent = Date.now() + totalTimeOpponent; // Moment où le timer doit se terminer
-let remainingTimePlayer = totalTimePlayer; // Temps restant en millisecondes
-let remainingTimeOpponent = totalTimeOpponent; // Temps restant en millisecondes
-let isRunningPlayer = false; // État du timer
-let isRunningOpponent = false; // État du timer
-let animationFrame = null; // Référence à requestAnimationFrame
+//
 
-// Fonction pour formater le temps en MM:SS
+// Format milliseconds int to MM:SS
 function formatTime(ms) {
     const totalSeconds = Math.max(0, Math.floor(ms / 1000)); // Évite les nombres négatifs
     const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
@@ -1629,10 +1633,10 @@ function formatTime(ms) {
     return minutes + ':' + seconds;
 }
 
-// Fonction pour mettre à jour l'affichage
+// Update player timer
 function updateTimerPlayer() {
     const currentTime = Date.now();
-    remainingTimePlayer = endTimePlayer - currentTime; // Temps restant
+    remainingTimePlayer = endTimePlayer - currentTime; // Time left
 
     if (remainingTimePlayer <= 0) {
         $("#timer-player").text("00:00");
@@ -1649,9 +1653,11 @@ function updateTimerPlayer() {
         $("#timer-opponent").text(formatTime(remainingTimeOpponent));
     }
 }
+
+// Update opponent timer
 function updateTimerOpponent() {
     const currentTime = Date.now();
-    remainingTimeOpponent = endTimeOpponent - currentTime; // Temps restant
+    remainingTimeOpponent = endTimeOpponent - currentTime; // Time left
 
     if (remainingTimeOpponent <= 0) {
         $("#timer-opponent").text("00:00");
@@ -1670,20 +1676,18 @@ function updateTimerOpponent() {
     }
 }
 
+// Loop autocalled to update timers
 function loop() {
-    // console.log('loop');
-    // console.log(isRunningPlayer);
-    // console.log(isRunningOpponent);
     if (isRunningPlayer) {
         updateTimerPlayer();
-        animationFrame = requestAnimationFrame(loop); // Continue la mise à jou
+        animationFrame = requestAnimationFrame(loop); // Keeping the update
     } else if (isRunningOpponent) {
         updateTimerOpponent();
-        animationFrame = requestAnimationFrame(loop); // Continue la mise à jou
+        animationFrame = requestAnimationFrame(loop); // Keeping the update
     }
 }
 
-// Fonction pour démarrer ou reprendre le timer
+// Start or continue a timer
 function startTimer(doIncrement, playerType, time) {
     // Game is finished, do not launch timer again
     if (GAMESTATUS === 'finished') {
@@ -1698,9 +1702,9 @@ function startTimer(doIncrement, playerType, time) {
             if (typeof time !== 'undefined') {
                 remainingTimePlayer = time * 1000;
             }
-            endTimePlayer = Date.now() + remainingTimePlayer; // Réajuste le temps de fin en fonction du temps restant
+            endTimePlayer = Date.now() + remainingTimePlayer; // Update endtime
             isRunningPlayer = true;
-            animationFrame = requestAnimationFrame(loop); // Relance la boucle
+            animationFrame = requestAnimationFrame(loop); // Start the loop
         }
     } else {
         if (!isRunningOpponent) {
@@ -1710,30 +1714,30 @@ function startTimer(doIncrement, playerType, time) {
             if (typeof time !== 'undefined') {
                 remainingTimeOpponent = time * 1000;
             }
-            endTimeOpponent = Date.now() + remainingTimeOpponent; // Réajuste le temps de fin en fonction du temps restant
+            endTimeOpponent = Date.now() + remainingTimeOpponent; // Update endtime
             isRunningOpponent = true;
-            animationFrame = requestAnimationFrame(loop); // Relance la boucle
+            animationFrame = requestAnimationFrame(loop); // Start the loop
         }
     }
 }
 
 
-// Fonction pour arrêter le timer
+// Stop timer
 function stopTimer(playerType) {
     if (playerType === 'player') {
         if (isRunningPlayer) {
             isRunningPlayer = false;
-            cancelAnimationFrame(animationFrame); // Arrête la mise à jour
+            cancelAnimationFrame(animationFrame); // Stop the update, this will stop the loop
         }
     } else if (playerType === 'opponent') {
         if (isRunningOpponent) {
             isRunningOpponent = false;
-            cancelAnimationFrame(animationFrame); // Arrête la mise à jour
+            cancelAnimationFrame(animationFrame); // Stop the update, this will stop the loop
         }
     }
 }
 
-
+// Switch turn, stop one timer and start the other one
 function switchTurn() {
     if (isRunningPlayer) {
         stopTimer('player');
@@ -1743,10 +1747,6 @@ function switchTurn() {
         startTimer(true, 'player');
     }
 }
-
-// Affiche l'état initial
-$("#timer-player").text(formatTime(totalTimePlayer));
-$("#timer-opponent").text(formatTime(totalTimeOpponent));
 
 
 function gameIsOver(status, playerWinner, endReason, socketMessage) {
