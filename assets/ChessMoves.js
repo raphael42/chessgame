@@ -358,7 +358,7 @@ $(function() {
             if (socketMessage.colorWinner === 'w') {
                 gameIsOver('win', 'w', 'White win ! Black timer is over');
             } else {
-                gameIsOver('win', 'w', 'Black win ! White timer is over');
+                gameIsOver('win', 'b', 'Black win ! White timer is over');
             }
 
             return;
@@ -1760,9 +1760,12 @@ function gameIsOver(status, playerWinner, endReason, socketMessage) {
     stopTimer('player');
     stopTimer('opponent');
 
-    const canVibrate = window.navigator.vibrate;
-    if (canVibrate) {
-        window.navigator.vibrate(1000);
+    if ('vibrate' in window.navigator) {
+        try {
+            window.navigator.vibrate(1000);
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     if (typeof socketMessage !== 'undefined' && socketMessage === 'timeout') {
