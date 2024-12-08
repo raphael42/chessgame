@@ -3,7 +3,6 @@ import { Chess } from 'chess.js';
 require('bootstrap');
 
 $(function() {
-    console.log(GAMESLIST);
     for (let i in GAMESLIST) {
         placePieces(GAMESLIST[i].id, GAMESLIST[i].fen, GAMESLIST[i].pgn);
     }
@@ -65,9 +64,10 @@ $(function() {
 
             let chessHistory = chess.history({verbose: true});
             let lastMove = chessHistory[chessHistory.length - 1];
-
-            $('#' + idGame + '-' + lastMove.from).addClass('last-move');
-            $('#' + idGame + '-' + lastMove.to).addClass('last-move');
+            if (typeof lastMove !== 'undefined' && typeof lastMove.from !== 'undefined' && typeof lastMove.to !== 'undefined') {
+                $('#' + idGame + '-' + lastMove.from).addClass('last-move');
+                $('#' + idGame + '-' + lastMove.to).addClass('last-move');
+            }
         }
     }
 });

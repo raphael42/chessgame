@@ -28,10 +28,21 @@ if (ENV === 'dev') {
     var socket = new WebSocket('wss://' + SERVERNAME + ':3001/ws/game?' + queryString);
 }
 
-var turn = null;
-var times, timer;
 placePieces(FEN);
-setUpTimer();
+
+// Timer variables
+const totalTimePlayer = PLAYERTIMELEFT * 1000; // Player time * 1000 to convert it to milliseconds
+const totalTimeOpponent = OPPONENTTIMELEFT * 1000; // Opponent time * 1000 to convert it to milliseconds
+let endTimePlayer = Date.now() + totalTimePlayer; // Player datetime when timer has to stop
+let endTimeOpponent = Date.now() + totalTimeOpponent; // Opponent datetime when timer has to stop
+let remainingTimePlayer = totalTimePlayer; // Player timeleft in milliseconds
+let remainingTimeOpponent = totalTimeOpponent; // Opponent timeleft in milliseconds
+let isRunningPlayer = false; // Player timer state. True if the player timer player is running. False otherwise
+let isRunningOpponent = false; // Opponent timer state. True if the opponent timer is running. False otherwise
+let animationFrame = null; // Reference to requestAnimationFrame
+
+$("#timer-player").text(formatTime(totalTimePlayer));
+$("#timer-opponent").text(formatTime(totalTimeOpponent));
 
 $('#color-player').html(PLAYERCOLOR + ' | ');
 if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
@@ -204,22 +215,22 @@ $(function() {
 
             let fenSplit = chess.fen().split(' ');
             let fenTurnNumber = parseInt(fenSplit[5]);
-            if (fenTurnNumber >= 2 && typeof times === 'undefined') { // Timer must have started and is not started
+            if (fenTurnNumber >= 2) { // Timer must have started and is not started
                 if (fenSplit[1] === 'b') { // Black turn
                     if (PLAYERCOLOR === 'black') {
                         // Set up player timer
-                        startTimer('player', socketMessage.blackMicrotimeSpend);
+                        startTimer(false, 'player', socketMessage.blackMicrotimeSpend);
                     } else {
                         // Set up opponent timer
-                        startTimer('opponent', null, socketMessage.blackMicrotimeSpend);
+                        startTimer(false, 'opponent', socketMessage.blackMicrotimeSpend);
                     }
                 } else { // White turn
                     if (PLAYERCOLOR === 'white') {
                         // Set up player timer
-                        startTimer('player', socketMessage.whiteMicrotimeSpend);
+                        startTimer(false, 'player', socketMessage.whiteMicrotimeSpend);
                     } else {
                         // Set up opponent timer
-                        startTimer('opponent', null, socketMessage.whiteMicrotimeSpend);
+                        startTimer(false, 'opponent', socketMessage.whiteMicrotimeSpend);
                     }
                 }
             }
@@ -355,7 +366,7 @@ $(function() {
 
         // Opponent timer is over
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'timeout') {
-            if (PLAYERCOLOR === 'white') {
+            if (socketMessage.colorWinner === 'w') {
                 gameIsOver('win', 'w', 'White win ! Black timer is over');
             } else {
                 gameIsOver('win', 'b', 'Black win ! White timer is over');
@@ -536,9 +547,10 @@ $(function() {
                 var tmp = socketMessage.after.split(' ');
                 var tmp2 = parseInt(tmp[5]);
                 if (tmp2 === 2 && socketMessage.color === 'b') {
-                    startTimer('player');
+                    startTimer(false, 'player');
                 } else {
-                    $('#timer-opponent').text(getTime(socketMessage.timer)); // update time because of lantency
+                    // TODO : update timer maybe ?
+                    // $('#timer-opponent').text(getTime(socketMessage.timer)); // update time because of lantency
                     switchTurn();
                 }
             }
@@ -1471,7 +1483,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         var tmp = chess.fen().split(' ');
         var tmp2 = parseInt(tmp[5]);
         if (tmp2 === 2 && moving.color === 'b') {
-            startTimer('opponent');
+            startTimer(false, 'opponent');
         } else {
             switchTurn();
         }
@@ -1609,126 +1621,161 @@ function placePieces(fen, noLastMove) {
     }
 }
 
+//
 // timer functions
-function getTime(time) {
-    var min = Math.floor(time / 60);
-    var sec = time % 60;
-    return min + ':' + (sec < 10 ? '0' + sec : sec);
+//
+
+// Format milliseconds int to MM:SS
+function formatTime(ms) {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000)); // Évite les nombres négatifs
+    const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+    const seconds = String(totalSeconds % 60).padStart(2, '0');
+    return minutes + ':' + seconds;
 }
 
-function getSeconds(min, sec) {
-    var time = min * 60 + sec;
-    return time;
-}
+// Update player timer
+function updateTimerPlayer() {
+    const currentTime = Date.now();
+    remainingTimePlayer = endTimePlayer - currentTime; // Time left
 
-function getSecondsWithTime(time, splitChar) {
-    var splitTime = time.split(splitChar);
-    var seconds = splitTime[0] * 60;
-    if (typeof splitTime[1] !== 'undefined') {
-        seconds += parseInt(splitTime[1]);
-    }
-    return seconds;
-}
+    if (remainingTimePlayer <= 0) {
+        $("#timer-player").text("00:00");
 
-function switchTurn() {
-    if (typeof times !== 'undefined') { // undefined the first moves, when the timer is not started yet
-        times[turn] += parseInt(INCREMENT);
-    }
-    if (turn === 'player') {
-        turn = 'opponent';
+        // Player turn and player color is white, blacks win
+        if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
+            gameIsOver('win', 'b', 'Black win ! White timer is over', 'timeout');
+        // Player turn and player color is black, whites win
+        } else if (PLAYERCOLOR === 'black' || PLAYERCOLOR === 'b') {
+            gameIsOver('win', 'w', 'White win ! Black timer is over', 'timeout');
+        }
     } else {
-        turn = 'player';
+        $("#timer-player").text(formatTime(remainingTimePlayer));
+        $("#timer-opponent").text(formatTime(remainingTimeOpponent));
     }
 }
 
-function setUpTimer(playerTime, opponentTime) {
-    let playerTimeToUse = PLAYERTIMELEFT;
-    if (typeof playerTime !== 'undefined' && playerTime !== null) {
-        playerTimeToUse = playerTime;
-    }
+// Update opponent timer
+function updateTimerOpponent() {
+    const currentTime = Date.now();
+    remainingTimeOpponent = endTimeOpponent - currentTime; // Time left
 
-    let opponentTimeToUse = OPPONENTTIMELEFT;
-    if (typeof opponentTime !== 'undefined' && opponentTime !== null) {
-        opponentTimeToUse = opponentTime;
-    }
+    if (remainingTimeOpponent <= 0) {
+        $("#timer-opponent").text("00:00");
 
-    var minutesPlayer = parseInt(playerTimeToUse / 60, 10);
-    var secondsPlayer = parseInt(playerTimeToUse % 60, 10);
+        // Opponent turn and player color is white, blacks win
+        if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
+            gameIsOver('win', 'w', 'White win ! Black timer is over', 'timeout');
 
-    var minutesOpponent = parseInt(opponentTimeToUse / 60, 10);
-    var secondsOpponent = parseInt(opponentTimeToUse % 60, 10);
-
-    $('#timer-player').text(getTime(getSeconds(minutesPlayer, secondsPlayer)));
-    $('#timer-opponent').text(getTime(getSeconds(minutesOpponent, secondsOpponent)));
-
-    return {
-        player: getSeconds(minutesPlayer, secondsPlayer),
-        opponent: getSeconds(minutesOpponent, secondsOpponent),
-    };
-}
-
-function startTimer(playerTurn, playerTime, opponentTime) {
-    times = setUpTimer(playerTime, opponentTime);
-
-    turn = playerTurn;
-
-    if (GAMESTATUS !== 'finished') {
-        timer = setInterval(updateTimer, 1000);
-    }
-}
-
-function updateTimer() {
-    times[turn]--;
-
-    $('#timer-player').text(getTime(times['player']));
-    $('#timer-opponent').text(getTime(times['opponent']));
-
-    if (times[turn] == 0) {
-        const canVibrate = window.navigator.vibrate;
-        if (canVibrate) {
-            window.navigator.vibrate(1000);
+        // Opponent turn and player color is black, whites win
+        } else if (PLAYERCOLOR === 'black' || PLAYERCOLOR === 'b') {
+            gameIsOver('win', 'b', 'Black win ! White timer is over', 'timeout');
         }
+    } else {
+        $("#timer-player").text(formatTime(remainingTimePlayer));
+        $("#timer-opponent").text(formatTime(remainingTimeOpponent));
+    }
+}
 
-        clearInterval(timer);
-        timer = false;
+// Loop autocalled to update timers
+function loop() {
+    if (isRunningPlayer) {
+        updateTimerPlayer();
+        animationFrame = requestAnimationFrame(loop); // Keeping the update
+    } else if (isRunningOpponent) {
+        updateTimerOpponent();
+        animationFrame = requestAnimationFrame(loop); // Keeping the update
+    }
+}
 
-        if ((turn === 'player' && PLAYERCOLOR === 'white') || (turn === 'opponent' && PLAYERCOLOR === 'black')) {
-            socket.send(JSON.stringify({
-                'method': 'timeout',
-                'color': PLAYERCOLOR,
-                'idGame': IDGAME,
-            }));
+// Start or continue a timer
+function startTimer(doIncrement, playerType, time) {
+    // Game is finished, do not launch timer again
+    if (GAMESTATUS === 'finished') {
+        return;
+    }
 
-            if (PLAYERCOLOR === 'white') {
-                gameIsOver('win', 'w', 'White win ! Black timer is over');
-            } else {
-                gameIsOver('win', 'b', 'Black win ! White timer is over');
+    if (playerType === 'player') {
+        if (!isRunningPlayer) {
+            if (doIncrement) {
+                remainingTimeOpponent += (parseInt(INCREMENT) * 1000);
             }
-        } else if ((turn === 'player' && PLAYERCOLOR === 'black') || (turn === 'opponent' && PLAYERCOLOR === 'white')) {
-            socket.send(JSON.stringify({
-                'method': 'timeout',
-                'color': PLAYERCOLOR,
-                'idGame': IDGAME,
-            }));
-
-            if (PLAYERCOLOR === 'white') {
-                gameIsOver('win', 'w', 'White win ! Black timer is over');
-            } else {
-                gameIsOver('win', 'b', 'Black win ! White timer is over');
+            if (typeof time !== 'undefined') {
+                remainingTimePlayer = time * 1000;
             }
+            endTimePlayer = Date.now() + remainingTimePlayer; // Update endtime
+            isRunningPlayer = true;
+            animationFrame = requestAnimationFrame(loop); // Start the loop
+        }
+    } else {
+        if (!isRunningOpponent) {
+            if (doIncrement) {
+                remainingTimePlayer += (parseInt(INCREMENT) * 1000);
+            }
+            if (typeof time !== 'undefined') {
+                remainingTimeOpponent = time * 1000;
+            }
+            endTimeOpponent = Date.now() + remainingTimeOpponent; // Update endtime
+            isRunningOpponent = true;
+            animationFrame = requestAnimationFrame(loop); // Start the loop
         }
     }
 }
 
-function stopTimer() {
-    clearInterval(timer);
-    timer = false;
+
+// Stop timer
+function stopTimer(playerType) {
+    if (playerType === 'player') {
+        if (isRunningPlayer) {
+            isRunningPlayer = false;
+            cancelAnimationFrame(animationFrame); // Stop the update, this will stop the loop
+        }
+    } else if (playerType === 'opponent') {
+        if (isRunningOpponent) {
+            isRunningOpponent = false;
+            cancelAnimationFrame(animationFrame); // Stop the update, this will stop the loop
+        }
+    }
 }
 
-function gameIsOver(status, playerWinner, endReason) {
+// Switch turn, stop one timer and start the other one
+function switchTurn() {
+    if (isRunningPlayer) {
+        stopTimer('player');
+        startTimer(true, 'opponent');
+    } else if (isRunningOpponent) {
+        stopTimer('opponent');
+        startTimer(true, 'player');
+    }
+}
+
+
+function gameIsOver(status, playerWinner, endReason, socketMessage) {
+    // Game is already mark as finished, do not process this again
+    if (GAMESTATUS === 'finished') {
+        return;
+    }
+
     GAMESTATUS = 'finished';
 
-    stopTimer();
+    stopTimer('player');
+    stopTimer('opponent');
+
+    if ('vibrate' in window.navigator) {
+        try {
+            window.navigator.vibrate(1000);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    if (typeof socketMessage !== 'undefined' && socketMessage === 'timeout') {
+        socket.send(JSON.stringify({
+            'method': socketMessage,
+            'color': PLAYERCOLOR,
+            'colorWinner': playerWinner,
+            'idGame': IDGAME,
+        }));
+    }
 
     $('.tchat').append('<div>' + endReason + '</div>');
 
