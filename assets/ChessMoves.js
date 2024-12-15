@@ -364,6 +364,19 @@ $(function() {
             return;
         }
 
+        // Timer update, in case for exemple a takeback is accepted
+        if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'update-timers') {
+            if (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white') {
+                remainingTimePlayer = socketMessage.white_time_left * 1000; // Player timeleft in milliseconds
+                remainingTimeOpponent = socketMessage.black_time_left * 1000; // Player timeleft in milliseconds
+            } else {
+                remainingTimePlayer = socketMessage.black_time_left * 1000; // Player timeleft in milliseconds
+                remainingTimeOpponent = socketMessage.white_time_left * 1000; // Player timeleft in milliseconds
+            }
+
+            return;
+        }
+
         // Opponent timer is over
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'timeout') {
             if (socketMessage.colorWinner === 'w') {
@@ -452,10 +465,6 @@ $(function() {
             }
 
             if (chess.isGameOver()) {
-                let colorToUse = 'black';
-                if (socketMessage.color === 'w') {
-                    colorToUse = 'white';
-                }
                 if (chess.isCheckmate() === true) {
                     if (socketMessage.color === 'w') {
                         gameIsOver('win', 'w', 'White win ! Black is checkmate');
@@ -508,10 +517,6 @@ $(function() {
             }
 
             if (chess.isGameOver()) {
-                let colorToUse = 'black';
-                if (socketMessage.color === 'w') {
-                    colorToUse = 'white';
-                }
                 if (chess.isCheckmate() === true) {
                     if (socketMessage.color === 'w') {
                         gameIsOver('win', 'w', 'White win ! Black is checkmate');
@@ -551,6 +556,15 @@ $(function() {
                 } else {
                     // TODO : update timer maybe ?
                     // $('#timer-opponent').text(getTime(socketMessage.timer)); // update time because of lantency
+
+                    if (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white') {
+                        remainingTimePlayer = socketMessage.white_time_left * 1000; // Player timeleft in milliseconds
+                        remainingTimeOpponent = socketMessage.black_time_left * 1000; // Player timeleft in milliseconds
+                    } else {
+                        remainingTimePlayer = socketMessage.black_time_left * 1000; // Player timeleft in milliseconds
+                        remainingTimeOpponent = socketMessage.white_time_left * 1000; // Player timeleft in milliseconds
+                    }
+
                     switchTurn();
                 }
             }
@@ -1231,6 +1245,7 @@ $(function() {
             socket.send(JSON.stringify({
                 'method': 'takeback-yes',
                 'idGame': IDGAME,
+                'color': PLAYERCOLOR,
                 'message': message,
                 'fen' : chess.fen(),
                 'pgn': chess.pgn(),

@@ -402,8 +402,9 @@ class MessageHandler implements MessageComponentInterface
             );
 
             $oneMore = true;
-            foreach ($moves as $oneMove) {
+            foreach ($moves as $key => $oneMove) {
                 $this->em->remove($oneMove); // Remove one Move
+                unset($moves[$key]);
 
                 // If onlyOne true, break the loop to remove only one move
                 if ($msgArray['onlyOne'] || !$oneMore) {
@@ -411,6 +412,39 @@ class MessageHandler implements MessageComponentInterface
                 } else { // If not, go next to remove another one, but set the varaible to break after that
                     $oneMore = false;
                     continue;
+                }
+            }
+
+            $lastMove = array_values($moves)[0] ?? null;
+
+            $updateTimerMsgArray = [
+                'method' => 'update-timers',
+            ];
+            if (isset($lastMove)) {
+                // TODO : il ne faut pas faire comme ca. Il faut récupérer le temps restant
+                $updateTimerMsgArray['white_time_left'] = $lastMove->getWhiteTimeLeft();
+                $updateTimerMsgArray['black_time_left'] = $lastMove->getBlackTimeLeft();
+            } else {
+                $updateTimerMsgArray['white_time_left'] = $this->gameEntity[$idGame]->getTime();
+                $updateTimerMsgArray['black_time_left'] = $this->gameEntity[$idGame]->getTime();
+            }
+
+            // Update microtimes
+            $this->whiteMicrotimeSpend[$idGame] = ($this->gameEntity[$idGame]->getTime() - $updateTimerMsgArray['white_time_left']);
+            $this->blackMicrotimeSpend[$idGame] = ($this->gameEntity[$idGame]->getTime() - $updateTimerMsgArray['black_time_left']);
+
+            $microtimeNow = microtime(true);
+            $fenExplode = explode(' ', $msgArray['fen']);
+            if ($fenExplode[1] === 'w') {
+                $this->whiteMicrotimeStart[$idGame] = $microtimeNow;
+            } else {
+                $this->blackMicrotimeStart[$idGame] = $microtimeNow;
+            }
+
+            $updateTimerMsgJson = json_encode($updateTimerMsgArray);
+            foreach ($this->connections as $connection) {
+                if (isset($connection->gameId) && $connection->gameId === $idGame) {
+                    $connection->send($updateTimerMsgJson);
                 }
             }
 
@@ -427,6 +461,11 @@ class MessageHandler implements MessageComponentInterface
                 }
             }
 
+            return;
+        }
+
+        // Update timers function is called by servers to users, we have nothing to do here
+        if (isset($msgArray['method']) && $msgArray['method'] === 'update-timers') {
             return;
         }
 
@@ -491,7 +530,9 @@ class MessageHandler implements MessageComponentInterface
 
         $microtimeNow = microtime(true);
         if (isset($msgArray['after'])) {
-            $msgArray['timer'] = round($this->gameTimer[$idGame]);
+            $msgArray['white_time_left'] = round($this->gameTimer[$idGame]);
+            $msgArray['black_time_left'] = round($this->gameTimer[$idGame]);
+
             $fenSplit = explode(' ', $msgArray['after']);
             // Second move and color black, start white timer
             if ((int) $fenSplit[5] === 2 && $msgArray['color'] === 'b') {
@@ -502,15 +543,16 @@ class MessageHandler implements MessageComponentInterface
             if ((int) $fenSplit[5] > 2 && $msgArray['color'] === 'b') {
                 $this->blackMicrotimeSpend[$idGame] += $microtimeNow - $this->blackMicrotimeStart[$idGame] - $this->gameIncrement[$idGame];
                 $this->whiteMicrotimeStart[$idGame] = $microtimeNow;
-                $msgArray['timer'] = round($this->gameTimer[$idGame] - $this->blackMicrotimeSpend[$idGame]);
             }
 
             // Timers has started and white played, update his timer
             if ((int) $fenSplit[5] >= 2 && $msgArray['color'] === 'w') {
                 $this->whiteMicrotimeSpend[$idGame] += $microtimeNow - $this->whiteMicrotimeStart[$idGame] - $this->gameIncrement[$idGame];
                 $this->blackMicrotimeStart[$idGame] = $microtimeNow;
-                $msgArray['timer'] = round($this->gameTimer[$idGame] - $this->whiteMicrotimeSpend[$idGame]);
             }
+
+            $msgArray['white_time_left'] = round($this->gameTimer[$idGame] - $this->whiteMicrotimeSpend[$idGame]);
+            $msgArray['black_time_left'] = round($this->gameTimer[$idGame] - $this->blackMicrotimeSpend[$idGame]);
 
             $msg = json_encode($msgArray);
             foreach ($this->connections as $connection) {
@@ -553,6 +595,8 @@ class MessageHandler implements MessageComponentInterface
             $movesEntity->setLan($msgArray['lan']);
             $movesEntity->setFlags($msgArray['flags']);
             $movesEntity->setMoveNumber($msgArray['moveNumber']);
+            $movesEntity->setWhiteTimeLeft($this->playerWhiteEntity[$idGame]->getTimeLeft());
+            $movesEntity->setBlackTimeLeft($this->playerBlackEntity[$idGame]->getTimeLeft());
             if (isset($msgArray['promotion'])) {
                 $movesEntity->setPromotion($msgArray['promotion']);
             }
