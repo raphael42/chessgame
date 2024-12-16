@@ -355,9 +355,11 @@ $(function() {
 
             let chessHistory = chess.history({verbose: true});
             // We need to use the before for this one
-            let fenSplitForHistory = (chessHistory[chessHistory.length - 1].before).split(' ');
-            // fenSplitForHistory[1] is color and fenSplitForHistory[5] is the move number
-            $('#move-san-' + fenSplitForHistory[1] + '-' + fenSplitForHistory[5]).addClass('last-history-move');
+            if (typeof chessHistory[chessHistory.length - 1] !== 'undefined') {
+                let fenSplitForHistory = (chessHistory[chessHistory.length - 1].before).split(' ');
+                // fenSplitForHistory[1] is color and fenSplitForHistory[5] is the move number
+                $('#move-san-' + fenSplitForHistory[1] + '-' + fenSplitForHistory[5]).addClass('last-history-move');
+            }
 
             setupDraggable();
 
@@ -366,6 +368,7 @@ $(function() {
 
         // Timer update, in case for exemple a takeback is accepted
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'update-timers') {
+            // TODO : update endTimePlayer et endTimeOpponent
             if (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white') {
                 remainingTimePlayer = socketMessage.white_time_left * 1000; // Player timeleft in milliseconds
                 remainingTimeOpponent = socketMessage.black_time_left * 1000; // Player timeleft in milliseconds
@@ -554,9 +557,6 @@ $(function() {
                 if (tmp2 === 2 && socketMessage.color === 'b') {
                     startTimer(false, 'player');
                 } else {
-                    // TODO : update timer maybe ?
-                    // $('#timer-opponent').text(getTime(socketMessage.timer)); // update time because of lantency
-
                     if (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white') {
                         remainingTimePlayer = socketMessage.white_time_left * 1000; // Player timeleft in milliseconds
                         remainingTimeOpponent = socketMessage.black_time_left * 1000; // Player timeleft in milliseconds
@@ -1146,6 +1146,11 @@ $(function() {
             return;
         }
 
+        // Disable takeback in the first move
+        if (chess.moveNumber() === 1) {
+            return;
+        }
+
         $('#takeback-display').removeClass('d-none');
 
         let message = 'Takeback sent';
@@ -1235,9 +1240,11 @@ $(function() {
 
         let chessHistory = chess.history({verbose: true});
         // We need to use the before for this one
-        let fenSplitForHistory = (chessHistory[chessHistory.length - 1].before).split(' ');
-        // fenSplitForHistory[1] is color and fenSplitForHistory[5] is the move number
-        $('#move-san-' + fenSplitForHistory[1] + '-' + fenSplitForHistory[5]).addClass('last-history-move');
+        if (typeof chessHistory[chessHistory.length - 1] !== 'undefined') {
+            let fenSplitForHistory = (chessHistory[chessHistory.length - 1].before).split(' ');
+            // fenSplitForHistory[1] is color and fenSplitForHistory[5] is the move number
+            $('#move-san-' + fenSplitForHistory[1] + '-' + fenSplitForHistory[5]).addClass('last-history-move');
+        }
 
         setupDraggable();
 

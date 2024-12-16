@@ -401,8 +401,25 @@ class MessageHandler implements MessageComponentInterface
                 ['id' => 'DESC']
             );
 
+            // Check number of moves we have. If too much moves to remove, we shouldn't do the takeback and return
+            if ($msgArray['onlyOne']) {
+                if (count($moves) < 1) { // One move to remove, return if we have less than 1 move in DB (0 btw)
+                    return;
+                }
+            } else {
+                if (count($moves) < 2) { // Two moves to remove, return if we have less than 2 moves in DB
+                    return;
+                }
+            }
+
             $oneMore = true;
+            $updateTimerMsgArray = [
+                'method' => 'update-timers',
+            ];
             foreach ($moves as $key => $oneMove) {
+                $updateTimerMsgArray['white_time_left'] = $oneMove->getWhiteTimeLeft();
+                $updateTimerMsgArray['black_time_left'] = $oneMove->getBlackTimeLeft();
+
                 $this->em->remove($oneMove); // Remove one Move
                 unset($moves[$key]);
 
@@ -413,20 +430,6 @@ class MessageHandler implements MessageComponentInterface
                     $oneMore = false;
                     continue;
                 }
-            }
-
-            $lastMove = array_values($moves)[0] ?? null;
-
-            $updateTimerMsgArray = [
-                'method' => 'update-timers',
-            ];
-            if (isset($lastMove)) {
-                // TODO : il ne faut pas faire comme ca. Il faut récupérer le temps restant
-                $updateTimerMsgArray['white_time_left'] = $lastMove->getWhiteTimeLeft();
-                $updateTimerMsgArray['black_time_left'] = $lastMove->getBlackTimeLeft();
-            } else {
-                $updateTimerMsgArray['white_time_left'] = $this->gameEntity[$idGame]->getTime();
-                $updateTimerMsgArray['black_time_left'] = $this->gameEntity[$idGame]->getTime();
             }
 
             // Update microtimes
