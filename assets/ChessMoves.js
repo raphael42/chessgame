@@ -355,11 +355,30 @@ $(function() {
 
             let chessHistory = chess.history({verbose: true});
             // We need to use the before for this one
-            let fenSplitForHistory = (chessHistory[chessHistory.length - 1].before).split(' ');
-            // fenSplitForHistory[1] is color and fenSplitForHistory[5] is the move number
-            $('#move-san-' + fenSplitForHistory[1] + '-' + fenSplitForHistory[5]).addClass('last-history-move');
+            if (typeof chessHistory[chessHistory.length - 1] !== 'undefined') {
+                let fenSplitForHistory = (chessHistory[chessHistory.length - 1].before).split(' ');
+                // fenSplitForHistory[1] is color and fenSplitForHistory[5] is the move number
+                $('#move-san-' + fenSplitForHistory[1] + '-' + fenSplitForHistory[5]).addClass('last-history-move');
+            }
 
             setupDraggable();
+
+            return;
+        }
+
+        // Timer update, in case for exemple a takeback is accepted
+        if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'update-timers') {
+            if (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white') {
+                remainingTimePlayer = socketMessage.white_time_left * 1000; // Player timeleft in milliseconds
+                remainingTimeOpponent = socketMessage.black_time_left * 1000; // Player timeleft in milliseconds
+            } else {
+                remainingTimePlayer = socketMessage.black_time_left * 1000; // Player timeleft in milliseconds
+                remainingTimeOpponent = socketMessage.white_time_left * 1000; // Player timeleft in milliseconds
+            }
+
+            // Update this variables to update both timers
+            endTimePlayer = Date.now() + remainingTimePlayer;
+            endTimeOpponent = Date.now() + remainingTimeOpponent;
 
             return;
         }
@@ -452,10 +471,6 @@ $(function() {
             }
 
             if (chess.isGameOver()) {
-                let colorToUse = 'black';
-                if (socketMessage.color === 'w') {
-                    colorToUse = 'white';
-                }
                 if (chess.isCheckmate() === true) {
                     if (socketMessage.color === 'w') {
                         gameIsOver('win', 'w', 'White win ! Black is checkmate');
@@ -508,10 +523,6 @@ $(function() {
             }
 
             if (chess.isGameOver()) {
-                let colorToUse = 'black';
-                if (socketMessage.color === 'w') {
-                    colorToUse = 'white';
-                }
                 if (chess.isCheckmate() === true) {
                     if (socketMessage.color === 'w') {
                         gameIsOver('win', 'w', 'White win ! Black is checkmate');
@@ -546,11 +557,17 @@ $(function() {
             if (typeof socketMessage.after !== 'undefined') {
                 var tmp = socketMessage.after.split(' ');
                 var tmp2 = parseInt(tmp[5]);
-                if (tmp2 === 2 && socketMessage.color === 'b') {
+                if (tmp2 === 2 && socketMessage.color === 'b' && !isRunningPlayer && !isRunningOpponent) {
                     startTimer(false, 'player');
                 } else {
-                    // TODO : update timer maybe ?
-                    // $('#timer-opponent').text(getTime(socketMessage.timer)); // update time because of lantency
+                    if (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white') {
+                        remainingTimePlayer = socketMessage.white_time_left * 1000; // Player timeleft in milliseconds
+                        remainingTimeOpponent = socketMessage.black_time_left * 1000; // Player timeleft in milliseconds
+                    } else {
+                        remainingTimePlayer = socketMessage.black_time_left * 1000; // Player timeleft in milliseconds
+                        remainingTimeOpponent = socketMessage.white_time_left * 1000; // Player timeleft in milliseconds
+                    }
+
                     switchTurn();
                 }
             }
@@ -1132,6 +1149,11 @@ $(function() {
             return;
         }
 
+        // Disable takeback in the first move
+        if (chess.moveNumber() === 1) {
+            return;
+        }
+
         $('#takeback-display').removeClass('d-none');
 
         let message = 'Takeback sent';
@@ -1221,9 +1243,11 @@ $(function() {
 
         let chessHistory = chess.history({verbose: true});
         // We need to use the before for this one
-        let fenSplitForHistory = (chessHistory[chessHistory.length - 1].before).split(' ');
-        // fenSplitForHistory[1] is color and fenSplitForHistory[5] is the move number
-        $('#move-san-' + fenSplitForHistory[1] + '-' + fenSplitForHistory[5]).addClass('last-history-move');
+        if (typeof chessHistory[chessHistory.length - 1] !== 'undefined') {
+            let fenSplitForHistory = (chessHistory[chessHistory.length - 1].before).split(' ');
+            // fenSplitForHistory[1] is color and fenSplitForHistory[5] is the move number
+            $('#move-san-' + fenSplitForHistory[1] + '-' + fenSplitForHistory[5]).addClass('last-history-move');
+        }
 
         setupDraggable();
 
@@ -1231,6 +1255,7 @@ $(function() {
             socket.send(JSON.stringify({
                 'method': 'takeback-yes',
                 'idGame': IDGAME,
+                'color': PLAYERCOLOR,
                 'message': message,
                 'fen' : chess.fen(),
                 'pgn': chess.pgn(),
@@ -1426,6 +1451,10 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         lastMoveHistory['method'] = 'move';
         lastMoveHistory['moveNumber'] = moveNumber;
         lastMoveHistory['pgn'] = chess.pgn();
+        lastMoveHistory['timersStarted'] = false;
+        if (isRunningPlayer || isRunningOpponent) {
+            lastMoveHistory['timersStarted'] = true;
+        }
 
         $('#playerturn-start').addClass('d-none');
 
@@ -1482,7 +1511,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
 
         var tmp = chess.fen().split(' ');
         var tmp2 = parseInt(tmp[5]);
-        if (tmp2 === 2 && moving.color === 'b') {
+        if (tmp2 === 2 && moving.color === 'b' && !isRunningPlayer && !isRunningOpponent) {
             startTimer(false, 'opponent');
         } else {
             switchTurn();

@@ -51,6 +51,12 @@ class Moves
     #[ORM\Column]
     private ?int $move_number = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $white_time_left = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $black_time_left = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -196,6 +202,30 @@ class Moves
     public function setMoveNumber(int $move_number): static
     {
         $this->move_number = $move_number;
+
+        return $this;
+    }
+
+    public function getWhiteTimeLeft(): ?int
+    {
+        return $this->white_time_left;
+    }
+
+    public function setWhiteTimeLeft(?int $white_time_left): static
+    {
+        $this->white_time_left = $white_time_left;
+
+        return $this;
+    }
+
+    public function getBlackTimeLeft(): ?int
+    {
+        return $this->black_time_left;
+    }
+
+    public function setBlackTimeLeft(?int $black_time_left): static
+    {
+        $this->black_time_left = $black_time_left;
 
         return $this;
     }

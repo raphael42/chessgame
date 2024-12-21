@@ -602,13 +602,6 @@ $(function() {
         //     return;
         // }
 
-
-        // PLAYERCOLOR in one letter format
-        let playerColorFormat = 'b';
-        if (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white') {
-            playerColorFormat = 'w';
-        }
-
         // Always revert 2 moves, the computer one, and the player one
         let undo = chess.undo();
         let fenSplit = undo.before.split(' ');
@@ -647,9 +640,11 @@ $(function() {
 
         let chessHistory = chess.history({verbose: true});
         // We need to use the before for this one
-        let fenSplitForHistory = (chessHistory[chessHistory.length - 1].before).split(' ');
-        // fenSplitForHistory[1] is color and fenSplitForHistory[5] is the move number
-        $('#move-san-' + fenSplitForHistory[1] + '-' + fenSplitForHistory[5]).addClass('last-history-move');
+        if (typeof chessHistory[chessHistory.length - 1] !== 'undefined') {
+            let fenSplitForHistory = (chessHistory[chessHistory.length - 1].before).split(' ');
+            // fenSplitForHistory[1] is color and fenSplitForHistory[5] is the move number
+            $('#move-san-' + fenSplitForHistory[1] + '-' + fenSplitForHistory[5]).addClass('last-history-move');
+        }
 
         setupDraggable();
 
