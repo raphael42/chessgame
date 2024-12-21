@@ -538,18 +538,18 @@ class MessageHandler implements MessageComponentInterface
 
             $fenSplit = explode(' ', $msgArray['after']);
             // Second move and color black, start white timer
-            if ((int) $fenSplit[5] === 2 && $msgArray['color'] === 'b') {
+            if ($msgArray['timersStarted'] === false && (int) $fenSplit[5] === 2 && $msgArray['color'] === 'b') {
                 $this->whiteMicrotimeStart[$idGame] = $microtimeNow;
             }
 
             // Timers has started and black played, update his timer
-            if ((int) $fenSplit[5] > 2 && $msgArray['color'] === 'b') {
+            if ($msgArray['timersStarted'] === true && $msgArray['color'] === 'b') {
                 $this->blackMicrotimeSpend[$idGame] += $microtimeNow - $this->blackMicrotimeStart[$idGame] - $this->gameIncrement[$idGame];
                 $this->whiteMicrotimeStart[$idGame] = $microtimeNow;
             }
 
             // Timers has started and white played, update his timer
-            if ((int) $fenSplit[5] >= 2 && $msgArray['color'] === 'w') {
+            if ($msgArray['timersStarted'] === true && $msgArray['color'] === 'w') {
                 $this->whiteMicrotimeSpend[$idGame] += $microtimeNow - $this->whiteMicrotimeStart[$idGame] - $this->gameIncrement[$idGame];
                 $this->blackMicrotimeStart[$idGame] = $microtimeNow;
             }

@@ -368,7 +368,6 @@ $(function() {
 
         // Timer update, in case for exemple a takeback is accepted
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'update-timers') {
-            // TODO : update endTimePlayer et endTimeOpponent
             if (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white') {
                 remainingTimePlayer = socketMessage.white_time_left * 1000; // Player timeleft in milliseconds
                 remainingTimeOpponent = socketMessage.black_time_left * 1000; // Player timeleft in milliseconds
@@ -376,6 +375,10 @@ $(function() {
                 remainingTimePlayer = socketMessage.black_time_left * 1000; // Player timeleft in milliseconds
                 remainingTimeOpponent = socketMessage.white_time_left * 1000; // Player timeleft in milliseconds
             }
+
+            // Update this variables to update both timers
+            endTimePlayer = Date.now() + remainingTimePlayer;
+            endTimeOpponent = Date.now() + remainingTimeOpponent;
 
             return;
         }
@@ -554,7 +557,7 @@ $(function() {
             if (typeof socketMessage.after !== 'undefined') {
                 var tmp = socketMessage.after.split(' ');
                 var tmp2 = parseInt(tmp[5]);
-                if (tmp2 === 2 && socketMessage.color === 'b') {
+                if (tmp2 === 2 && socketMessage.color === 'b' && !isRunningPlayer && !isRunningOpponent) {
                     startTimer(false, 'player');
                 } else {
                     if (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white') {
@@ -1448,6 +1451,10 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         lastMoveHistory['method'] = 'move';
         lastMoveHistory['moveNumber'] = moveNumber;
         lastMoveHistory['pgn'] = chess.pgn();
+        lastMoveHistory['timersStarted'] = false;
+        if (isRunningPlayer || isRunningOpponent) {
+            lastMoveHistory['timersStarted'] = true;
+        }
 
         $('#playerturn-start').addClass('d-none');
 
@@ -1504,7 +1511,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
 
         var tmp = chess.fen().split(' ');
         var tmp2 = parseInt(tmp[5]);
-        if (tmp2 === 2 && moving.color === 'b') {
+        if (tmp2 === 2 && moving.color === 'b' && !isRunningPlayer && !isRunningOpponent) {
             startTimer(false, 'opponent');
         } else {
             switchTurn();
