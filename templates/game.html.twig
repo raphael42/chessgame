@@ -157,9 +157,16 @@
                 <span id="color-opponent"></span>
                 <span id="timer-opponent"></span>
             </div>
-            <div>
-                Statut de connexion : <span class="opponent-connect"></span>
+
+            <div class="user-connected-div">
+                <i id="opponent-connect" class="user-disconnected" title="Utilisateur inactif"></i>
+                {% if opponent.user is not null %}
+                    <span class="ms-1">{{ opponent.user.nickname }}</span>
+                {% else %}
+                    <span>Anonyme</span>
+                {% endif %}
             </div>
+
             <div class="history">
                 <div class="row text-center">
                     <div class="col-3 btn history-button" id="history-start"><i class="bi bi-chevron-double-left"></i></div>
@@ -189,9 +196,16 @@
                     {% endfor %}
                 </div>
             </div>
-            <div>
-                Statut de connexion : <span class="player-connect">OK</span>
+
+            <div class="user-connected-div">
+                <i id="player-connect" class="user-connected" title="Utilisateur actif"></i>
+                {% if is_granted('IS_AUTHENTICATED_FULLY') and app.user is not null %}
+                    <span class="ms-1">{{ app.user.nickname }}</span>
+                {% else %}
+                    <span>Anonyme</span>
+                {% endif %}
             </div>
+
             <div>
                 <span id="color-player"></span>
                 <span id="timer-player"></span>

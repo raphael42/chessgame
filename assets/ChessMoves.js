@@ -134,16 +134,20 @@ $(function() {
 
             // Update player connection status
             if (playerFound) {
-                $('.player-connect').html('OK');
+                $('#player-connect').removeClass('user-disconnected');
+                $('#player-connect').addClass('user-connected');
             } else {
-                $('.player-connect').html('KO');
+                $('#player-connect').addClass('user-disconnected');
+                $('#player-connect').removeClass('user-connected');
             }
 
             // update opponent status
             if (opponentFound) {
-                $('.opponent-connect').html('OK');
+                $('#opponent-connect').removeClass('user-disconnected');
+                $('#opponent-connect').addClass('user-connected');
             } else {
-                $('.opponent-connect').html('KO');
+                $('#opponent-connect').addClass('user-disconnected');
+                $('#opponent-connect').removeClass('user-connected');
             }
 
             // One or more spectators, remove d-none on div if there is one, and update the number
@@ -182,14 +186,17 @@ $(function() {
 
             // Update player connection status
             if (playerFound) {
-                $('.player-connect').html('OK');
+                $('#player-connect').removeClass('user-disconnected');
+                $('#player-connect').addClass('user-connected');
             } else {
-                $('.player-connect').html('KO');
+                $('#player-connect').addClass('user-disconnected');
+                $('#player-connect').removeClass('user-connected');
             }
 
             // update opponent status
             if (opponentFound) {
-                $('.opponent-connect').html('OK');
+                $('#opponent-connect').removeClass('user-disconnected');
+                $('#opponent-connect').addClass('user-connected');
 
                 if ($('#begining-with-friend-modal').hasClass('show')) {
                     $('#begining-with-friend-modal').modal('hide');
@@ -199,7 +206,8 @@ $(function() {
                     $('#begining-random-modal').modal('hide');
                 }
             } else {
-                $('.opponent-connect').html('KO');
+                $('#opponent-connect').addClass('user-disconnected');
+                $('#opponent-connect').removeClass('user-connected');
             }
 
             // One or more spectators, remove d-none on div if there is one, and update the number

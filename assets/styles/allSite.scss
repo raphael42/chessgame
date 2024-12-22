@@ -151,7 +151,7 @@
                             content: "";
                             width: 25px;
                             height: 25px;
-                            background-color: #8baf73; /* Couleur de fond du cercle */
+                            background-color: #8baf73;
                             border-radius: 50%;
 
                             @media (max-width: 1300px) {
@@ -214,7 +214,7 @@
                             content: "";
                             width: 25px;
                             height: 25px;
-                            background-color: #646f40; /* Couleur de fond du cercle */
+                            background-color: #646f40;
                             border-radius: 50%;
 
                             @media (max-width: 1300px) {
@@ -313,7 +313,7 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    pointer-events: none; // Allow to click throw the anipation
+    pointer-events: none; // Allow to click throw the animation
     z-index: 99999; // Set fireworks at the top of everything
 }
 
@@ -326,5 +326,41 @@
 .game-history-board {
     @media (max-width: 767px) {
         display: none;
+    }
+}
+
+.user-connected-div {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+
+    .user-connected {
+        display: flex;
+        width: 1rem;
+        text-align: center;
+        vertical-align: text-top;
+
+        &:before {
+            content: "";
+            width: 0.7rem;
+            height: 0.7rem;
+            background-color: #73a23d;
+            border-radius: 50%;
+        }
+    }
+
+    .user-disconnected {
+        display: flex;
+        width: 1rem;
+        text-align: center;
+        vertical-align: text-top;
+
+        &:before {
+            content: "";
+            width: 0.7rem;
+            height: 0.7rem;
+            border: 2px solid;
+            border-radius: 50%;
+        }
     }
 }
