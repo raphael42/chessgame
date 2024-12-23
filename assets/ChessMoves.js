@@ -44,13 +44,6 @@ let animationFrame = null; // Reference to requestAnimationFrame
 $("#timer-player").text(formatTime(totalTimePlayer));
 $("#timer-opponent").text(formatTime(totalTimeOpponent));
 
-$('#color-player').html(PLAYERCOLOR + ' | ');
-if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
-    $('#color-opponent').html('black | ');
-} else {
-    $('#color-opponent').html('white | ');
-}
-
 $(function() {
     if (chess.inCheck() === true) {
         let kingposition = null;

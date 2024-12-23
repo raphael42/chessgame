@@ -77,13 +77,13 @@
                     </div>
                 </div>
             {% endif %}
-            <div class="tchat">
+            <section class="tchat">
                 {% for oneMessage in messages %}
                     <div>
                         {{ oneMessage.message }}
                     </div>
                 {% endfor %}
-            </div>
+            </section>
             <form id="form-tchat" class="{{ playerType == 'spectator' ? 'd-none' }}">
                 <input id="input-tchat" type="text" class="form-control" placeholder="Écrire à votre adversaire">
             </form>
@@ -154,7 +154,7 @@
         </div>
         <div class="col-lg-3 col-md-12 col-sm-12">
             <div>
-                <span id="color-opponent"></span>
+                {# <span id="color-opponent"></span> #}
                 <span id="timer-opponent"></span>
             </div>
 
@@ -167,8 +167,8 @@
                 {% endif %}
             </div>
 
-            <div class="history">
-                <div class="row text-center">
+            <section class="history">
+                <div class="history-buttons-div row text-center">
                     <div class="col-3 btn history-button" id="history-start"><i class="bi bi-chevron-double-left"></i></div>
                     <div class="col-3 btn history-button" id="history-backward"><i class="bi bi-chevron-left"></i></div>
                     <div class="col-3 btn history-button" id="history-forward"><i class="bi bi-chevron-right"></i></div>
@@ -195,7 +195,7 @@
                         </div>
                     {% endfor %}
                 </div>
-            </div>
+            </section>
 
             <div class="user-connected-div">
                 <i id="player-connect" class="user-connected" title="Utilisateur actif"></i>
