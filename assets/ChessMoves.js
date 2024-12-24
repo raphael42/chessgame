@@ -44,6 +44,14 @@ let animationFrame = null; // Reference to requestAnimationFrame
 $("#timer-player").text(formatTime(totalTimePlayer));
 $("#timer-opponent").text(formatTime(totalTimeOpponent));
 
+if (totalTimePlayer === 0) {
+    $('.timer-bottom').addClass('over');
+}
+
+if (totalTimeOpponent === 0) {
+    $('.timer-top').addClass('over');
+}
+
 $(function() {
     if (chess.inCheck() === true) {
         let kingposition = null;
@@ -392,6 +400,24 @@ $(function() {
                 gameIsOver('win', 'b', 'Black win ! White timer is over');
             }
 
+            if ((PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') && socketMessage.colorWinner === 'w') {
+                $("#timer-opponent").text("00:00");
+                $('.timer-top').removeClass('active');
+                $('.timer-top').addClass('over');
+            } else if ((PLAYERCOLOR === 'black' || PLAYERCOLOR === 'b') && socketMessage.colorWinner === 'b') {
+                $("#timer-opponent").text("00:00");
+                $('.timer-top').removeClass('active');
+                $('.timer-top').addClass('over');
+            } else if ((PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') && socketMessage.colorWinner === 'b') {
+                $("#timer-player").text("00:00");
+                $('.timer-bottom').removeClass('active');
+                $('.timer-bottom').addClass('over');
+            } else if ((PLAYERCOLOR === 'black' || PLAYERCOLOR === 'b') && socketMessage.colorWinner === 'w') {
+                $("#timer-player").text("00:00");
+                $('.timer-bottom').removeClass('active');
+                $('.timer-bottom').addClass('over');
+            }
+
             return;
         }
 
@@ -576,7 +602,8 @@ $(function() {
 
         $('#title').html('C\'est votre tour ! | ' + SERVERNAME);
 
-        $('#playerturn-start').addClass('d-none');
+        $('.history-section-before').addClass('d-none');
+        $('.history-section').removeClass('d-none');
 
         // Not history in view, manage the last-history-move
         if (!HISTORYINVIEW) {
@@ -584,9 +611,9 @@ $(function() {
             if (socketMessage.color === 'w') { // White play, make a new line
                 let htmlMoveRow = '' +
                 '<div class="row move-' + socketMessage.moveNumber + ' text-center">' +
-                    '<div class="col-4">' + socketMessage.moveNumber + '</div>' +
+                    '<div class="col-3 move-index">' + socketMessage.moveNumber + '</div>' +
                     '<div id="move-san-w-' + socketMessage.moveNumber + '" class="col-4 one-move-san last-history-move">' + socketMessage.san + '</div>' +
-                    '<div id="move-san-b-' + socketMessage.moveNumber + '" class="col-4 one-move-san"></div>' +
+                    '<div id="move-san-b-' + socketMessage.moveNumber + '" class="col-5 one-move-san"></div>' +
                 '</div>';
 
                 $('.history-section').append(htmlMoveRow);
@@ -598,9 +625,9 @@ $(function() {
             if (socketMessage.color === 'w') { // White play, make a new line
                 let htmlMoveRow = '' +
                 '<div class="row move-' + socketMessage.moveNumber + ' text-center">' +
-                    '<div class="col-4">' + socketMessage.moveNumber + '</div>' +
-                    '<div id="move-san-w-' + socketMessage.moveNumber + '" class="col-4 one-move-san">' + socketMessage.san + '</div>' +
-                    '<div id="move-san-b-' + socketMessage.moveNumber + '" class="col-4 one-move-san"></div>' +
+                    '<div class="col-3 move-index">' + socketMessage.moveNumber + '</div>' +
+                    '<div id="move-san-w-' + socketMessage.moveNumber + '" class="col-5 one-move-san">' + socketMessage.san + '</div>' +
+                    '<div id="move-san-b-' + socketMessage.moveNumber + '" class="col-5 one-move-san"></div>' +
                 '</div>';
 
                 $('.history-section').append(htmlMoveRow);
@@ -1457,15 +1484,16 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             lastMoveHistory['timersStarted'] = true;
         }
 
-        $('#playerturn-start').addClass('d-none');
+        $('.history-section-before').addClass('d-none');
+        $('.history-section').removeClass('d-none');
 
         $('.history-section').find('.last-history-move').removeClass('last-history-move');
         if (moving.color === 'w') { // White play, make a new line
             let htmlMoveRow = '' +
             '<div class="row move-' + lastMoveHistory.moveNumber + ' text-center">' +
-                '<div class="col-4">' + lastMoveHistory.moveNumber + '</div>' +
+                '<div class="col-3 move-index">' + lastMoveHistory.moveNumber + '</div>' +
                 '<div id="move-san-w-' + lastMoveHistory.moveNumber + '" class="col-4 one-move-san last-history-move">' + lastMoveHistory.san + '</div>' +
-                '<div id="move-san-b-' + lastMoveHistory.moveNumber + '" class="col-4 one-move-san"></div>' +
+                '<div id="move-san-b-' + lastMoveHistory.moveNumber + '" class="col-5 one-move-san"></div>' +
             '</div>';
 
             $('.history-section').append(htmlMoveRow);
@@ -1678,6 +1706,9 @@ function updateTimerPlayer() {
         } else if (PLAYERCOLOR === 'black' || PLAYERCOLOR === 'b') {
             gameIsOver('win', 'w', 'White win ! Black timer is over', 'timeout');
         }
+
+        $('.timer-bottom').removeClass('active');
+        $('.timer-bottom').addClass('over');
     } else {
         $("#timer-player").text(formatTime(remainingTimePlayer));
         $("#timer-opponent").text(formatTime(remainingTimeOpponent));
@@ -1700,6 +1731,9 @@ function updateTimerOpponent() {
         } else if (PLAYERCOLOR === 'black' || PLAYERCOLOR === 'b') {
             gameIsOver('win', 'b', 'Black win ! White timer is over', 'timeout');
         }
+
+        $('.timer-top').removeClass('active');
+        $('.timer-top').addClass('over');
     } else {
         $("#timer-player").text(formatTime(remainingTimePlayer));
         $("#timer-opponent").text(formatTime(remainingTimeOpponent));
@@ -1736,6 +1770,8 @@ function startTimer(doIncrement, playerType, time) {
             isRunningPlayer = true;
             animationFrame = requestAnimationFrame(loop); // Start the loop
         }
+
+        $('.timer-bottom').addClass('active');
     } else {
         if (!isRunningOpponent) {
             if (doIncrement) {
@@ -1748,6 +1784,8 @@ function startTimer(doIncrement, playerType, time) {
             isRunningOpponent = true;
             animationFrame = requestAnimationFrame(loop); // Start the loop
         }
+
+        $('.timer-top').addClass('active');
     }
 }
 
@@ -1759,11 +1797,15 @@ function stopTimer(playerType) {
             isRunningPlayer = false;
             cancelAnimationFrame(animationFrame); // Stop the update, this will stop the loop
         }
+
+        $('.timer-bottom').removeClass('active');
     } else if (playerType === 'opponent') {
         if (isRunningOpponent) {
             isRunningOpponent = false;
             cancelAnimationFrame(animationFrame); // Stop the update, this will stop the loop
         }
+
+        $('.timer-top').removeClass('active');
     }
 }
 
