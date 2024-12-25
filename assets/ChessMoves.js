@@ -1750,6 +1750,9 @@ function calculateScore(fen) {
             $('#score-opponent').html('+' + advantageBlack);
             $('#score-player').html('');
         }
+    } else {
+        $('#score-player').html('');
+        $('#score-opponent').html('');
     }
 
     return {
