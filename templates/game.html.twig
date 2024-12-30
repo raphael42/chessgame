@@ -32,7 +32,7 @@
 {% block body %}
     <div id="fireworks-container"></div>
     <div class="row">
-        <div class="col-lg-3 col-md-4 col-sm-12">
+        <div class="col-lg-3 col-md-12 tchat-column">
             {% if playerType == 'spectator' %}
                 <div>
                     <p>Mode spectateur</p>
@@ -91,136 +91,180 @@
                 <p><i class="bi bi-person-fill"></i><span class="spectators-number"></span></p>
             </div>
         </div>
-        <div class="col-lg-6 col-md-8 col-sm-12">
-            <div id="board">
-                {% if player.color == 'white' %}
-                    {% for key, column in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] %}
-                        <div class="one-column">
-                            {% for line in 8..1 %}
-                                {% if key is even %}
-                                    <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-white' : 'case-black' }}">
-                                        {% if column == 'h' %}
-                                            <span class="absolute-top-right">{{ line }}</span>
-                                        {% endif %}
-
-                                        {% if line == 1 %}
-                                            <span class="absolute-bottom-left">{{ column }}</span>
-                                        {% endif %}
-                                    </div>
+        <div class="col-lg-9 col-md-12">
+            <div class="row">
+                <div class="col-md-8 col-12 board-column">
+                    <div class="timer-score-opponent-mobile">
+                        <div class="user-mobile-div">
+                            <div class="user-connected-div">
+                                <i class="user-disconnected opponent-connect" title="Utilisateur inactif"></i>
+                                {% if opponent.user is not null %}
+                                    <span class="ms-1">{{ opponent.user.nickname }}</span>
                                 {% else %}
-                                    <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-black' : 'case-white' }}">
-                                        {% if column == 'h' %}
-                                            <span class="absolute-top-right">{{ line }}</span>
-                                        {% endif %}
-
-                                        {% if line == 1 %}
-                                            <span class="absolute-bottom-left">{{ column }}</span>
-                                        {% endif %}
-                                    </div>
+                                    <span>Anonyme</span>
                                 {% endif %}
-                            {% endfor %}
+                            </div>
+                            <div class="score-div">
+                                <span class="score-opponent"></span>
+                            </div>
                         </div>
-                    {% endfor %}
-                {% else %}
-                    {% for key, column in ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'] %}
-                        <div class="one-column">
-                            {% for line in 1..8 %}
-                                {% if key is even %}
-                                    <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-white' : 'case-black' }}">
-                                        {% if column == 'a' %}
-                                            <span class="absolute-top-right">{{ line }}</span>
-                                        {% endif %}
-
-                                        {% if line == 8 %}
-                                            <span class="absolute-bottom-left">{{ column }}</span>
-                                        {% endif %}
-                                    </div>
-                                {% else %}
-                                    <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-black' : 'case-white' }}">
-                                        {% if column == 'a' %}
-                                            <span class="absolute-top-right">{{ line }}</span>
-                                        {% endif %}
-
-                                        {% if line == 8 %}
-                                            <span class="absolute-bottom-left">{{ column }}</span>
-                                        {% endif %}
-                                    </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-12 col-sm-12">
-            <div class="score-div mb-1">
-                <span id="score-opponent"></span>
-            </div>
-            <div class="timer-div timer-top text-center">
-                <span id="timer-opponent"></span>
-            </div>
-            <section class="history-section-div">
-                <div class="user-connected-div mx-2 py-2">
-                    <i id="opponent-connect" class="user-disconnected" title="Utilisateur inactif"></i>
-                    {% if opponent.user is not null %}
-                        <span class="ms-1">{{ opponent.user.nickname }}</span>
-                    {% else %}
-                        <span>Anonyme</span>
-                    {% endif %}
-                </div>
-
-                <div class="history">
-                    <div class="history-buttons-div text-center">
-                        <div class="row">
-                            <div class="col-3 btn history-button" id="history-start"><i class="bi bi-chevron-double-left"></i></div>
-                            <div class="col-3 btn history-button" id="history-backward"><i class="bi bi-chevron-left"></i></div>
-                            <div class="col-3 btn history-button" id="history-forward"><i class="bi bi-chevron-right"></i></div>
-                            <div class="col-3 btn history-button" id="history-end"><i class="bi bi-chevron-double-right"></i></div>
+                        <div class="timer-div timer-top text-center">
+                            <span class="timer-opponent"></span>
                         </div>
                     </div>
+                    <div id="board">
+                        {% if player.color == 'white' %}
+                            {% for key, column in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] %}
+                                <div class="one-column">
+                                    {% for line in 8..1 %}
+                                        {% if key is even %}
+                                            <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-white' : 'case-black' }}">
+                                                {% if column == 'h' %}
+                                                    <span class="absolute-top-right">{{ line }}</span>
+                                                {% endif %}
 
-                    <div class="history-section-before {{ game.status not in ['begining', 'waiting-player'] ? 'd-none' }}">
-                        <div id="playerturn-start">
-                            {% if player.color == 'w' or player.color == 'white' %}
-                                <div>
-                                    <i class="bi bi-info-circle-fill"></i> Vous jouez avec les blancs.
+                                                {% if line == 1 %}
+                                                    <span class="absolute-bottom-left">{{ column }}</span>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-black' : 'case-white' }}">
+                                                {% if column == 'h' %}
+                                                    <span class="absolute-top-right">{{ line }}</span>
+                                                {% endif %}
+
+                                                {% if line == 1 %}
+                                                    <span class="absolute-bottom-left">{{ column }}</span>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
                                 </div>
-                                <div>
-                                    <strong>C'est votre tour !</strong>
+                            {% endfor %}
+                        {% else %}
+                            {% for key, column in ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'] %}
+                                <div class="one-column">
+                                    {% for line in 1..8 %}
+                                        {% if key is even %}
+                                            <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-white' : 'case-black' }}">
+                                                {% if column == 'a' %}
+                                                    <span class="absolute-top-right">{{ line }}</span>
+                                                {% endif %}
+
+                                                {% if line == 8 %}
+                                                    <span class="absolute-bottom-left">{{ column }}</span>
+                                                {% endif %}
+                                            </div>
+                                        {% else %}
+                                            <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-black' : 'case-white' }}">
+                                                {% if column == 'a' %}
+                                                    <span class="absolute-top-right">{{ line }}</span>
+                                                {% endif %}
+
+                                                {% if line == 8 %}
+                                                    <span class="absolute-bottom-left">{{ column }}</span>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
                                 </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="timer-score-player-mobile">
+                        <div class="user-mobile-div">
+                            <div class="score-div">
+                                <span class="score-player"></span>
+                            </div>
+                            <div class="user-connected-div">
+                                <i class="user-connected player-connect" title="Utilisateur actif"></i>
+                                {% if is_granted('IS_AUTHENTICATED_FULLY') and app.user is not null %}
+                                    <span class="ms-1">{{ app.user.nickname }}</span>
+                                {% else %}
+                                    <span>Anonyme</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="timer-div timer-bottom text-center">
+                            <span class="timer-player"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-12">
+                    <div class="timer-score-opponent-desktop">
+                        <div class="score-div mb-1">
+                            <span class="score-opponent"></span>
+                        </div>
+                        <div class="timer-div timer-top text-center">
+                            <span class="timer-opponent"></span>
+                        </div>
+                    </div>
+                    <section class="history-section-div">
+                        <div class="user-connected-div desktop mx-2 py-2">
+                            <i class="user-disconnected opponent-connect" title="Utilisateur inactif"></i>
+                            {% if opponent.user is not null %}
+                                <span class="ms-1">{{ opponent.user.nickname }}</span>
                             {% else %}
-                                <div>
-                                    <i class="bi bi-info-circle-fill"></i> Vous jouez avec les noirs.
-                                </div>
+                                <span>Anonyme</span>
                             {% endif %}
                         </div>
-                    </div>
 
-                    <div class="history-section {{ game.status in ['begining', 'waiting-player'] ? 'd-none' }}">
-                        {% for moveNumber, oneMove in arrMovesForHtml %}
-                            <div class="row move-{{ moveNumber }} text-center">
-                                <div class="col-3 move-index">{{ moveNumber }}</div>
-                                <div id="move-san-w-{{ moveNumber }}" class="col-4 one-move-san {{ loop.last and oneMove.san_black is not defined ? 'last-history-move' }}">{{ oneMove.san_white is defined ? oneMove.san_white }}</div>
-                                <div id="move-san-b-{{ moveNumber }}" class="col-5 one-move-san {{ loop.last and oneMove.san_black is defined ? 'last-history-move' }}">{{ oneMove.san_black is defined ? oneMove.san_black }}</div>
+                        <div class="history">
+                            <div class="history-buttons-div text-center">
+                                <div class="row">
+                                    <div class="col-3 btn history-button" id="history-start"><i class="bi bi-chevron-double-left"></i></div>
+                                    <div class="col-3 btn history-button" id="history-backward"><i class="bi bi-chevron-left"></i></div>
+                                    <div class="col-3 btn history-button" id="history-forward"><i class="bi bi-chevron-right"></i></div>
+                                    <div class="col-3 btn history-button" id="history-end"><i class="bi bi-chevron-double-right"></i></div>
+                                </div>
                             </div>
-                        {% endfor %}
+
+                            <div class="history-section-before {{ game.status not in ['begining', 'waiting-player'] ? 'd-none' }}">
+                                <div id="playerturn-start">
+                                    {% if player.color == 'w' or player.color == 'white' %}
+                                        <div>
+                                            <i class="bi bi-info-circle-fill"></i> Vous jouez avec les blancs.
+                                        </div>
+                                        <div>
+                                            <strong>C'est votre tour !</strong>
+                                        </div>
+                                    {% else %}
+                                        <div>
+                                            <i class="bi bi-info-circle-fill"></i> Vous jouez avec les noirs.
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="history-section {{ game.status in ['begining', 'waiting-player'] ? 'd-none' }}">
+                                {% for moveNumber, oneMove in arrMovesForHtml %}
+                                    <div class="row move-{{ moveNumber }} text-center">
+                                        <div class="col-3 move-index">{{ moveNumber }}</div>
+                                        <div id="move-san-w-{{ moveNumber }}" class="col-4 one-move-san {{ loop.last and oneMove.san_black is not defined ? 'last-history-move' }}">{{ oneMove.san_white is defined ? oneMove.san_white }}</div>
+                                        <div id="move-san-b-{{ moveNumber }}" class="col-5 one-move-san {{ loop.last and oneMove.san_black is defined ? 'last-history-move' }}">{{ oneMove.san_black is defined ? oneMove.san_black }}</div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="user-connected-div desktop mx-2 py-2">
+                            <i class="user-connected player-connect" title="Utilisateur actif"></i>
+                            {% if is_granted('IS_AUTHENTICATED_FULLY') and app.user is not null %}
+                                <span class="ms-1">{{ app.user.nickname }}</span>
+                            {% else %}
+                                <span>Anonyme</span>
+                            {% endif %}
+                        </div>
+                    </section>
+                    <div class="timer-score-player-desktop">
+                        <div class="timer-div timer-bottom text-center">
+                            <span class="timer-player"></span>
+                        </div>
+                        <div class="score-div mt-1">
+                            <span class="score-player"></span>
+                        </div>
                     </div>
                 </div>
-
-                <div class="user-connected-div mx-2 py-2">
-                    <i id="player-connect" class="user-connected" title="Utilisateur actif"></i>
-                    {% if is_granted('IS_AUTHENTICATED_FULLY') and app.user is not null %}
-                        <span class="ms-1">{{ app.user.nickname }}</span>
-                    {% else %}
-                        <span>Anonyme</span>
-                    {% endif %}
-                </div>
-            </section>
-            <div class="timer-div timer-bottom text-center">
-                <span id="timer-player"></span>
-            </div>
-            <div class="score-div mt-1">
-                <span id="score-player"></span>
             </div>
         </div>
     </div>

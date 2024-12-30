@@ -55,8 +55,8 @@ const piecesRanking = {
 
 calculateScore(FEN);
 
-$("#timer-player").text(formatTime(totalTimePlayer));
-$("#timer-opponent").text(formatTime(totalTimeOpponent));
+$(".timer-player").text(formatTime(totalTimePlayer));
+$(".timer-opponent").text(formatTime(totalTimeOpponent));
 
 if (totalTimePlayer === 0) {
     $('.timer-bottom').addClass('over');
@@ -149,20 +149,20 @@ $(function() {
 
             // Update player connection status
             if (playerFound) {
-                $('#player-connect').removeClass('user-disconnected');
-                $('#player-connect').addClass('user-connected');
+                $('.player-connect').removeClass('user-disconnected');
+                $('.player-connect').addClass('user-connected');
             } else {
-                $('#player-connect').addClass('user-disconnected');
-                $('#player-connect').removeClass('user-connected');
+                $('.player-connect').addClass('user-disconnected');
+                $('.player-connect').removeClass('user-connected');
             }
 
             // update opponent status
             if (opponentFound) {
-                $('#opponent-connect').removeClass('user-disconnected');
-                $('#opponent-connect').addClass('user-connected');
+                $('.opponent-connect').removeClass('user-disconnected');
+                $('.opponent-connect').addClass('user-connected');
             } else {
-                $('#opponent-connect').addClass('user-disconnected');
-                $('#opponent-connect').removeClass('user-connected');
+                $('.opponent-connect').addClass('user-disconnected');
+                $('.opponent-connect').removeClass('user-connected');
             }
 
             // One or more spectators, remove d-none on div if there is one, and update the number
@@ -201,17 +201,17 @@ $(function() {
 
             // Update player connection status
             if (playerFound) {
-                $('#player-connect').removeClass('user-disconnected');
-                $('#player-connect').addClass('user-connected');
+                $('.player-connect').removeClass('user-disconnected');
+                $('.player-connect').addClass('user-connected');
             } else {
-                $('#player-connect').addClass('user-disconnected');
-                $('#player-connect').removeClass('user-connected');
+                $('.player-connect').addClass('user-disconnected');
+                $('.player-connect').removeClass('user-connected');
             }
 
             // update opponent status
             if (opponentFound) {
-                $('#opponent-connect').removeClass('user-disconnected');
-                $('#opponent-connect').addClass('user-connected');
+                $('.opponent-connect').removeClass('user-disconnected');
+                $('.opponent-connect').addClass('user-connected');
 
                 if ($('#begining-with-friend-modal').hasClass('show')) {
                     $('#begining-with-friend-modal').modal('hide');
@@ -221,8 +221,8 @@ $(function() {
                     $('#begining-random-modal').modal('hide');
                 }
             } else {
-                $('#opponent-connect').addClass('user-disconnected');
-                $('#opponent-connect').removeClass('user-connected');
+                $('.opponent-connect').addClass('user-disconnected');
+                $('.opponent-connect').removeClass('user-connected');
             }
 
             // One or more spectators, remove d-none on div if there is one, and update the number
@@ -417,19 +417,19 @@ $(function() {
             }
 
             if ((PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') && socketMessage.colorWinner === 'w') {
-                $("#timer-opponent").text("00:00");
+                $(".timer-opponent").text("00:00");
                 $('.timer-top').removeClass('active');
                 $('.timer-top').addClass('over');
             } else if ((PLAYERCOLOR === 'black' || PLAYERCOLOR === 'b') && socketMessage.colorWinner === 'b') {
-                $("#timer-opponent").text("00:00");
+                $(".timer-opponent").text("00:00");
                 $('.timer-top').removeClass('active');
                 $('.timer-top').addClass('over');
             } else if ((PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') && socketMessage.colorWinner === 'b') {
-                $("#timer-player").text("00:00");
+                $(".timer-player").text("00:00");
                 $('.timer-bottom').removeClass('active');
                 $('.timer-bottom').addClass('over');
             } else if ((PLAYERCOLOR === 'black' || PLAYERCOLOR === 'b') && socketMessage.colorWinner === 'w') {
-                $("#timer-player").text("00:00");
+                $(".timer-player").text("00:00");
                 $('.timer-bottom').removeClass('active');
                 $('.timer-bottom').addClass('over');
             }
@@ -1736,23 +1736,23 @@ function calculateScore(fen) {
 
     if (advantageWhite > 0) {
         if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
-            $('#score-player').html('+' + advantageWhite);
-            $('#score-opponent').html('');
+            $('.score-player').html('+' + advantageWhite);
+            $('.score-opponent').html('');
         } else {
-            $('#score-opponent').html('+' + advantageWhite);
-            $('#score-player').html('');
+            $('.score-opponent').html('+' + advantageWhite);
+            $('.score-player').html('');
         }
     } else if (advantageBlack > 0) {
         if (PLAYERCOLOR === 'black' || PLAYERCOLOR === 'b') {
-            $('#score-player').html('+' + advantageBlack);
-            $('#score-opponent').html('');
+            $('.score-player').html('+' + advantageBlack);
+            $('.score-opponent').html('');
         } else {
-            $('#score-opponent').html('+' + advantageBlack);
-            $('#score-player').html('');
+            $('.score-opponent').html('+' + advantageBlack);
+            $('.score-player').html('');
         }
     } else {
-        $('#score-player').html('');
-        $('#score-opponent').html('');
+        $('.score-player').html('');
+        $('.score-opponent').html('');
     }
 
     return {
@@ -1781,7 +1781,7 @@ function updateTimerPlayer() {
     remainingTimePlayer = endTimePlayer - currentTime; // Time left
 
     if (remainingTimePlayer <= 0) {
-        $("#timer-player").text("00:00");
+        $(".timer-player").text("00:00");
 
         // Player turn and player color is white, blacks win
         if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
@@ -1794,8 +1794,8 @@ function updateTimerPlayer() {
         $('.timer-bottom').removeClass('active');
         $('.timer-bottom').addClass('over');
     } else {
-        $("#timer-player").text(formatTime(remainingTimePlayer));
-        $("#timer-opponent").text(formatTime(remainingTimeOpponent));
+        $(".timer-player").text(formatTime(remainingTimePlayer));
+        $(".timer-opponent").text(formatTime(remainingTimeOpponent));
     }
 }
 
@@ -1805,7 +1805,7 @@ function updateTimerOpponent() {
     remainingTimeOpponent = endTimeOpponent - currentTime; // Time left
 
     if (remainingTimeOpponent <= 0) {
-        $("#timer-opponent").text("00:00");
+        $(".timer-opponent").text("00:00");
 
         // Opponent turn and player color is white, blacks win
         if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
@@ -1819,8 +1819,8 @@ function updateTimerOpponent() {
         $('.timer-top').removeClass('active');
         $('.timer-top').addClass('over');
     } else {
-        $("#timer-player").text(formatTime(remainingTimePlayer));
-        $("#timer-opponent").text(formatTime(remainingTimeOpponent));
+        $(".timer-player").text(formatTime(remainingTimePlayer));
+        $(".timer-opponent").text(formatTime(remainingTimeOpponent));
     }
 }
 

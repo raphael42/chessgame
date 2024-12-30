@@ -64,37 +64,39 @@ body {
     }
 }
 
+.board-column {
+    @media (min-width: 768px) {
+        display: flex;
+        justify-content: center;
+    }
+}
+
 #board {
     display: flex;
     justify-content: center;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
+    border-radius: 6px;
+    overflow: hidden;
+    width: auto;
+    max-width: 600px;
 
     @media (max-width: 767px) {
-        margin-top : 1rem;
-        margin-bottom : 1rem;
+        box-shadow: none;
+        border-radius: 0;
     }
 
     .one-column {
-        display: flex;
-        flex-direction: column;
+        width: 12.5%;
 
         .chess-table {
+            // Display is used for the possible-move
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 80px;
-            height: 80px;
+
+            aspect-ratio: 1/1;
             cursor: pointer;
             position: relative;
-
-            @media (max-width: 1300px) {
-                width: 64px;
-                height: 64px;
-            }
-
-            @media (max-width: 767px) {
-                width: 12.4vw;
-                height: 12.4vw;
-            }
 
             .absolute-top-right {
                 position: absolute;
@@ -248,12 +250,16 @@ body {
 .history-section-div {
     background-color: white;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
-    border-radius: 6px;
     border-radius: 0 6px 6px 0;
+    overflow: hidden;
+
+    @media (max-width: 767px) {
+        border-radius: 6px;
+    }
 
     .history {
         .history-section-before {
-            height: 200px;
+            height: 160px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -268,7 +274,7 @@ body {
 
 
         .history-section {
-            height: 200px;
+            height: 160px;
             overflow-y: auto;
             overflow-x: hidden;
 
@@ -289,40 +295,52 @@ body {
             cursor: pointer;
         }
     }
+}
 
-    .user-connected-div {
-        display: flex;
-        justify-content: start;
-        align-items: center;
+.user-mobile-div {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
 
-        .user-connected {
-            display: flex;
-            width: 1rem;
-            text-align: center;
-            vertical-align: text-top;
+.user-connected-div {
+    display: flex;
+    justify-content: start;
+    align-items: center;
 
-            &:before {
-                content: "";
-                width: 0.7rem;
-                height: 0.7rem;
-                background-color: #73a23d;
-                border-radius: 50%;
-            }
+    &.desktop {
+        @media (max-width: 767px) {
+            display: none;
         }
+    }
 
-        .user-disconnected {
-            display: flex;
-            width: 1rem;
-            text-align: center;
-            vertical-align: text-top;
+    .user-connected {
+        display: flex;
+        width: 1rem;
+        text-align: center;
+        vertical-align: text-top;
 
-            &:before {
-                content: "";
-                width: 0.7rem;
-                height: 0.7rem;
-                border: 2px solid;
-                border-radius: 50%;
-            }
+        &:before {
+            content: "";
+            width: 0.7rem;
+            height: 0.7rem;
+            background-color: #73a23d;
+            border-radius: 50%;
+        }
+    }
+
+    .user-disconnected {
+        display: flex;
+        width: 1rem;
+        text-align: center;
+        vertical-align: text-top;
+
+        &:before {
+            content: "";
+            width: 0.7rem;
+            height: 0.7rem;
+            border: 2px solid;
+            border-radius: 50%;
         }
     }
 }
@@ -360,15 +378,59 @@ body {
     height: 20px;
 }
 
-.tchat {
-    height: 300px;
+.timer-score-opponent-desktop,
+.timer-score-player-desktop {
+    @media (max-width: 767px) {
+        display: none;
+    }
+}
 
-    background-color: white;
-    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
-    border-radius: 6px;
+.timer-score-player-mobile {
+    display: none;
 
-    overflow-y: auto;
-    overflow-x: hidden;
+    @media (max-width: 767px) {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    @media (max-width: 767px) {
+        margin-bottom: 1rem;
+    }
+}
+
+.timer-score-opponent-mobile {
+    display: none;
+
+    @media (max-width: 767px) {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    @media (max-width: 767px) {
+        margin-top: 1rem;
+    }
+}
+
+.tchat-column {
+    @media (max-width: 991px) {
+        order: 2;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .tchat {
+        height: 300px;
+        @media (max-width: 991px) {
+            height: 160px;
+        }
+
+        background-color: white;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
+        border-radius: 6px;
+
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
 }
 
 .create-game-section {
