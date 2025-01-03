@@ -101,7 +101,7 @@
                                 {% if opponent.user is not null %}
                                     <span class="ms-1">{{ opponent.user.nickname }}</span>
                                 {% else %}
-                                    <span>Anonyme</span>
+                                    <span class="ms-1">Anonyme</span>
                                 {% endif %}
                             </div>
                             <div class="score-div">
@@ -181,7 +181,7 @@
                                 {% if is_granted('IS_AUTHENTICATED_FULLY') and app.user is not null %}
                                     <span class="ms-1">{{ app.user.nickname }}</span>
                                 {% else %}
-                                    <span>Anonyme</span>
+                                    <span class="ms-1">Anonyme</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -205,7 +205,7 @@
                             {% if opponent.user is not null %}
                                 <span class="ms-1">{{ opponent.user.nickname }}</span>
                             {% else %}
-                                <span>Anonyme</span>
+                                <span class="ms-1">Anonyme</span>
                             {% endif %}
                         </div>
 
@@ -252,7 +252,7 @@
                             {% if is_granted('IS_AUTHENTICATED_FULLY') and app.user is not null %}
                                 <span class="ms-1">{{ app.user.nickname }}</span>
                             {% else %}
-                                <span>Anonyme</span>
+                                <span class="ms-1">Anonyme</span>
                             {% endif %}
                         </div>
                     </section>
@@ -349,6 +349,5 @@
             </div>
         </div>
     </div>
-</div>
 
 {% endblock %}

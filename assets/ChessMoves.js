@@ -53,7 +53,7 @@ const piecesRanking = {
     'k': 0,
 };
 
-calculateScore(FEN);
+calculateMaterial(FEN);
 
 $(".timer-player").text(formatTime(totalTimePlayer));
 $(".timer-opponent").text(formatTime(totalTimeOpponent));
@@ -376,7 +376,7 @@ $(function() {
 
             $('.last-history-move').removeClass('last-history-move');
 
-            calculateScore(chess.fen());
+            calculateMaterial(chess.fen());
 
             let chessHistory = chess.history({verbose: true});
             // We need to use the before for this one
@@ -616,7 +616,7 @@ $(function() {
             }
         }
 
-        calculateScore(socketMessage.after);
+        calculateMaterial(socketMessage.after);
 
         $('#title').html('C\'est votre tour ! | ' + SERVERNAME);
 
@@ -644,7 +644,7 @@ $(function() {
                 let htmlMoveRow = '' +
                 '<div class="row move-' + socketMessage.moveNumber + ' text-center">' +
                     '<div class="col-3 move-index">' + socketMessage.moveNumber + '</div>' +
-                    '<div id="move-san-w-' + socketMessage.moveNumber + '" class="col-5 one-move-san">' + socketMessage.san + '</div>' +
+                    '<div id="move-san-w-' + socketMessage.moveNumber + '" class="col-4 one-move-san">' + socketMessage.san + '</div>' +
                     '<div id="move-san-b-' + socketMessage.moveNumber + '" class="col-5 one-move-san"></div>' +
                 '</div>';
 
@@ -1295,7 +1295,7 @@ $(function() {
             $('#move-san-' + fenSplitForHistory[1] + '-' + fenSplitForHistory[5]).addClass('last-history-move');
         }
 
-        calculateScore(chess.fen());
+        calculateMaterial(chess.fen());
 
         setupDraggable();
 
@@ -1582,7 +1582,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
 
         $('#title').html('En attente de l\'adversaire | ' + SERVERNAME);
 
-        calculateScore(lastMoveHistory.after);
+        calculateMaterial(lastMoveHistory.after);
 
         return true;
     }
@@ -1702,7 +1702,7 @@ function placePieces(fen, noLastMove) {
 }
 
 // Function to calculate the current score of the game
-function calculateScore(fen) {
+function calculateMaterial(fen) {
     whiteScore = 0;
     blackScore = 0;
 
