@@ -65,9 +65,16 @@ body {
 }
 
 .board-column {
+    display: flex;
+
     @media (min-width: 768px) {
-        display: flex;
         justify-content: center;
+    }
+
+    @media (max-width: 767px) {
+        flex-direction: column;
+        flex-wrap: wrap;
+        align-content: center;
     }
 }
 
@@ -255,6 +262,7 @@ body {
 
     @media (max-width: 767px) {
         border-radius: 6px;
+        margin-top: 1rem;
     }
 
     .history {
@@ -387,6 +395,7 @@ body {
 
 .timer-score-player-mobile {
     display: none;
+    max-width: 600px;
 
     @media (max-width: 767px) {
         display: flex;
@@ -400,14 +409,11 @@ body {
 
 .timer-score-opponent-mobile {
     display: none;
+    max-width: 600px;
 
     @media (max-width: 767px) {
         display: flex;
         justify-content: space-between;
-    }
-
-    @media (max-width: 767px) {
-        margin-top: 1rem;
     }
 }
 
