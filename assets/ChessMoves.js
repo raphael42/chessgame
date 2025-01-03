@@ -1918,7 +1918,7 @@ function gameIsOver(status, playerWinner, endReason, socketMessage) {
 
     if ('vibrate' in window.navigator) {
         try {
-            window.navigator.vibrate(1000);
+            window.navigator.vibrate(100);
         } catch (error) {
             console.log(error);
         }
