@@ -18,6 +18,14 @@ watch:
     path: watch
     controller: App\Controller\WatchController::watchfunction
 
+learn:
+    path: apprendre
+    controller: App\Controller\LearnController::learnfunction
+
+learnGame:
+    path: apprendre/{game}
+    controller: App\Controller\LearnController::learnGamefunction
+
 contact:
     path: contact
     controller: App\Controller\ContactController::contactfunction

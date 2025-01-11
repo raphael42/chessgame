@@ -1,0 +1,204 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ app.request.host }} | Apprendre les échecs{% endblock %}
+
+{% block style_container %}max-width:968px; margin: 32px auto;{% endblock %}
+
+{% block body %}
+    <div class="text-center">
+        <h1>Apprenez les echecs</h1>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <section>
+                <div class="row">
+                    <div class="col-12">
+                        <h2>Votre Progression</h2>
+                        <div class="bg-light pb-4 text-center rounded">
+                            <p class="pt-1 mb-2">Apprendre les échecs en jouant</p>
+                            <div class="progress w-75 mx-auto" role="progressbar" aria-label="Animated striped example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 75%">75%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mt-5">
+                <div class="row">
+                    <div class="col-12">
+                        <h2>Les pièces</h2>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6">
+                        <div class="card text-bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Le pion</h5>
+                                <p class="card-text">Il se déplace uniquement vers l'avant</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="card text-bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Le fou</h5>
+                                <p class="card-text">Il se déplace en diagonal</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="card text-bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Le cavalier</h5>
+                                <p class="card-text">Il se déplace en forme de L</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="card text-bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">La tour</h5>
+                                <p class="card-text">Elle se déplace sur une ligne droite</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="card text-bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">La reine</h5>
+                                <p class="card-text">Dame = tour + fou</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="card text-bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Le roi</h5>
+                                <p class="card-text">La pièce la plus importante</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mt-5">
+                <div class="row">
+                    <div class="col-12">
+                        <h2>Les fondamentaux</h2>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6">
+                        <div class="card text-bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Capturer</h5>
+                                <p class="card-text">Prennez les pièces adverses</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="card text-bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Protéger</h5>
+                                <p class="card-text">Assurez la sécurité de vos pièces</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="card text-bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Combat</h5>
+                                <p class="card-text">Capturez et défendez les pièces</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="card text-bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Échec en un coup</h5>
+                                <p class="card-text">Attaquez le Roi adverse</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="card text-bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Parer un échec</h5>
+                                <p class="card-text">Défendez votre Roi</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="card text-bg-light mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Mat en un coup</h5>
+                                <p class="card-text">Matez le Roi adverse</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {# <section>
+                <div class="row">
+                    <div class="col-12">
+                        <h2>Intermédiaire</h2>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6">
+                        Le pion
+                    </div>
+                    <div class="col-12 col-md-6">
+                        Le fou
+                    </div>
+                    <div class="col-12 col-md-6">
+                        Le cavalier
+                    </div>
+                    <div class="col-12 col-md-6">
+                        La tour
+                    </div>
+                    <div class="col-12 col-md-6">
+                        La reine
+                    </div>
+                    <div class="col-12 col-md-6">
+                        Le roi
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="row">
+                    <div class="col-12">
+                        <h2>Avancé</h2>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 col-md-6">
+                        Le pion
+                    </div>
+                    <div class="col-12 col-md-6">
+                        Le fou
+                    </div>
+                    <div class="col-12 col-md-6">
+                        Le cavalier
+                    </div>
+                    <div class="col-12 col-md-6">
+                        La tour
+                    </div>
+                    <div class="col-12 col-md-6">
+                        La reine
+                    </div>
+                    <div class="col-12 col-md-6">
+                        Le roi
+                    </div>
+                </div>
+            </section> #}
+        </div>
+    </div>
+{% endblock %}
