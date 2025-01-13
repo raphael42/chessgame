@@ -15,7 +15,7 @@ gameAi:
     controller: App\Controller\GameAIController::gameaifunction
 
 watch:
-    path: watch
+    path: parties-en-cours
     controller: App\Controller\WatchController::watchfunction
 
 contact:
