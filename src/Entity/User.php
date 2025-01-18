@@ -48,9 +48,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $date_last_connection = null;
 
+    /**
+     * @var Collection<int, ChallengeUser>
+     */
+    #[ORM\OneToMany(targetEntity: ChallengeUser::class, mappedBy: 'user')]
+    private Collection $challengeUsers;
+
     public function __construct()
     {
         $this->players = new ArrayCollection();
+        $this->challengeUsers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -197,6 +204,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setDateLastConnection(?\DateTimeInterface $date_last_connection): static
     {
         $this->date_last_connection = $date_last_connection;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChallengeUser>
+     */
+    public function getChallengeUsers(): Collection
+    {
+        return $this->challengeUsers;
+    }
+
+    public function addChallengeUser(ChallengeUser $challengeUser): static
+    {
+        if (!$this->challengeUsers->contains($challengeUser)) {
+            $this->challengeUsers->add($challengeUser);
+            $challengeUser->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChallengeUser(ChallengeUser $challengeUser): static
+    {
+        if ($this->challengeUsers->removeElement($challengeUser)) {
+            // set the owning side to null (unless already changed)
+            if ($challengeUser->getUser() === $this) {
+                $challengeUser->setUser(null);
+            }
+        }
 
         return $this;
     }
