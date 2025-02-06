@@ -23,6 +23,7 @@ Encore
     .addEntry('allSite', './assets/allSite.js')
     .addEntry('gameJs', './assets/ChessMoves.js')
     .addEntry('gameAiJs', './assets/ChessMovesAI.js')
+    .addEntry('gameChallengesJs', './assets/ChessChallenges.js')
     .addEntry('homeJs', './assets/home.js')
     .addEntry('gameHistoryJs', './assets/personal-space/gameHistory.js')
 

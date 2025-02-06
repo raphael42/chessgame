@@ -1,0 +1,111 @@
+{% extends 'base.html.twig' %}
+
+{# {% block title %}{{ app.request.host }} | Apprendre les échecs{% endblock %} #}
+
+{% block javascripts %}
+    <script>
+        const FEN = '{{ currentChallenge.fen }}';
+        const PIECESIMGURL = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
+        const AJAXSAVECHALLENGE = '{{ path('ajaxSaveChallenge') }}';
+        {% if nextChallengeExist %}
+            const NEXTCHALLENGEPATH = '{{ path('learnGame', {'gameCategory': currentChallenge.slug, 'gameId': currentChallenge.ordering + 1}) }}';
+        {% else %}
+            const NEXTCHALLENGEPATH = null;
+        {% endif %}
+        const SLUG = '{{ currentChallenge.slug }}';
+        const ID = '{{ currentChallenge.ordering }}';
+    </script>
+
+    {{ encore_entry_link_tags('gameChallengesJs') }}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ encore_entry_script_tags('gameChallengesJs') }}
+{% endblock %}
+
+
+
+{% block body %}
+    <div class="row">
+        <div class="col-lg-3 col-md-12 tchat-column">
+            {# TODO : make menu #}
+            {# <section class="tchat" style="margin-top: 2rem">
+            </section> #}
+        </div>
+        <div class="col-lg-9 col-md-12">
+            <div class="row">
+                <div class="col-md-8 col-12 board-column">
+                    <div id="board">
+                        {% for key, column in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] %}
+                            <div class="one-column">
+                                {% for line in 8..1 %}
+                                    {% if key is even %}
+                                        <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-white' : 'case-black' }}">
+                                            {% if column == 'h' %}
+                                                <span class="absolute-top-right">{{ line }}</span>
+                                            {% endif %}
+
+                                            {% if line == 1 %}
+                                                <span class="absolute-bottom-left">{{ column }}</span>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-black' : 'case-white' }}">
+                                            {% if column == 'h' %}
+                                                <span class="absolute-top-right">{{ line }}</span>
+                                            {% endif %}
+
+                                            {% if line == 1 %}
+                                                <span class="absolute-bottom-left">{{ column }}</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-4 col-12 d-flex flex-column flex-wrap justify-content-center">
+                    {# TODO : display different levels #}
+                    {# <section class="history-section-div">
+                    </section> #}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# TODO : update design of this #}
+    <div class="modal fade" id="promotion-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <button class="button" id="q">reine</button>
+                    <button class="button" id="r">tour</button>
+                    <button class="button" id="b">fou</button>
+                    <button class="button" id="n">cavalier</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="final-modal" tabindex="-1" aria-labelledby="finalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Étape terminée</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="final-score">
+                        {# TODO : display the score with the ajax request return datas ajaxSaveChallengeFunction #}
+                    </div>
+                    <p>Félicitations ! Vous maîtrisez ce niveau.</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="{{ path('learn') }}" class="btn btn-secondary">Retour au menu</a>
+                    <a href="{{ path('learn') }}" class="btn btn-primary">Suivant</a> {# TODO : update learn url #}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -23,8 +23,12 @@ learn:
     controller: App\Controller\LearnController::learnfunction
 
 learnGame:
-    path: apprendre/{game}
+    path: apprendre/{gameCategory}/{gameId}
     controller: App\Controller\LearnController::learnGamefunction
+
+ajaxSaveChallenge:
+    path: ajax/save-challenge
+    controller: App\Controller\LearnController::ajaxSaveChallengeFunction
 
 contact:
     path: contact

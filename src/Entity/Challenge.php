@@ -37,6 +37,12 @@ class Challenge
     #[ORM\OneToMany(targetEntity: ChallengeUser::class, mappedBy: 'challenge', orphanRemoval: true)]
     private Collection $challengeUsers;
 
+    #[ORM\Column(length: 255)]
+    private ?string $fen = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $slug = null;
+
     public function __construct()
     {
         $this->challengeUsers = new ArrayCollection();
@@ -133,6 +139,30 @@ class Challenge
                 $challengeUser->setChallenge(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getFen(): ?string
+    {
+        return $this->fen;
+    }
+
+    public function setFen(string $fen): static
+    {
+        $this->fen = $fen;
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): static
+    {
+        $this->slug = $slug;
 
         return $this;
     }
