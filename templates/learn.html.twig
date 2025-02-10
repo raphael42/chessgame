@@ -39,9 +39,20 @@
                                     <h5 class="card-title">Le pion</h5>
                                     <p class="card-text">Il se déplace uniquement vers l'avant</p>
                                 </div>
-                                <span class="ribbon-wrapper">
-                                    <span class="ribbon-display bg-success text-white">test</span>
-                                </span>
+                                {% if ongoingChallengesAdvancement.pawn is defined %}
+                                    <span class="ribbon-wrapper">
+                                        <span class="ribbon-display bg-primary text-white">{{ ongoingChallengesAdvancement.pawn }}</span>
+                                    </span>
+                                {% endif %}
+                                {% if finishedChallengesResult.pawn is defined %}
+                                    <span class="ribbon-wrapper">
+                                        <span class="ribbon-display bg-success text-white">
+                                            {% for i in 1..min(finishedChallengesResult.pawn, 3) %}
+                                                <i class="bi bi-star-fill"></i>
+                                            {% endfor %}
+                                        </span>
+                                    </span>
+                                {% endif %}
                             </div>
                         </a>
                     </div>

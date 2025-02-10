@@ -513,15 +513,14 @@ body {
 
     .ribbon-display {
         display: block;
-        font-size: 15px;
-        font-weight: bold;
+        font-size: 0.7rem;
         text-align: center;
         text-shadow: hsla(0, 0%, 100%, .5) 0px 1px 0px;
         transform: rotate(45deg);
         position: relative;
         padding: 7px 0;
         top: 10px;
-        width: 120px;
+        width: 115px;
         box-shadow: 0px 0px 3px rgba(0, 0, 0, .3);
     }
 }

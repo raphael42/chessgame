@@ -45,8 +45,43 @@ class LearnController extends AbstractController
             ]);
         }
 
+        $challengesAdvancement = [];
+        if (!empty($challengesUser)) {
+            foreach ($challenges as $oneChallenge) {
+                if (!isset($challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()])) {
+                    $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = null;
+                }
+
+                foreach ($challengesUser as $oneChallengeUser) {
+                    if ($oneChallenge->getId() === $oneChallengeUser->getChallenge()->getId()) {
+                        $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = $oneChallengeUser->getScore();
+                    }
+                }
+            }
+        }
+
+        $finishedChallengesResult = [];
+        $ongoingChallengesAdvancement = [];
+        foreach ($challengesAdvancement as $oneSlug => $challengesScores) {
+            $nbChallengesDone = 0;
+            foreach ($challengesScores as $oneScore) {
+                if (!is_null($oneScore)) {
+                    $nbChallengesDone++;
+                }
+            }
+
+            if (count($challengesScores) === $nbChallengesDone) { // All challenges are done, calculate average score
+                $finishedChallengesResult[$oneSlug] = floor(array_sum($challengesScores) / count($challengesScores));
+            } elseif ($nbChallengesDone > 0) { // Not all challenges done, check how much it misses
+                $ongoingChallengesAdvancement[$oneSlug] = $nbChallengesDone.' / '.count($challengesScores);
+            }
+        }
+
         return $this->render('learn.html.twig', [
+            'challenges' => $challenges,
             'challengesUser' => $challengesUser,
+            'ongoingChallengesAdvancement' => $ongoingChallengesAdvancement,
+            'finishedChallengesResult' => $finishedChallengesResult,
         ]);
     }
 
