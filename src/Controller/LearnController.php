@@ -85,9 +85,49 @@ class LearnController extends AbstractController
         ]);
     }
 
-    public function learnGamefunction(string $gameCategory, int $gameId, EntityManagerInterface $entityManager): Response
+    public function learnGamefunction(#[CurrentUser] ?Entity\User $user, Request $request, string $gameCategory, int $gameId, EntityManagerInterface $entityManager): Response
     {
         $challenges = $entityManager->getRepository(Entity\Challenge::class)->findAll();
+
+        // If user is connected, use the user
+        if ($user !== null) {
+            $challengesUser = $entityManager->getRepository(Entity\ChallengeUser::class)->findBy([
+                'user' => $user,
+            ]);
+        } else {
+            // If not, use a cookie
+            $challengeCookie = $request->cookies->get('challenge-cookie');
+
+            // The cookie doesn't exists, create one
+            if (is_null($challengeCookie)) {
+                $challengeCookie = time().bin2hex(random_bytes(5));
+
+                setcookie('challenge-cookie', $challengeCookie, [
+                    'expires' => time() + (20 * 365 * 24 * 60 * 60), // expiration : 20 years to not expire it
+                    'path' => '/',
+                    'samesite' => 'Lax',
+                ]);
+            }
+
+            $challengesUser = $entityManager->getRepository(Entity\ChallengeUser::class)->findBy([
+                'session' => $challengeCookie
+            ]);
+        }
+
+        $challengesAdvancement = [];
+        if (!empty($challengesUser)) {
+            foreach ($challenges as $oneChallenge) {
+                if (!isset($challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()])) {
+                    $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = null;
+                }
+
+                foreach ($challengesUser as $oneChallengeUser) {
+                    if ($oneChallenge->getId() === $oneChallengeUser->getChallenge()->getId()) {
+                        $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = $oneChallengeUser->getScore();
+                    }
+                }
+            }
+        }
 
         $currentChallenge = [];
         $nextChallengeExist = false; // Defines if there is a next challenge, to redirect to the next or display modal
@@ -103,6 +143,7 @@ class LearnController extends AbstractController
 
         return $this->render('learn-game.html.twig', [
             'challenges' => $challenges,
+            'challengesAdvancement' => $challengesAdvancement,
             'currentChallenge' => $currentChallenge,
             'nextChallengeExist' => $nextChallengeExist,
         ]);
@@ -167,7 +208,7 @@ class LearnController extends AbstractController
             ]);
         }
 
-        // User is not connected or we didn't find a chllenge, try with cookie
+        // User is not connected or we didn't find a challenge, try with cookie
         if (is_null($user) || !isset($challengeUser)) {
             $challengeUser = $entityManager->getRepository(Entity\ChallengeUser::class)->findOneBy([
                 'session' => $challengeCookie,

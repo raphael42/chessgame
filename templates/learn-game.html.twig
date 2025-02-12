@@ -67,8 +67,42 @@
                 </div>
                 <div class="col-md-4 col-12 d-flex flex-column flex-wrap justify-content-center">
                     {# TODO : display different levels #}
-                    {# <section class="history-section-div">
-                    </section> #}
+                    <section class="learn-advancement-section">
+                        <div class="title bg-primary bg-gradient text-white ps-4">
+                            <h2>{{ currentChallenge.category }}</h2>
+                            <p>{{ currentChallenge.name }}</p>
+                        </div>
+                        <div class="text-center mb-3">
+                            {{ currentChallenge.description|raw }}
+                        </div>
+                        <div class="btn-toolbar justify-content-around" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group w-100" role="group" aria-label="Btn group">
+                                {% for slug, listChallenges in challengesAdvancement %}
+                                    {% if slug == currentChallenge.slug %}
+                                        {% set widthBtn = 100 / listChallenges|length %}
+                                        {% for oneChallengeOrdering, oneChallengeScore in listChallenges %}
+                                            {% set btnClass = 'btn-outline-secondary' %}
+                                            {% if currentChallenge.ordering == oneChallengeOrdering %}
+                                                {% set btnClass = 'btn-primary' %}
+                                            {% elseif oneChallengeScore is not null %}
+                                                {% set btnClass = 'btn-success' %}
+                                            {% endif %}
+
+                                            <a class="btn {{ btnClass }} d-flex flex-wrap justify-content-center align-content-center px-1 py-1" style="width: {{ widthBtn }}%" href="{{ path('learnGame', {'gameCategory': slug, 'gameId': oneChallengeOrdering}) }}">
+                                                {% if oneChallengeScore is not null %}
+                                                    {% for i in 1..min(oneChallengeScore, 3) %}
+                                                        <i class="bi bi-star-fill lh-1"></i>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    {{ oneChallengeOrdering }}
+                                                {% endif %}
+                                            </a>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </div>
         </div>
