@@ -535,3 +535,18 @@ body {
         margin-top: 1rem;
     }
 }
+
+.section-title {
+    padding: 1rem 1.25rem;
+    margin: 0;
+    background-color: #fff;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+    text-decoration: none;
+    display: flex;
+    color: inherit;
+
+    &:hover {
+        background-color: #f8f9fa;
+    }
+}

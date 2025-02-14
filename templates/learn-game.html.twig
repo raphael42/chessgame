@@ -28,9 +28,63 @@
 {% block body %}
     <div class="row">
         <div class="col-lg-3 col-md-12 tchat-column">
-            {# TODO : make menu #}
-            {# <section class="tchat" style="margin-top: 2rem">
-            </section> #}
+            <section class="learn-menu-section">
+                <a href="{{ path('learn') }}" class="section-title">Retour au menu</a>
+                <div class="accordion" id="accordionLearnMenu">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="accordion-pieces">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-pieces-collapse" aria-expanded="true" aria-controls="accordion-pieces-collapse">
+                                Les pièces
+                            </button>
+                        </h2>
+                        <div id="accordion-pieces-collapse" class="accordion-collapse collapse show" aria-labelledby="accordion-pieces">
+                            <div class="accordion-body">
+                                <div class="list-group">
+                                    {% for slug, listChallenges in challengesAdvancement %}
+                                        {% set breakLoop = false %}
+                                        {% for onechallenge in challenges %}
+                                            {% if slug == onechallenge.slug and not breakLoop %}
+                                                {% set breakLoop = true %}
+                                                {% if slug == currentChallenge.slug %}
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': 1}) }}" class="list-group-item list-group-item-action active" aria-current="true">{{ onechallenge.category }}</a>
+                                                {% else %}
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': 1}) }}" class="list-group-item list-group-item-action">{{ onechallenge.category }}</a>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {# <div class="accordion-item">
+                        <h2 class="accordion-header" id="accordion-fondamentaux">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-fondamentaux-collapse" aria-expanded="false" aria-controls="accordion-fondamentaux-collapse">
+                                Les fondamentaux
+                            </button>
+                        </h2>
+                        <div id="accordion-fondamentaux-collapse" class="accordion-collapse collapse" aria-labelledby="accordion-fondamentaux">
+                            <div class="accordion-body">
+                                <div class="list-group">
+                                    {% for slug, listChallenges in challengesAdvancement %}
+                                        {% set breakLoop = false %}
+                                        {% for onechallenge in challenges %}
+                                            {% if slug == onechallenge.slug and not breakLoop %}
+                                                {% set breakLoop = true %}
+                                                {% if slug == currentChallenge.slug %}
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': 1}) }}" class="list-group-item list-group-item-action active" aria-current="true">{{ onechallenge.category }}</a>
+                                                {% else %}
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': 1}) }}" class="list-group-item list-group-item-action">{{ onechallenge.category }}</a>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div> #}
+                </div>
+            </section>
         </div>
         <div class="col-lg-9 col-md-12">
             <div class="row">
