@@ -46,9 +46,9 @@
                                             {% if slug == onechallenge.slug and not breakLoop %}
                                                 {% set breakLoop = true %}
                                                 {% if slug == currentChallenge.slug %}
-                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': 1}) }}" class="list-group-item list-group-item-action active" aria-current="true">{{ onechallenge.category }}</a>
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': challengeNumberLink[slug]}) }}" class="list-group-item list-group-item-action active" aria-current="true">{{ onechallenge.category }}</a>
                                                 {% else %}
-                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': 1}) }}" class="list-group-item list-group-item-action">{{ onechallenge.category }}</a>
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': challengeNumberLink[slug]}) }}" class="list-group-item list-group-item-action">{{ onechallenge.category }}</a>
                                                 {% endif %}
                                             {% endif %}
                                         {% endfor %}

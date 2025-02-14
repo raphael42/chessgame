@@ -60,6 +60,7 @@ class LearnController extends AbstractController
             }
         }
 
+        $challengeNumberLink = [];
         $finishedChallengesResult = [];
         $ongoingChallengesAdvancement = [];
         foreach ($challengesAdvancement as $oneSlug => $challengesScores) {
@@ -68,6 +69,14 @@ class LearnController extends AbstractController
                 if (!is_null($oneScore)) {
                     $nbChallengesDone++;
                 }
+            }
+
+            $challengeNumberLink[$oneSlug] = array_key_first(array_filter($challengesScores, function($value) {
+                return $value === null;
+            }));
+
+            if (is_null($challengeNumberLink[$oneSlug])) {
+                $challengeNumberLink[$oneSlug] = 1;
             }
 
             if (count($challengesScores) === $nbChallengesDone) { // All challenges are done, calculate average score
@@ -82,6 +91,7 @@ class LearnController extends AbstractController
             'challengesUser' => $challengesUser,
             'ongoingChallengesAdvancement' => $ongoingChallengesAdvancement,
             'finishedChallengesResult' => $finishedChallengesResult,
+            'challengeNumberLink' => $challengeNumberLink,
         ]);
     }
 
@@ -129,6 +139,17 @@ class LearnController extends AbstractController
             }
         }
 
+        $challengeNumberLink = [];
+        foreach ($challengesAdvancement as $oneSlug => $challengesScores) {
+            $challengeNumberLink[$oneSlug] = array_key_first(array_filter($challengesScores, function($value) {
+                return $value === null;
+            }));
+
+            if (is_null($challengeNumberLink[$oneSlug])) {
+                $challengeNumberLink[$oneSlug] = 1;
+            }
+        }
+
         $currentChallenge = [];
         $nextChallengeExist = false; // Defines if there is a next challenge, to redirect to the next or display modal
         foreach ($challenges as $oneChallenge) {
@@ -146,6 +167,7 @@ class LearnController extends AbstractController
             'challengesAdvancement' => $challengesAdvancement,
             'currentChallenge' => $currentChallenge,
             'nextChallengeExist' => $nextChallengeExist,
+            'challengeNumberLink' => $challengeNumberLink,
         ]);
     }
 

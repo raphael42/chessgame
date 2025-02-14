@@ -33,7 +33,7 @@
 
                 <div class="row">
                     <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'pawn', 'gameId': 1}) }}" class="no-decoration">
+                        <a href="{{ path('learnGame', {'gameCategory': 'pawn', 'gameId': challengeNumberLink.pawn}) }}" class="no-decoration">
                             {% set borderClass = '' %}
                             {% set textClass = '' %}
                             {% if ongoingChallengesAdvancement.pawn is defined %}
@@ -66,7 +66,7 @@
                         </a>
                     </div>
                     <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'bishop', 'gameId': 1}) }}" class="no-decoration">
+                        <a href="{{ path('learnGame', {'gameCategory': 'bishop', 'gameId': challengeNumberLink.bishop}) }}" class="no-decoration">
                             {% set borderClass = '' %}
                             {% set textClass = '' %}
                             {% if ongoingChallengesAdvancement.bishop is defined %}
@@ -99,7 +99,7 @@
                         </a>
                     </div>
                     <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'knight', 'gameId': 1}) }}" class="no-decoration">
+                        <a href="{{ path('learnGame', {'gameCategory': 'knight', 'gameId': challengeNumberLink.knight}) }}" class="no-decoration">
                             {% set borderClass = '' %}
                             {% set textClass = '' %}
                             {% if ongoingChallengesAdvancement.knight is defined %}
@@ -132,7 +132,7 @@
                         </a>
                     </div>
                     <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'rook', 'gameId': 1}) }}" class="no-decoration">
+                        <a href="{{ path('learnGame', {'gameCategory': 'rook', 'gameId': challengeNumberLink.rook}) }}" class="no-decoration">
                             {% set borderClass = '' %}
                             {% set textClass = '' %}
                             {% if ongoingChallengesAdvancement.rook is defined %}
@@ -165,7 +165,7 @@
                         </a>
                     </div>
                     <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'queen', 'gameId': 1}) }}" class="no-decoration">
+                        <a href="{{ path('learnGame', {'gameCategory': 'queen', 'gameId': challengeNumberLink.queen}) }}" class="no-decoration">
                             {% set borderClass = '' %}
                             {% set textClass = '' %}
                             {% if ongoingChallengesAdvancement.queen is defined %}
@@ -198,7 +198,7 @@
                         </a>
                     </div>
                     <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'king', 'gameId': 1}) }}" class="no-decoration">
+                        <a href="{{ path('learnGame', {'gameCategory': 'king', 'gameId': challengeNumberLink.king}) }}" class="no-decoration">
                             {% set borderClass = '' %}
                             {% set textClass = '' %}
                             {% if ongoingChallengesAdvancement.king is defined %}
