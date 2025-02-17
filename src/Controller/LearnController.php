@@ -47,17 +47,15 @@ class LearnController extends AbstractController
 
         $challengesAdvancement = [];
         $totalStars = 0;
-        if (!empty($challengesUser)) {
-            foreach ($challenges as $oneChallenge) {
-                if (!isset($challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()])) {
-                    $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = null;
-                }
+        foreach ($challenges as $oneChallenge) {
+            if (!isset($challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()])) {
+                $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = null;
+            }
 
-                foreach ($challengesUser as $oneChallengeUser) {
-                    if ($oneChallenge->getId() === $oneChallengeUser->getChallenge()->getId()) {
-                        $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = $oneChallengeUser->getScore();
-                        $totalStars += $oneChallengeUser->getScore();
-                    }
+            foreach ($challengesUser as $oneChallengeUser) {
+                if ($oneChallenge->getId() === $oneChallengeUser->getChallenge()->getId()) {
+                    $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = $oneChallengeUser->getScore();
+                    $totalStars += $oneChallengeUser->getScore();
                 }
             }
         }
@@ -128,16 +126,14 @@ class LearnController extends AbstractController
         }
 
         $challengesAdvancement = [];
-        if (!empty($challengesUser)) {
-            foreach ($challenges as $oneChallenge) {
-                if (!isset($challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()])) {
-                    $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = null;
-                }
+        foreach ($challenges as $oneChallenge) {
+            if (!isset($challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()])) {
+                $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = null;
+            }
 
-                foreach ($challengesUser as $oneChallengeUser) {
-                    if ($oneChallenge->getId() === $oneChallengeUser->getChallenge()->getId()) {
-                        $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = $oneChallengeUser->getScore();
-                    }
+            foreach ($challengesUser as $oneChallengeUser) {
+                if ($oneChallenge->getId() === $oneChallengeUser->getChallenge()->getId()) {
+                    $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = $oneChallengeUser->getScore();
                 }
             }
         }
