@@ -17,7 +17,6 @@ let nbMoves = 0;
 
 $(function() {
     $('#board').off().on('click', '.chess-table', function() {
-        const self = $(this);
         var idSquare = $(this).attr('id');
 
         // If all squares has the class clicked-premove-hover because a premove was made before, remove it
@@ -134,10 +133,19 @@ function setupDraggable(jQueryElement) {
             }
         },
         stop: function(ev, ui) {
-            $('.chess-table.clicked').removeClass('clicked');
-            $('.chess-table.possible-move').each(function() {
-                $(this).removeClass('possible-move');
-            });
+            const targetElement = $(document.elementFromPoint(
+                ev.clientX,
+                ev.clientY
+            ));
+
+            // If target element if is undefined, it's the same square
+            // In that case, we don't remove the clicked stuff to make the UI for firendly
+            if (typeof targetElement.attr('id') !== 'undefined') {
+                $('.chess-table.clicked').removeClass('clicked');
+                $('.chess-table.possible-move').each(function() {
+                    $(this).removeClass('possible-move');
+                });
+            }
         }
     });
 }
@@ -301,6 +309,19 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                 document.location.href = NEXTCHALLENGEPATH;
             } else { // If it's the last, display the final modal
                 $('#final-modal').modal('show');
+            }
+        }
+
+        // Keep the same piece selected to make the UI more firendly
+        $('#' + squareIdTo).addClass('clicked');
+        var allPossibleMoves = chess.moves({
+            square: squareIdTo,
+            verbose: true
+        });
+
+        for (var i in allPossibleMoves) {
+            if (allPossibleMoves[i].from === squareIdTo) {
+                $('#' + allPossibleMoves[i].to).addClass('possible-move');
             }
         }
 
