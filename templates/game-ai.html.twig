@@ -242,15 +242,40 @@
         </div>
     </div>
 
-    {# TODO : update design of this #}
-    <div class="modal fade" id="promotion-modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" id="promotion-modal" tabindex="-1" role="dialog" aria-labelledby="promotionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
             <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="promotionModalLabel">Promotion du pion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
                 <div class="modal-body">
-                    <button class="button" id="q">reine</button>
-                    <button class="button" id="r">tour</button>
-                    <button class="button" id="b">fou</button>
-                    <button class="button" id="n">cavalier</button>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <button class="btn btn-outline-secondary w-100 h-100 py-3 promotion-piece-button" id="q" data-piece="q">
+                                <img src="{{ asset('assets/img/pieces/white-queen.png') }}" alt="Reine">
+                                <span class="d-block mt-2">Reine</span>
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn btn-outline-secondary w-100 h-100 py-3 promotion-piece-button" id="r" data-piece="r">
+                                <img src="{{ asset('assets/img/pieces/white-rook.png') }}" alt="Tour">
+                                <span class="d-block mt-2">Tour</span>
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn btn-outline-secondary w-100 h-100 py-3 promotion-piece-button" id="b" data-piece="b">
+                                <img src="{{ asset('assets/img/pieces/white-bishop.png') }}" alt="Fou">
+                                <span class="d-block mt-2">Fou</span>
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn btn-outline-secondary w-100 h-100 py-3 promotion-piece-button" id="n" data-piece="n">
+                                <img src="{{ asset('assets/img/pieces/white-knight.png') }}" alt="Cavalier">
+                                <span class="d-block mt-2">Cavalier</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

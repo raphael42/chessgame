@@ -550,3 +550,16 @@ body {
         background-color: #f8f9fa;
     }
 }
+
+.promotion-piece-button {
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+
+    img {
+        width: 40px;
+        height: 40px;
+    }
+}
