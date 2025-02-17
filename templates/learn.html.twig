@@ -16,8 +16,8 @@
                         <h2>Votre Progression</h2>
                         <div class="bg-light pb-4 text-center rounded">
                             <p class="pt-1 mb-2">Apprendre les échecs en jouant</p>
-                            <div class="progress w-75 mx-auto" role="progressbar" aria-label="Animated striped example" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 75%">75%</div>
+                            <div class="progress w-75 mx-auto" role="progressbar" aria-label="Animated striped example" aria-valuenow="{{ progressPercent }}" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width:{{ progressPercent }}%">{{ progressPercent }}%</div>
                             </div>
                         </div>
                     </div>

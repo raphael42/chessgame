@@ -46,6 +46,7 @@ class LearnController extends AbstractController
         }
 
         $challengesAdvancement = [];
+        $totalStars = 0;
         if (!empty($challengesUser)) {
             foreach ($challenges as $oneChallenge) {
                 if (!isset($challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()])) {
@@ -55,6 +56,7 @@ class LearnController extends AbstractController
                 foreach ($challengesUser as $oneChallengeUser) {
                     if ($oneChallenge->getId() === $oneChallengeUser->getChallenge()->getId()) {
                         $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = $oneChallengeUser->getScore();
+                        $totalStars += $oneChallengeUser->getScore();
                     }
                 }
             }
@@ -92,6 +94,7 @@ class LearnController extends AbstractController
             'ongoingChallengesAdvancement' => $ongoingChallengesAdvancement,
             'finishedChallengesResult' => $finishedChallengesResult,
             'challengeNumberLink' => $challengeNumberLink,
+            'progressPercent' => round(($totalStars / (count($challenges) * 3)) * 100),
         ]);
     }
 
