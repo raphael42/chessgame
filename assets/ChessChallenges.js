@@ -197,11 +197,12 @@ function placePieces(fen) {
     for (var k in chessboard) {
         if (chessboard[k] === 'star') {
             src = PIECESIMGURL;
-            src = src.replace("playerColor-chessboard", chessboard[k]);
+            src = src.replace('playerColor-chessboard', chessboard[k]);
+            src = src.replace('png', 'svg');
             $('#' + k).append('<img class="piece black" src="' + src + '" alt>');
         } else {
             src = PIECESIMGURL;
-            src = src.replace("playerColor-chessboard", chessboard[k]);
+            src = src.replace('playerColor-chessboard', chessboard[k]);
 
             color = 'white';
             if (chessboard[k].indexOf('white') == -1){
