@@ -18,6 +18,18 @@ watch:
     path: watch
     controller: App\Controller\WatchController::watchfunction
 
+learn:
+    path: apprendre
+    controller: App\Controller\LearnController::learnfunction
+
+learnGame:
+    path: apprendre/{gameCategory}/{gameId}
+    controller: App\Controller\LearnController::learnGamefunction
+
+ajaxSaveChallenge:
+    path: ajax/save-challenge
+    controller: App\Controller\LearnController::ajaxSaveChallengeFunction
+
 contact:
     path: contact
     controller: App\Controller\ContactController::contactfunction

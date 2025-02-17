@@ -1,0 +1,199 @@
+{% extends 'base.html.twig' %}
+
+{# {% block title %}{{ app.request.host }} | Apprendre les échecs{% endblock %} #}
+
+{% block javascripts %}
+    <script>
+        const FEN = '{{ currentChallenge.fen }}';
+        const PIECESIMGURL = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
+        const AJAXSAVECHALLENGE = '{{ path('ajaxSaveChallenge') }}';
+        {% if nextChallengeExist %}
+            const NEXTCHALLENGEPATH = '{{ path('learnGame', {'gameCategory': currentChallenge.slug, 'gameId': currentChallenge.ordering + 1}) }}';
+        {% else %}
+            const NEXTCHALLENGEPATH = null;
+        {% endif %}
+        const SLUG = '{{ currentChallenge.slug }}';
+        const ID = '{{ currentChallenge.ordering }}';
+    </script>
+
+    {{ encore_entry_link_tags('gameChallengesJs') }}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ encore_entry_script_tags('gameChallengesJs') }}
+{% endblock %}
+
+
+
+{% block body %}
+    <div class="row">
+        <div class="col-lg-3 col-md-12 tchat-column">
+            <section class="learn-menu-section">
+                <a href="{{ path('learn') }}" class="section-title">Retour au menu</a>
+                <div class="accordion" id="accordionLearnMenu">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="accordion-pieces">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-pieces-collapse" aria-expanded="true" aria-controls="accordion-pieces-collapse">
+                                Les pièces
+                            </button>
+                        </h2>
+                        <div id="accordion-pieces-collapse" class="accordion-collapse collapse show" aria-labelledby="accordion-pieces">
+                            <div class="accordion-body">
+                                <div class="list-group">
+                                    {% for slug, listChallenges in challengesAdvancement %}
+                                        {% set breakLoop = false %}
+                                        {% for onechallenge in challenges %}
+                                            {% if slug == onechallenge.slug and not breakLoop %}
+                                                {% set breakLoop = true %}
+                                                {% if slug == currentChallenge.slug %}
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': challengeNumberLink[slug]}) }}" class="list-group-item list-group-item-action active" aria-current="true">{{ onechallenge.category }}</a>
+                                                {% else %}
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': challengeNumberLink[slug]}) }}" class="list-group-item list-group-item-action">{{ onechallenge.category }}</a>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {# <div class="accordion-item">
+                        <h2 class="accordion-header" id="accordion-fondamentaux">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accordion-fondamentaux-collapse" aria-expanded="false" aria-controls="accordion-fondamentaux-collapse">
+                                Les fondamentaux
+                            </button>
+                        </h2>
+                        <div id="accordion-fondamentaux-collapse" class="accordion-collapse collapse" aria-labelledby="accordion-fondamentaux">
+                            <div class="accordion-body">
+                                <div class="list-group">
+                                    {% for slug, listChallenges in challengesAdvancement %}
+                                        {% set breakLoop = false %}
+                                        {% for onechallenge in challenges %}
+                                            {% if slug == onechallenge.slug and not breakLoop %}
+                                                {% set breakLoop = true %}
+                                                {% if slug == currentChallenge.slug %}
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': 1}) }}" class="list-group-item list-group-item-action active" aria-current="true">{{ onechallenge.category }}</a>
+                                                {% else %}
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': 1}) }}" class="list-group-item list-group-item-action">{{ onechallenge.category }}</a>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div> #}
+                </div>
+            </section>
+        </div>
+        <div class="col-lg-9 col-md-12">
+            <div class="row">
+                <div class="col-md-8 col-12 board-column">
+                    <div id="board">
+                        {% for key, column in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] %}
+                            <div class="one-column">
+                                {% for line in 8..1 %}
+                                    {% if key is even %}
+                                        <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-white' : 'case-black' }}">
+                                            {% if column == 'h' %}
+                                                <span class="absolute-top-right">{{ line }}</span>
+                                            {% endif %}
+
+                                            {% if line == 1 %}
+                                                <span class="absolute-bottom-left">{{ column }}</span>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <div id="{{ column ~ line }}" class="chess-table {{ line is even ? 'case-black' : 'case-white' }}">
+                                            {% if column == 'h' %}
+                                                <span class="absolute-top-right">{{ line }}</span>
+                                            {% endif %}
+
+                                            {% if line == 1 %}
+                                                <span class="absolute-bottom-left">{{ column }}</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-4 col-12 d-flex flex-column flex-wrap justify-content-center">
+                    {# TODO : display different levels #}
+                    <section class="learn-advancement-section">
+                        <div class="title bg-primary bg-gradient text-white ps-4">
+                            <h2>{{ currentChallenge.category }}</h2>
+                            <p>{{ currentChallenge.name }}</p>
+                        </div>
+                        <div class="text-center mb-3">
+                            {{ currentChallenge.description|raw }}
+                        </div>
+                        <div class="btn-toolbar justify-content-around" role="toolbar" aria-label="Toolbar with button groups">
+                            <div class="btn-group w-100" role="group" aria-label="Btn group">
+                                {% for slug, listChallenges in challengesAdvancement %}
+                                    {% if slug == currentChallenge.slug %}
+                                        {% set widthBtn = 100 / listChallenges|length %}
+                                        {% for oneChallengeOrdering, oneChallengeScore in listChallenges %}
+                                            {% set btnClass = 'btn-outline-secondary' %}
+                                            {% if currentChallenge.ordering == oneChallengeOrdering %}
+                                                {% set btnClass = 'btn-primary' %}
+                                            {% elseif oneChallengeScore is not null %}
+                                                {% set btnClass = 'btn-success' %}
+                                            {% endif %}
+
+                                            <a class="btn {{ btnClass }} d-flex flex-wrap justify-content-center align-content-center px-1 py-1" style="width: {{ widthBtn }}%" href="{{ path('learnGame', {'gameCategory': slug, 'gameId': oneChallengeOrdering}) }}">
+                                                {% if oneChallengeScore is not null %}
+                                                    {% for i in 1..min(oneChallengeScore, 3) %}
+                                                        <i class="bi bi-star-fill lh-1"></i>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    {{ oneChallengeOrdering }}
+                                                {% endif %}
+                                            </a>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# TODO : update design of this #}
+    <div class="modal fade" id="promotion-modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <button class="button" id="q">reine</button>
+                    <button class="button" id="r">tour</button>
+                    <button class="button" id="b">fou</button>
+                    <button class="button" id="n">cavalier</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="final-modal" tabindex="-1" aria-labelledby="finalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Étape terminée</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="final-score">
+                        {# TODO : display the score with the ajax request return datas ajaxSaveChallengeFunction #}
+                    </div>
+                    <p>Félicitations ! Vous maîtrisez ce niveau.</p>
+                </div>
+                <div class="modal-footer">
+                    <a href="{{ path('learn') }}" class="btn btn-secondary">Retour au menu</a>
+                    <a href="{{ path('learn') }}" class="btn btn-primary">Suivant</a> {# TODO : update learn url #}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
