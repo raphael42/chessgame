@@ -13,9 +13,6 @@ chess.load(fenChessJs, {
     skipValidation: true
 });
 
-console.log(NEXTCHALLENGEPATH);
-// document.location.href = 'apprendre/' + SLUG + '/' + ID;
-
 let nbMoves = 0;
 
 $(function() {
@@ -277,11 +274,6 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
 
         const regexStar = /\p/;
 
-        console.log(newFen);
-        console.log(regexStar.test(newFen));
-
-        // TODO : no stars in the FEN, must find a solution here
-
         if (!regexStar.test(newFen)) { // There is not stars anymore, save the challenge and redirect to the new one
             const data = {
                 'category': SLUG,
@@ -308,8 +300,6 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             if (NEXTCHALLENGEPATH !== null) {
                 document.location.href = NEXTCHALLENGEPATH;
             } else { // If it's the last, display the final modal
-                // TODO : display a modal
-
                 $('#final-modal').modal('show');
             }
         }
