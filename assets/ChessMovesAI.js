@@ -737,10 +737,19 @@ function setupDraggable(jQueryElement) {
             }
         },
         stop: function(ev, ui) {
-            $('.chess-table.clicked').removeClass('clicked');
-            $('.chess-table.possible-move').each(function() {
-                $(this).removeClass('possible-move');
-            });
+            const targetElement = $(document.elementFromPoint(
+                ev.clientX,
+                ev.clientY
+            ));
+
+            // If target element if is undefined, it's the same square
+            // In that case, we don't remove the clicked stuff to make the UI for firendly
+            if (typeof targetElement.attr('id') !== 'undefined') {
+                $('.chess-table.clicked').removeClass('clicked');
+                $('.chess-table.possible-move').each(function() {
+                    $(this).removeClass('possible-move');
+                });
+            }
         }
     });
 }
