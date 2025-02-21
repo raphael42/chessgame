@@ -244,18 +244,5 @@
 
     {% include 'modules/modals/promotion.html.twig' %}
 
-    <div class="modal fade" id="resign-modal" tabindex="-1" aria-labelledby="resignLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Vous êtes sur le point d'abandonner.</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="button" class="btn btn-primary" id="confirm-resign-modal">Confirmer</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include 'modules/modals/resign.html.twig' %}
 {% endblock %}
