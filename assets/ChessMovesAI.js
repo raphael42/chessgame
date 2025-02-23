@@ -1228,7 +1228,7 @@ function calculateMaterial(fen) {
 
 function promotionPiece(callback) {
     $('#promotion-modal').modal('show');
-    $('#promotion-modal promotion-piece-button').on('click', function() {
+    $('#promotion-modal .promotion-piece-button').on('click', function() {
         var piece = $(this).attr('id');
         $('#promotion-modal').modal('hide');
         callback(piece);

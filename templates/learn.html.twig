@@ -233,7 +233,7 @@
                 </div>
             </section>
 
-            {# <section class="mt-5">
+            <section class="mt-5">
                 <div class="row">
                     <div class="col-12">
                         <h2>Les fondamentaux</h2>
@@ -242,55 +242,40 @@
 
                 <div class="row">
                     <div class="col-12 col-md-6">
-                        <div class="card text-bg-light mb-3">
-                            <div class="card-body">
-                                <h5 class="card-title">Capturer</h5>
-                                <p class="card-text">Prennez les pièces adverses</p>
+                        <a href="{{ path('learnGame', {'gameCategory': 'capture', 'gameId': challengeNumberLink.capture}) }}" class="no-decoration">
+                            {% set borderClass = '' %}
+                            {% set textClass = '' %}
+                            {% if ongoingChallengesAdvancement.capture is defined %}
+                                {% set borderClass = 'border-primary' %}
+                                {% set textClass = 'text-primary' %}
+                            {% elseif finishedChallengesResult.capture is defined %}
+                                {% set borderClass = 'border-success' %}
+                                {% set textClass = 'text-success' %}
+                            {% endif %}
+                            <div class="card text-bg-light mb-3 {{ borderClass }}">
+                                <div class="card-body {{ textClass }}">
+                                    <h5 class="card-title">Capturer</h5>
+                                    <p class="card-text">Prenez les pièces adverses</p>
+                                </div>
+                                {% if ongoingChallengesAdvancement.capture is defined %}
+                                    <span class="ribbon-wrapper">
+                                        <span class="ribbon-display bg-primary text-white">{{ ongoingChallengesAdvancement.capture }}</span>
+                                    </span>
+                                {% endif %}
+                                {% if finishedChallengesResult.capture is defined %}
+                                    <span class="ribbon-wrapper">
+                                        <span class="ribbon-display bg-success text-white">
+                                            {% for i in 1..min(finishedChallengesResult.capture, 3) %}
+                                                <i class="bi bi-star-fill"></i>
+                                            {% endfor %}
+                                        </span>
+                                    </span>
+                                {% endif %}
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <div class="card text-bg-light mb-3">
-                            <div class="card-body">
-                                <h5 class="card-title">Protéger</h5>
-                                <p class="card-text">Assurez la sécurité de vos pièces</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <div class="card text-bg-light mb-3">
-                            <div class="card-body">
-                                <h5 class="card-title">Combat</h5>
-                                <p class="card-text">Capturez et défendez les pièces</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <div class="card text-bg-light mb-3">
-                            <div class="card-body">
-                                <h5 class="card-title">Échec en un coup</h5>
-                                <p class="card-text">Attaquez le Roi adverse</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <div class="card text-bg-light mb-3">
-                            <div class="card-body">
-                                <h5 class="card-title">Parer un échec</h5>
-                                <p class="card-text">Défendez votre Roi</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <div class="card text-bg-light mb-3">
-                            <div class="card-body">
-                                <h5 class="card-title">Mat en un coup</h5>
-                                <p class="card-text">Matez le Roi adverse</p>
-                            </div>
-                        </div>
+                        </a>
                     </div>
                 </div>
-            </section> #}
+            </section>
 
             {# <section>
                 <div class="row">

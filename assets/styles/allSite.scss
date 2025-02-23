@@ -563,3 +563,13 @@ body {
         height: 40px;
     }
 }
+
+.exclamation-capture {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 32px;
+    height: 32px;
+    font-size: 2rem;
+    z-index: 3;
+}

@@ -273,6 +273,60 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         // Increament moves number
         nbMoves++;
 
+        // We get all pieces in the board
+        const chessBoard = chess.board();
+
+        let keepPieceSelected = true;
+
+        // For each lines found
+        for (let oneLine in chessBoard) {
+            for (let oneSquare in chessBoard[oneLine]) {
+                if (chessBoard[oneLine][oneSquare] !== null && chessBoard[oneLine][oneSquare].color === 'b') {
+                    let allPossibleMoves = chess.moves({
+                        square: chessBoard[oneLine][oneSquare].square,
+                        verbose: true
+                    });
+
+                    for (let oneMove in allPossibleMoves) {
+                        if (allPossibleMoves[oneMove].flags === 'c') {
+                            $('#challenge-description').html('Vous avez perdu !<br><button class="mt-1 btn btn-danger" onclick="window.location.reload()">Réessayez</button>');
+                            $('#challenge-description').addClass('alert alert-danger');
+
+                            $('#' + allPossibleMoves[oneMove].from).append('<i class="bi bi-exclamation-circle d-inline-flex text-bg-danger rounded-circle exclamation-capture"></i>');
+
+                            try {
+                                moving = chess.move({
+                                    from: allPossibleMoves[oneMove].from,
+                                    to: allPossibleMoves[oneMove].to,
+                                    promotion: null,
+                                });
+                            } catch (error) {
+                                let regex = /Invalid move/;
+                                if (!regex.test(error)) { // Do not display a log if it's an invalid move
+                                    console.log(error);
+                                }
+                            }
+
+                            setTimeout(() => {
+                                if ($('#' + allPossibleMoves[oneMove].to).find('img').length > 0) {
+                                    $('#' + allPossibleMoves[oneMove].to + ' img').remove();
+                                }
+                                $('#' + allPossibleMoves[oneMove].from + ' img').detach().css({top: 0, left: 0}).appendTo('#' + allPossibleMoves[oneMove].to);
+
+                                $('.exclamation-capture').remove();
+
+                                keepPieceSelected = false;
+
+                                $('#' + allPossibleMoves[oneMove].from).addClass('last-move');
+                                $('#' + allPossibleMoves[oneMove].to).addClass('last-move');
+                            }, '500');
+                        }
+                    }
+                }
+            }
+        }
+
+
         // Set the white turn back
         let newFen = chess.fen();
         newFen = newFen.replace(' b ', ' w ');
@@ -280,9 +334,12 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             skipValidation: true
         });
 
-        const regexStar = /\p/;
+        let fenSplit = newFen.split(' ');
+        let fenToTest = fenSplit[0];
 
-        if (!regexStar.test(newFen)) { // There is not stars anymore, save the challenge and redirect to the new one
+        const regexStar = /[rnbqkp]/;
+
+        if (!regexStar.test(fenToTest)) { // There is not black pieces anymore, save the challenge and redirect to the new one
             const data = {
                 'category': SLUG,
                 'id': ID,
@@ -313,15 +370,17 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         }
 
         // Keep the same piece selected to make the UI more firendly
-        $('#' + squareIdTo).addClass('clicked');
-        var allPossibleMoves = chess.moves({
-            square: squareIdTo,
-            verbose: true
-        });
+        if (keepPieceSelected) {
+            $('#' + squareIdTo).addClass('clicked');
+            var allPossibleMoves = chess.moves({
+                square: squareIdTo,
+                verbose: true
+            });
 
-        for (var i in allPossibleMoves) {
-            if (allPossibleMoves[i].from === squareIdTo) {
-                $('#' + allPossibleMoves[i].to).addClass('possible-move');
+            for (var i in allPossibleMoves) {
+                if (allPossibleMoves[i].from === squareIdTo) {
+                    $('#' + allPossibleMoves[i].to).addClass('possible-move');
+                }
             }
         }
 
@@ -333,7 +392,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
 
 function promotionPiece(callback) {
     $('#promotion-modal').modal('show');
-    $('#promotion-modal promotion-piece-button').on('click', function() {
+    $('#promotion-modal .promotion-piece-button').on('click', function() {
         var piece = $(this).attr('id');
         $('#promotion-modal').modal('hide');
         callback(piece);
