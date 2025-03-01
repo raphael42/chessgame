@@ -20,10 +20,10 @@ class Challenge
     private ?int $ordering = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $category = null;
+    private ?string $title = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $name = null;
+    private ?string $subtitle = null;
 
     #[ORM\Column]
     private ?int $score_goal = null;
@@ -65,26 +65,26 @@ class Challenge
         return $this;
     }
 
-    public function getCategory(): ?string
+    public function getTitle(): ?string
     {
-        return $this->category;
+        return $this->title;
     }
 
-    public function setCategory(string $category): static
+    public function setTitle(string $title): static
     {
-        $this->category = $category;
+        $this->title = $title;
 
         return $this;
     }
 
-    public function getName(): ?string
+    public function getSubtitle(): ?string
     {
-        return $this->name;
+        return $this->subtitle;
     }
 
-    public function setName(string $name): static
+    public function setSubtitle(string $subtitle): static
     {
-        $this->name = $name;
+        $this->subtitle = $subtitle;
 
         return $this;
     }

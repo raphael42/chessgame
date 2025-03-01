@@ -363,7 +363,9 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
 
             // If there is a next challenge, redirect to it
             if (NEXTCHALLENGEPATH !== null) {
-                document.location.href = NEXTCHALLENGEPATH;
+                setTimeout(() => {
+                    document.location.href = NEXTCHALLENGEPATH;
+                }, '200');
             } else { // If it's the last, display the final modal
                 $('#final-modal').modal('show');
             }

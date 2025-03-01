@@ -46,9 +46,9 @@
                                             {% if slug == onechallenge.slug and not breakLoop %}
                                                 {% set breakLoop = true %}
                                                 {% if slug == currentChallenge.slug %}
-                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': challengeNumberLink[slug]}) }}" class="list-group-item list-group-item-action active" aria-current="true">{{ onechallenge.category }}</a>
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': challengeNumberLink[slug]}) }}" class="list-group-item list-group-item-action active" aria-current="true">{{ onechallenge.title }}</a>
                                                 {% else %}
-                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': challengeNumberLink[slug]}) }}" class="list-group-item list-group-item-action">{{ onechallenge.category }}</a>
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': challengeNumberLink[slug]}) }}" class="list-group-item list-group-item-action">{{ onechallenge.title }}</a>
                                                 {% endif %}
                                             {% endif %}
                                         {% endfor %}
@@ -72,9 +72,9 @@
                                             {% if slug == onechallenge.slug and not breakLoop %}
                                                 {% set breakLoop = true %}
                                                 {% if slug == currentChallenge.slug %}
-                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': 1}) }}" class="list-group-item list-group-item-action active" aria-current="true">{{ onechallenge.category }}</a>
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': 1}) }}" class="list-group-item list-group-item-action active" aria-current="true">{{ onechallenge.title }}</a>
                                                 {% else %}
-                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': 1}) }}" class="list-group-item list-group-item-action">{{ onechallenge.category }}</a>
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': 1}) }}" class="list-group-item list-group-item-action">{{ onechallenge.title }}</a>
                                                 {% endif %}
                                             {% endif %}
                                         {% endfor %}
@@ -123,8 +123,8 @@
                     {# TODO : display different levels #}
                     <section class="learn-advancement-section">
                         <div class="title bg-primary bg-gradient text-white ps-4">
-                            <h2>{{ currentChallenge.category }}</h2>
-                            <p>{{ currentChallenge.name }}</p>
+                            <h2>{{ currentChallenge.title }}</h2>
+                            <p>{{ currentChallenge.subtitle }}</p>
                         </div>
                         <div id="challenge-description" class="text-center mb-3">
                             {{ currentChallenge.description|raw }}
