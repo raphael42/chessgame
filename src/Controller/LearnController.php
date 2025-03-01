@@ -87,7 +87,6 @@ class LearnController extends AbstractController
         }
 
         return $this->render('learn.html.twig', [
-            'challenges' => $challenges,
             'challengesUser' => $challengesUser,
             'ongoingChallengesAdvancement' => $ongoingChallengesAdvancement,
             'finishedChallengesResult' => $finishedChallengesResult,

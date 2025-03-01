@@ -278,8 +278,8 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         // Increament moves number
         nbMoves++;
 
-        // If the piece got captured, this variable will change to false
-        let keepPieceSelected = true;
+        // If the game is lost, this variable will change to true
+        let gameLost = false;
 
         // Check blacks moves to see if they can capture our pieces
         if (activateBlackCaptures) { // Only if the capture is activated
@@ -297,13 +297,37 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
 
                         for (let oneMove in allPossibleMoves) {
                             if (allPossibleMoves[oneMove].flags === 'c') {
+                                console.log(allPossibleMoves[oneMove]);
+                                // TODO : check if the next move, the moved piece is captured or not
+
+                                const chess2 = new Chess();
+                                chess2.load(allPossibleMoves[oneMove].before, {
+                                    skipValidation: true
+                                });
+
+                                // Make the white move
+                                chess2.move({
+                                    from: allPossibleMoves[oneMove].from,
+                                    to: allPossibleMoves[oneMove].to,
+                                    promotion: null,
+                                });
+
+                                // Black piece is attacked after his move, our original piece was proctected
+                                const isAttacked = chess2.isAttacked(allPossibleMoves[oneMove].to, 'w');
+                                if (isAttacked === true) {
+                                    break;
+                                }
+
+                                // If a piece can be captured, the game is lost
+                                gameLost = true;
+
                                 $('#challenge-description').html('Vous avez perdu !<br><button class="mt-1 btn btn-danger" onclick="window.location.reload()">Réessayez</button>');
                                 $('#challenge-description').addClass('alert alert-danger');
 
                                 $('#' + allPossibleMoves[oneMove].from).append('<i class="bi bi-exclamation-circle d-inline-flex text-bg-danger rounded-circle exclamation-capture"></i>');
 
                                 try {
-                                    moving = chess.move({
+                                    chess.move({
                                         from: allPossibleMoves[oneMove].from,
                                         to: allPossibleMoves[oneMove].to,
                                         promotion: null,
@@ -323,11 +347,11 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
 
                                     $('.exclamation-capture').remove();
 
-                                    keepPieceSelected = false;
-
                                     $('#' + allPossibleMoves[oneMove].from).addClass('last-move');
                                     $('#' + allPossibleMoves[oneMove].to).addClass('last-move');
                                 }, '500');
+
+                                break;
                             }
                         }
                     }
@@ -343,12 +367,24 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             skipValidation: true
         });
 
-        let fenSplit = newFen.split(' ');
-        let fenToTest = fenSplit[0];
+        let challengeDone = false;
+        if (SLUG === 'protect') {
+            if (!gameLost) {
+                challengeDone = true;
+            }
+        } else { // Challenge ends when there is no black pieces anymore
+            let fenSplit = newFen.split(' ');
+            let fenToTest = fenSplit[0];
 
-        const regexStar = /[rnbqkp]/;
+            const regexStar = /[rnbqkp]/;
 
-        if (!regexStar.test(fenToTest)) { // There is not black pieces anymore, save the challenge and redirect to the new one
+            if (!regexStar.test(fenToTest)) { // Check if there is black piece in the board
+                challengeDone = true;
+            }
+        }
+
+        // Challenge is finished
+        if (challengeDone) {
             const data = {
                 'category': SLUG,
                 'id': ID,
@@ -379,7 +415,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         }
 
         // Keep the same piece selected to make the UI more firendly
-        if (keepPieceSelected) {
+        if (!gameLost) {
             $('#' + squareIdTo).addClass('clicked');
             var allPossibleMoves = chess.moves({
                 square: squareIdTo,
