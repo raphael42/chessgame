@@ -6,6 +6,11 @@ require('bootstrap');
 
 placePieces(FEN);
 
+let activateBlackCaptures = true;
+if (FEN.includes('*')) { // If a star is in FEN, do not activate the black captures
+    activateBlackCaptures = false;
+}
+
 let fenChessJs = FEN.replaceAll('*', 'p');
 const chess = new Chess();
 
@@ -273,53 +278,57 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         // Increament moves number
         nbMoves++;
 
-        // We get all pieces in the board
-        const chessBoard = chess.board();
-
+        // If the piece got captured, this variable will change to false
         let keepPieceSelected = true;
 
-        // For each lines found
-        for (let oneLine in chessBoard) {
-            for (let oneSquare in chessBoard[oneLine]) {
-                if (chessBoard[oneLine][oneSquare] !== null && chessBoard[oneLine][oneSquare].color === 'b') {
-                    let allPossibleMoves = chess.moves({
-                        square: chessBoard[oneLine][oneSquare].square,
-                        verbose: true
-                    });
+        // Check blacks moves to see if they can capture our pieces
+        if (activateBlackCaptures) { // Only if the capture is activated
+            // We get all pieces in the board
+            const chessBoard = chess.board();
 
-                    for (let oneMove in allPossibleMoves) {
-                        if (allPossibleMoves[oneMove].flags === 'c') {
-                            $('#challenge-description').html('Vous avez perdu !<br><button class="mt-1 btn btn-danger" onclick="window.location.reload()">Réessayez</button>');
-                            $('#challenge-description').addClass('alert alert-danger');
+            // For each lines found
+            for (let oneLine in chessBoard) {
+                for (let oneSquare in chessBoard[oneLine]) {
+                    if (chessBoard[oneLine][oneSquare] !== null && chessBoard[oneLine][oneSquare].color === 'b') {
+                        let allPossibleMoves = chess.moves({
+                            square: chessBoard[oneLine][oneSquare].square,
+                            verbose: true
+                        });
 
-                            $('#' + allPossibleMoves[oneMove].from).append('<i class="bi bi-exclamation-circle d-inline-flex text-bg-danger rounded-circle exclamation-capture"></i>');
+                        for (let oneMove in allPossibleMoves) {
+                            if (allPossibleMoves[oneMove].flags === 'c') {
+                                $('#challenge-description').html('Vous avez perdu !<br><button class="mt-1 btn btn-danger" onclick="window.location.reload()">Réessayez</button>');
+                                $('#challenge-description').addClass('alert alert-danger');
 
-                            try {
-                                moving = chess.move({
-                                    from: allPossibleMoves[oneMove].from,
-                                    to: allPossibleMoves[oneMove].to,
-                                    promotion: null,
-                                });
-                            } catch (error) {
-                                let regex = /Invalid move/;
-                                if (!regex.test(error)) { // Do not display a log if it's an invalid move
-                                    console.log(error);
+                                $('#' + allPossibleMoves[oneMove].from).append('<i class="bi bi-exclamation-circle d-inline-flex text-bg-danger rounded-circle exclamation-capture"></i>');
+
+                                try {
+                                    moving = chess.move({
+                                        from: allPossibleMoves[oneMove].from,
+                                        to: allPossibleMoves[oneMove].to,
+                                        promotion: null,
+                                    });
+                                } catch (error) {
+                                    let regex = /Invalid move/;
+                                    if (!regex.test(error)) { // Do not display a log if it's an invalid move
+                                        console.log(error);
+                                    }
                                 }
+
+                                setTimeout(() => {
+                                    if ($('#' + allPossibleMoves[oneMove].to).find('img').length > 0) {
+                                        $('#' + allPossibleMoves[oneMove].to + ' img').remove();
+                                    }
+                                    $('#' + allPossibleMoves[oneMove].from + ' img').detach().css({top: 0, left: 0}).appendTo('#' + allPossibleMoves[oneMove].to);
+
+                                    $('.exclamation-capture').remove();
+
+                                    keepPieceSelected = false;
+
+                                    $('#' + allPossibleMoves[oneMove].from).addClass('last-move');
+                                    $('#' + allPossibleMoves[oneMove].to).addClass('last-move');
+                                }, '500');
                             }
-
-                            setTimeout(() => {
-                                if ($('#' + allPossibleMoves[oneMove].to).find('img').length > 0) {
-                                    $('#' + allPossibleMoves[oneMove].to + ' img').remove();
-                                }
-                                $('#' + allPossibleMoves[oneMove].from + ' img').detach().css({top: 0, left: 0}).appendTo('#' + allPossibleMoves[oneMove].to);
-
-                                $('.exclamation-capture').remove();
-
-                                keepPieceSelected = false;
-
-                                $('#' + allPossibleMoves[oneMove].from).addClass('last-move');
-                                $('#' + allPossibleMoves[oneMove].to).addClass('last-move');
-                            }, '500');
                         }
                     }
                 }
@@ -357,18 +366,16 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                     console.log('Error - ' + errorMessage);
                 },
                 success: function(data) {
-                    console.log(data);
+                    // If there is a next challenge, redirect to it
+                    if (NEXTCHALLENGEPATH !== null) {
+                        setTimeout(() => {
+                            document.location.href = NEXTCHALLENGEPATH;
+                        }, '200');
+                    } else { // If it's the last, display the final modal
+                        $('#final-modal').modal('show');
+                    }
                 }
             });
-
-            // If there is a next challenge, redirect to it
-            if (NEXTCHALLENGEPATH !== null) {
-                setTimeout(() => {
-                    document.location.href = NEXTCHALLENGEPATH;
-                }, '200');
-            } else { // If it's the last, display the final modal
-                $('#final-modal').modal('show');
-            }
         }
 
         // Keep the same piece selected to make the UI more firendly
