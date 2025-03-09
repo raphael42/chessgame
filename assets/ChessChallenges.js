@@ -1,19 +1,27 @@
-import $ from 'jquery';
+import $, { inArray } from 'jquery';
 import 'jquery-ui/ui/widgets/draggable';
 import 'jquery-ui/ui/widgets/droppable';
 import { Chess } from 'chess.js';
 require('bootstrap');
 
+let starsPositions = [];
 placePieces(FEN);
 
-let activateBlackCaptures = true;
+// If the game is lost, this variable will change to true
+let gameLost = false;
+
+// If the challenge is done, this variable will change to true
+let challengeDone = false;
+
+let starsPieces = false;
 if (FEN.includes('*')) { // If a star is in FEN, do not activate the black captures
-    activateBlackCaptures = false;
+    starsPieces = true;
 }
 
-let fenChessJs = FEN.replaceAll('*', 'p');
 const chess = new Chess();
 
+// let fenChessJs = FEN.replaceAll('*', 'p');
+let fenChessJs = FEN;
 chess.load(fenChessJs, {
     skipValidation: true
 });
@@ -21,7 +29,22 @@ chess.load(fenChessJs, {
 let nbMoves = 0;
 
 $(function() {
+    if (chess.inCheck() === true) {
+        let kingposition = null;
+        if (chess.turn() === 'w') {
+            kingposition = getKingPosition(FEN, 'white');
+        } else {
+            kingposition = getKingPosition(FEN, 'black');
+        }
+
+        $('#' + kingposition).addClass('in-check');
+    }
+
     $('#board').off().on('click', '.chess-table', function() {
+        if (gameLost === true || challengeDone === true) {
+            return;
+        }
+
         var idSquare = $(this).attr('id');
 
         // If all squares has the class clicked-premove-hover because a premove was made before, remove it
@@ -49,14 +72,23 @@ $(function() {
 
             $(this).addClass('clicked');
 
-            var allPossibleMoves = chess.moves({
-                square: idSquare,
-                verbose: true
-            });
+            let pieceSquare = chess.get(idSquare);
+            // If king, make the moves ourself to display the illegal moves
+            if (typeof pieceSquare !== 'undefined' && pieceSquare.type === 'k') {
+                var allPossibleMoves = getKingMoves(idSquare);
+                for (var i in allPossibleMoves) {
+                    $('#' + allPossibleMoves[i]).addClass('possible-move');
+                }
+            } else {
+                var allPossibleMoves = chess.moves({
+                    square: idSquare,
+                    verbose: true
+                });
 
-            for (var i in allPossibleMoves) {
-                if (allPossibleMoves[i].from === idSquare) {
-                    $('#' + allPossibleMoves[i].to).addClass('possible-move');
+                for (var i in allPossibleMoves) {
+                    if (allPossibleMoves[i].from === idSquare) {
+                        $('#' + allPossibleMoves[i].to).addClass('possible-move');
+                    }
                 }
             }
         }
@@ -88,6 +120,10 @@ $(function() {
 
     $('.chess-table').droppable({
         drop: function(ev, ui) {
+            if (gameLost === true || challengeDone === true) {
+                return;
+            }
+
             // Set back z-index to the element dropped
             $(ui.helper[0]).css('z-index', 2);
 
@@ -123,17 +159,30 @@ function setupDraggable(jQueryElement) {
     $(elementToDraggable).draggable({
         revert: true,
         start: function(ev, ui) {
-            const self = $(this);
-            $(self).parent().addClass('clicked');
+            if (gameLost === true || challengeDone === true) {
+                return;
+            }
 
-            var allPossibleMoves = chess.moves({
-                square: $(self).parent().attr('id'),
-                verbose: true
-            });
+            $(this).parent().addClass('clicked');
+            let idSquare = $(this).parent().attr('id');
 
-            for (var i in allPossibleMoves) {
-                if (allPossibleMoves[i].from === $(self).parent().attr('id')) {
-                    $('#' + allPossibleMoves[i].to).addClass('possible-move');
+            let pieceSquare = chess.get(idSquare);
+            // If king, make the moves ourself to display the illegal moves
+            if (typeof pieceSquare !== 'undefined' && pieceSquare.type === 'k') {
+                var allPossibleMoves = getKingMoves(idSquare);
+                for (var i in allPossibleMoves) {
+                    $('#' + allPossibleMoves[i]).addClass('possible-move');
+                }
+            } else {
+                var allPossibleMoves = chess.moves({
+                    square: idSquare,
+                    verbose: true
+                });
+
+                for (var i in allPossibleMoves) {
+                    if (allPossibleMoves[i].from === idSquare) {
+                        $('#' + allPossibleMoves[i].to).addClass('possible-move');
+                    }
                 }
             }
         },
@@ -194,6 +243,9 @@ function placePieces(fen) {
         for (var j in count) {
             if ($.inArray(count[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P', '*']) !== -1) {
                 chessboard[column[columnKey] + line] = piecesLabel[count[j]];
+                if (count[j] === '*') {
+                    starsPositions.push(column[columnKey] + line);
+                }
                 columnKey += 1;
             } else {
                 columnKey += parseInt(count[j]);
@@ -231,6 +283,11 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         'q': 'queen',
     };
 
+    // If the move is the same square, do nothing
+    if (squareIdFrom === squareIdTo) {
+        return;
+    }
+
     var moving = null;
 
     try {
@@ -240,13 +297,36 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             promotion: promotion,
         });
     } catch (error) {
+        console.log(error);
         let regex = /Invalid move/;
         if (!regex.test(error)) { // Do not display a log if it's an invalid move
             console.log(error);
+        } else {
+            if (SLUG === 'outcheck' && $('#' + squareIdTo).hasClass('possible-move')) { // outcheck challenge, if the move is invalid, game is lost
+                gameLost = true;
+                moving = {
+                    'color': 'w',
+                    'flags': 'illegal-incheck',
+                };
+            }
         }
     }
 
     if (moving !== null) {
+        let inCheck = chess.inCheck();
+        $('.in-check').removeClass('in-check');
+        if (moving.flags === 'illegal-incheck') {
+            $('#' + squareIdTo).addClass('in-check');
+
+            $('#challenge-description').html('Vous avez perdu !<br><button class="mt-1 btn btn-danger" onclick="window.location.reload()">Réessayez</button>');
+            $('#challenge-description').addClass('alert alert-danger');
+        } else {
+            if (inCheck) {
+                let kingposition = getKingPosition(chess.fen(), 'black');
+                $('#' + kingposition).addClass('in-check');
+            }
+        }
+
         if ($('#' + squareIdTo).find('img').length > 0) {
             $('#' + squareIdTo + ' img').remove();
         }
@@ -278,11 +358,8 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         // Increament moves number
         nbMoves++;
 
-        // If the game is lost, this variable will change to true
-        let gameLost = false;
-
         // Check blacks moves to see if they can capture our pieces
-        if (activateBlackCaptures) { // Only if the capture is activated
+        if (!starsPieces) { // If there is starsPieces, the capture is not activated
             // We get all pieces in the board
             const chessBoard = chess.board();
 
@@ -297,9 +374,6 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
 
                         for (let oneMove in allPossibleMoves) {
                             if (allPossibleMoves[oneMove].flags === 'c') {
-                                console.log(allPossibleMoves[oneMove]);
-                                // TODO : check if the next move, the moved piece is captured or not
-
                                 const chess2 = new Chess();
                                 chess2.load(allPossibleMoves[oneMove].before, {
                                     skipValidation: true
@@ -349,6 +423,8 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
 
                                     $('#' + allPossibleMoves[oneMove].from).addClass('last-move');
                                     $('#' + allPossibleMoves[oneMove].to).addClass('last-move');
+
+                                    $('.in-check').removeClass('in-check');
                                 }, '500');
 
                                 break;
@@ -357,34 +433,66 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                     }
                 }
             }
+        } else { // If there is starsPieces, we check if the move done captured a star
+            if (inArray(squareIdTo, starsPositions) !== -1) {
+                starsPositions.splice(inArray(squareIdTo, starsPositions), 1); // Remove the star from the array
+            }
         }
 
+        if (!gameLost) {
+            if (starsPieces) { // It's a game with stars, we need to check if the stars are still in the board. If not, the game is win
+                if (starsPositions.length < 1) {
+                    challengeDone = true;
+                }
+            } else if (inArray(SLUG, ['protect', 'outcheck']) !== -1) { // If the game mode is 'protect' or 'outcheck', it is win when blacks can't attack our pieces
+                if (!gameLost) {
+                    challengeDone = true;
+                }
+            } else if (SLUG === 'check') { // If the game mode is 'check', it is win when black are in check
+                if (inCheck) {
+                    challengeDone = true;
+                } else {
+                    gameLost = true;
+                }
+            } else { // Challenge ends when there is no black pieces anymore
+                let fen = chess.fen();
+                let fenSplit = fen.split(' ');
+                let fenToTest = fenSplit[0];
+
+                const regexStar = /[rnbqkp]/;
+
+                if (!regexStar.test(fenToTest)) { // Check if there is black piece in the board
+                    challengeDone = true;
+                }
+            }
+        }
 
         // Set the white turn back
-        let newFen = chess.fen();
-        newFen = newFen.replace(' b ', ' w ');
-        chess.load(newFen, {
+        let fenWhiteTurn = chess.fen();
+        fenWhiteTurn = fenWhiteTurn.replace(' b ', ' w ');
+        chess.load(fenWhiteTurn, {
             skipValidation: true
         });
 
-        let challengeDone = false;
-        if (SLUG === 'protect') {
-            if (!gameLost) {
-                challengeDone = true;
-            }
-        } else { // Challenge ends when there is no black pieces anymore
-            let fenSplit = newFen.split(' ');
-            let fenToTest = fenSplit[0];
-
-            const regexStar = /[rnbqkp]/;
-
-            if (!regexStar.test(fenToTest)) { // Check if there is black piece in the board
-                challengeDone = true;
-            }
-        }
-
         // Challenge is finished
         if (challengeDone) {
+            let scoreDifference = SCOREGOAL - nbMoves;
+
+            let scoreObtained = 1; // 1 point default
+            if (scoreDifference === 0) { // Score same as the goal, 3 points
+                scoreObtained = 3;
+            } else if (scoreDifference === -1 || scoreDifference === -2) { // 2 moves more than the goal, 2 points
+                scoreObtained = 2;
+            }
+            let htmlStars = '';
+            while (scoreObtained !== 0) {
+                htmlStars += '<i class="bi bi-star-fill"></i>';
+                scoreObtained--;
+            }
+
+            $('#challenge-description').html('Félicitation !<br><span class="mt-1">' + htmlStars + '</span>');
+            $('#challenge-description').addClass('alert alert-success');
+
             const data = {
                 'category': SLUG,
                 'id': ID,
@@ -415,16 +523,26 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         }
 
         // Keep the same piece selected to make the UI more firendly
-        if (!gameLost) {
+        if (!gameLost && !challengeDone) {
             $('#' + squareIdTo).addClass('clicked');
-            var allPossibleMoves = chess.moves({
-                square: squareIdTo,
-                verbose: true
-            });
 
-            for (var i in allPossibleMoves) {
-                if (allPossibleMoves[i].from === squareIdTo) {
-                    $('#' + allPossibleMoves[i].to).addClass('possible-move');
+            let pieceSquare = chess.get(squareIdTo);
+            // If king, make the moves ourself to display the illegal moves
+            if (typeof pieceSquare !== 'undefined' && pieceSquare.type === 'k') {
+                var allPossibleMoves = getKingMoves(squareIdTo);
+                for (var i in allPossibleMoves) {
+                    $('#' + allPossibleMoves[i]).addClass('possible-move');
+                }
+            } else {
+                var allPossibleMoves = chess.moves({
+                    square: squareIdTo,
+                    verbose: true
+                });
+
+                for (var i in allPossibleMoves) {
+                    if (allPossibleMoves[i].from === squareIdTo) {
+                        $('#' + allPossibleMoves[i].to).addClass('possible-move');
+                    }
                 }
             }
         }
@@ -433,6 +551,80 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
     }
 
     return false;
+}
+
+function getKingPosition(fen, color) {
+    var tmp = fen.split(' ');
+    var tmp2 = tmp[0].split('/');
+    var column = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+    var columnKey = 0;
+    var line = 8;
+    var count = '';
+
+    for (var i in tmp2) {
+        count = tmp2[i].split('');
+        columnKey = 0;
+        for (var j in count) {
+            if ($.inArray(count[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) {
+                if ((color === 'white' && count[j] === 'K') || (color === 'black' && count[j] === 'k')) {
+                    return column[columnKey] + line;
+                }
+                columnKey += 1;
+            } else {
+                columnKey += parseInt(count[j]);
+            }
+        }
+        line--;
+    }
+
+    return null;
+}
+
+function getKingMoves(idSquare) {
+    let arrLetters = [];
+    let arrLines = [];
+
+    let letter = idSquare.charAt(0);
+    let letterMinus = null;
+    if (letter !== 'a') {
+        letterMinus = String.fromCharCode(letter.charCodeAt(0) - 1);
+    }
+    let letterPlus = null;
+    if (letter !== 'h') {
+        letterPlus = String.fromCharCode(letter.charCodeAt(0) + 1);
+    }
+
+    arrLetters.push(letter);
+    arrLetters.push(letterMinus);
+    arrLetters.push(letterPlus);
+
+    let line = parseInt(idSquare.charAt(1));
+    let lineMinus = null;
+    if (line !== 1) {
+        lineMinus = line - 1;
+    }
+    let linePlus = null;
+    if (line !== 8) {
+        linePlus = line + 1;
+    }
+
+    arrLines.push(line);
+    arrLines.push(lineMinus);
+    arrLines.push(linePlus);
+
+    let arrPossibleMoves = [];
+    for (let i in arrLetters) {
+        for (let j in arrLines) {
+            if (arrLetters[i] !== null && arrLines[j] !== null) {
+                let square = arrLetters[i] + arrLines[j];
+                if (square !== idSquare) {
+                    arrPossibleMoves.push(square);
+                }
+            }
+        }
+    }
+
+    return arrPossibleMoves;
 }
 
 function promotionPiece(callback) {
