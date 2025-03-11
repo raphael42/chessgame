@@ -71,26 +71,7 @@ $(function() {
             }
 
             $(this).addClass('clicked');
-
-            let pieceSquare = chess.get(idSquare);
-            // If king, make the moves ourself to display the illegal moves
-            if (typeof pieceSquare !== 'undefined' && pieceSquare.type === 'k') {
-                var allPossibleMoves = getKingMoves(idSquare);
-                for (var i in allPossibleMoves) {
-                    $('#' + allPossibleMoves[i]).addClass('possible-move');
-                }
-            } else {
-                var allPossibleMoves = chess.moves({
-                    square: idSquare,
-                    verbose: true
-                });
-
-                for (var i in allPossibleMoves) {
-                    if (allPossibleMoves[i].from === idSquare) {
-                        $('#' + allPossibleMoves[i].to).addClass('possible-move');
-                    }
-                }
-            }
+            setPossibleMovesClass(idSquare, true);
         }
 
         // Click on a square with "possible-move" class and #board has 1 element "clicked" then proceed a move
@@ -166,25 +147,7 @@ function setupDraggable(jQueryElement) {
             $(this).parent().addClass('clicked');
             let idSquare = $(this).parent().attr('id');
 
-            let pieceSquare = chess.get(idSquare);
-            // If king, make the moves ourself to display the illegal moves
-            if (typeof pieceSquare !== 'undefined' && pieceSquare.type === 'k') {
-                var allPossibleMoves = getKingMoves(idSquare);
-                for (var i in allPossibleMoves) {
-                    $('#' + allPossibleMoves[i]).addClass('possible-move');
-                }
-            } else {
-                var allPossibleMoves = chess.moves({
-                    square: idSquare,
-                    verbose: true
-                });
-
-                for (var i in allPossibleMoves) {
-                    if (allPossibleMoves[i].from === idSquare) {
-                        $('#' + allPossibleMoves[i].to).addClass('possible-move');
-                    }
-                }
-            }
+            setPossibleMovesClass(idSquare, true);
         },
         stop: function(ev, ui) {
             const targetElement = $(document.elementFromPoint(
@@ -297,7 +260,6 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             promotion: promotion,
         });
     } catch (error) {
-        console.log(error);
         let regex = /Invalid move/;
         if (!regex.test(error)) { // Do not display a log if it's an invalid move
             console.log(error);
@@ -316,7 +278,12 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         let inCheck = chess.inCheck();
         $('.in-check').removeClass('in-check');
         if (moving.flags === 'illegal-incheck') {
-            $('#' + squareIdTo).addClass('in-check');
+            let kingposition = getKingPosition(chess.fen(), 'white');
+            if (kingposition === squareIdFrom) { // king moved, keep it in check in his new square
+                $('#' + squareIdTo).addClass('in-check');
+            } else { // king didn't move, keep it in check in his original square
+                $('#' + kingposition).addClass('in-check');
+            }
 
             $('#challenge-description').html('Vous avez perdu !<br><button class="mt-1 btn btn-danger" onclick="window.location.reload()">Réessayez</button>');
             $('#challenge-description').addClass('alert alert-danger');
@@ -359,7 +326,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         nbMoves++;
 
         // Check blacks moves to see if they can capture our pieces
-        if (!starsPieces) { // If there is starsPieces, the capture is not activated
+        if (!starsPieces && SLUG !== 'outcheck') { // If there is starsPieces, the capture is not activated
             // We get all pieces in the board
             const chessBoard = chess.board();
 
@@ -525,26 +492,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         // Keep the same piece selected to make the UI more firendly
         if (!gameLost && !challengeDone) {
             $('#' + squareIdTo).addClass('clicked');
-
-            let pieceSquare = chess.get(squareIdTo);
-            // If king, make the moves ourself to display the illegal moves
-            if (typeof pieceSquare !== 'undefined' && pieceSquare.type === 'k') {
-                var allPossibleMoves = getKingMoves(squareIdTo);
-                for (var i in allPossibleMoves) {
-                    $('#' + allPossibleMoves[i]).addClass('possible-move');
-                }
-            } else {
-                var allPossibleMoves = chess.moves({
-                    square: squareIdTo,
-                    verbose: true
-                });
-
-                for (var i in allPossibleMoves) {
-                    if (allPossibleMoves[i].from === squareIdTo) {
-                        $('#' + allPossibleMoves[i].to).addClass('possible-move');
-                    }
-                }
-            }
+            setPossibleMovesClass(squareIdTo, true);
         }
 
         return true;
@@ -618,6 +566,11 @@ function getKingMoves(idSquare) {
             if (arrLetters[i] !== null && arrLines[j] !== null) {
                 let square = arrLetters[i] + arrLines[j];
                 if (square !== idSquare) {
+                    let pieceSquare = chess.get(square);
+                    if (typeof pieceSquare === 'object' && pieceSquare.color === 'w') {
+                        continue;
+                    }
+
                     arrPossibleMoves.push(square);
                 }
             }
@@ -625,6 +578,48 @@ function getKingMoves(idSquare) {
     }
 
     return arrPossibleMoves;
+}
+
+function setPossibleMovesClass(idSquare, allowIllegalMoves = false) {
+    let pieceSquare = chess.get(idSquare);
+    let allPossibleMoves = [];
+    // If king, make the moves ourself to display the illegal moves
+    if (typeof pieceSquare !== 'undefined' && pieceSquare.type === 'k') {
+        allPossibleMoves = getKingMoves(idSquare);
+    } else {
+        if (allowIllegalMoves) { // If we allow illegal moves, we replace our king by a pawn to get all moves
+            let fen = chess.fen();
+            fen = fen.replace('K', 'P');
+            let chess2 = new Chess();
+            chess2.load(fen, {
+                skipValidation: true
+            });
+
+            let chessMoves = chess2.moves({
+                square: idSquare,
+                verbose: true
+            });
+
+            for (var i in chessMoves) {
+                allPossibleMoves.push(chessMoves[i].to);
+            }
+        }
+
+        let chessMoves = chess.moves({
+            square: idSquare,
+            verbose: true
+        });
+
+        for (var i in chessMoves) {
+            allPossibleMoves.push(chessMoves[i].to);
+        }
+    }
+
+    for (var i in allPossibleMoves) {
+        $('#' + allPossibleMoves[i]).addClass('possible-move');
+    }
+
+    return true;
 }
 
 function promotionPiece(callback) {

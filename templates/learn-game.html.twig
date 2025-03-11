@@ -180,7 +180,9 @@
                 </div>
                 <div class="modal-footer">
                     <a href="{{ path('learn') }}" class="btn btn-secondary">Retour au menu</a>
-                    <a href="{{ path('learn') }}" class="btn btn-primary">Suivant</a> {# TODO : update learn url #}
+                    {% if nextChallengeCategory is not null %}
+                        <a href="{{ path('learnGame', {'gameCategory': nextChallengeCategory, 'gameId': 1}) }}" class="btn btn-primary">Suivant</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
