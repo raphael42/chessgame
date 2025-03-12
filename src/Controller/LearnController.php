@@ -87,7 +87,6 @@ class LearnController extends AbstractController
         }
 
         return $this->render('learn.html.twig', [
-            'challenges' => $challenges,
             'challengesUser' => $challengesUser,
             'ongoingChallengesAdvancement' => $ongoingChallengesAdvancement,
             'finishedChallengesResult' => $finishedChallengesResult,
@@ -150,10 +149,17 @@ class LearnController extends AbstractController
         }
 
         $currentChallenge = [];
+        $currentChallengeSlug = null;
         $nextChallengeExist = false; // Defines if there is a next challenge, to redirect to the next or display modal
+        $nextChallengeCategory = null;
         foreach ($challenges as $oneChallenge) {
             if ($gameId === $oneChallenge->getOrdering() && $gameCategory === $oneChallenge->getSlug()) {
                 $currentChallenge = $oneChallenge;
+                $currentChallengeSlug = $oneChallenge->getSlug();
+            }
+
+            if (is_null($nextChallengeCategory) && !is_null($currentChallengeSlug) && $currentChallengeSlug !== $oneChallenge->getSlug()) {
+                $nextChallengeCategory = $oneChallenge->getSlug();
             }
 
             if (($gameId + 1) === $oneChallenge->getOrdering() && $gameCategory === $oneChallenge->getSlug()) {
@@ -167,6 +173,7 @@ class LearnController extends AbstractController
             'currentChallenge' => $currentChallenge,
             'nextChallengeExist' => $nextChallengeExist,
             'challengeNumberLink' => $challengeNumberLink,
+            'nextChallengeCategory' => $nextChallengeCategory,
         ]);
     }
 
