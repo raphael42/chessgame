@@ -406,6 +406,38 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             }
         }
 
+        if (SLUG === 'checkmate') {
+            if (chess.isCheckmate() === true) {
+                challengeDone = true;
+            } else {
+                gameLost = true;
+                $('#challenge-description').html('Vous avez perdu !<br><button class="mt-1 btn btn-danger" onclick="window.location.reload()">Réessayez</button>');
+                $('#challenge-description').addClass('alert alert-danger');
+
+                try {
+                    let moves = chess.moves({
+                        verbose: true
+                    });
+
+                    if (moves.length > 0 && chess.inCheck() === true) {
+                        let from = moves[0].from;
+                        let to = moves[0].to;
+
+                        setTimeout(() => {
+                            if ($('#' + to).find('img').length > 0) {
+                                $('#' + to + ' img').remove();
+                            }
+                            $('#' + from + ' img').detach().css({top: 0, left: 0}).appendTo('#' + to);
+
+                            $('.in-check').removeClass('in-check');
+                        }, '400');
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+        }
+
         if (!gameLost) {
             if (starsPieces) { // It's a game with stars, we need to check if the stars are still in the board. If not, the game is win
                 if (starsPositions.length < 1) {

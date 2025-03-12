@@ -96,7 +96,7 @@ final class Version20250309185404 extends AbstractMigration
             (138,	1,	'Mat en un coup',	'Matez le Roi adverse',	1,	'Attaquez le Roi de votre adversaire de manière qu\'il ne puisse pas être défendu !',	'3qk3/3ppp2/8/8/2B5/5Q2/8/8 w - - 0 1',	'checkmate'),
             (139,	2,	'Mat en un coup',	'Matez le Roi adverse',	1,	'Attaquez le Roi de votre adversaire de manière qu\'il ne puisse pas être défendu !',	'6rk/6pp/7P/6N1/8/8/8/8 w - - 0 1',	'checkmate'),
             (140,	3,	'Mat en un coup',	'Matez le Roi adverse',	1,	'Attaquez le Roi de votre adversaire de manière qu\'il ne puisse pas être défendu !',	'R7/8/7k/2r5/5n2/8/6Q1/8 w - - 0 1',	'checkmate'),
-            (141,	4,	'Mat en un coup',	'Matez le Roi adverse',	1,	'Attaquez le Roi de votre adversaire de manière qu\'il ne puisse pas être défendu !',	'2rb4/2q5/5n2/1q6/8/8/8/8 w - - 0 1',	'checkmate'),
+            (141,	4,	'Mat en un coup',	'Matez le Roi adverse',	1,	'Attaquez le Roi de votre adversaire de manière qu\'il ne puisse pas être défendu !',	'2rb4/2q5/5N2/1Q6/8/8/8/8 w - - 0 1',	'checkmate'),
             (142,	5,	'Mat en un coup',	'Matez le Roi adverse',	1,	'Attaquez le Roi de votre adversaire de manière qu\'il ne puisse pas être défendu !',	'1r2kb2/ppB1p3/2P2p2/2p1N3/B7/8/8/3R4 w - - 0 1',	'checkmate'),
             (143,	6,	'Mat en un coup',	'Matez le Roi adverse',	1,	'Attaquez le Roi de votre adversaire de manière qu\'il ne puisse pas être défendu !',	'8/pk1N4/n7/b7/6B1/1r3b2/8/1RR5 w - - 0 1',	'checkmate'),
             (144,	7,	'Mat en un coup',	'Matez le Roi adverse',	1,	'Attaquez le Roi de votre adversaire de manière qu\'il ne puisse pas être défendu !',	'r1b5/ppp5/2N2kpN/5q2/8/Q7/8/4B3 w - - 0 1',	'checkmate');"
