@@ -210,11 +210,23 @@ $(function() {
     }
 
     if (GAMESTATUS !== 'finished') {
-        if (chess.turn() === 'w' && (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white')) {
-            $('#title').html('C\'est votre tour ! | ' + SERVERNAME);
+        // It's white turn
+        if (chess.turn() === 'w') {
+            if (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white') { // Player has white, so it's his turn
+                $('#title').html('C\'est votre tour ! | ' + SERVERNAME);
+            } else { // Player has black, so it's the AI turn
+                $('#title').html('En attente de l\'adversaire | ' + SERVERNAME);
+                AiPlay();
+            }
+
+        // It's black turn
         } else {
-            $('#title').html('En attente de l\'adversaire | ' + SERVERNAME);
-            AiPlay();
+            if (PLAYERCOLOR === 'b' || PLAYERCOLOR === 'black') { // Player has black, so it's his turn
+                $('#title').html('C\'est votre tour ! | ' + SERVERNAME);
+            } else { // Player has white, so it's the AI turn
+                $('#title').html('En attente de l\'adversaire | ' + SERVERNAME);
+                AiPlay();
+            }
         }
     }
 
