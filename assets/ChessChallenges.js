@@ -144,6 +144,12 @@ function setupDraggable(jQueryElement) {
                 return;
             }
 
+            // Remove the previous clicked class and possible-move class from all squares
+            $('.chess-table.clicked').removeClass('clicked');
+            $('.chess-table.possible-move').each(function() {
+                $(this).removeClass('possible-move');
+            });
+
             $(this).parent().addClass('clicked');
             let idSquare = $(this).parent().attr('id');
 
@@ -155,7 +161,7 @@ function setupDraggable(jQueryElement) {
                 ev.clientY
             ));
 
-            // If target element if is undefined, it's the same square
+            // If target element is undefined, it's the same square
             // In that case, we don't remove the clicked stuff to make the UI for firendly
             if (typeof targetElement.attr('id') !== 'undefined') {
                 $('.chess-table.clicked').removeClass('clicked');
