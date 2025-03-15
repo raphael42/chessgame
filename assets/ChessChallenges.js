@@ -20,8 +20,10 @@ if (FEN.includes('*')) { // If a star is in FEN, do not activate the black captu
 
 const chess = new Chess();
 
-// let fenChessJs = FEN.replaceAll('*', 'p');
 let fenChessJs = FEN;
+if (SLUG !== 'king') {
+    fenChessJs = FEN.replaceAll('*', 'p');
+}
 chess.load(fenChessJs, {
     skipValidation: true
 });
