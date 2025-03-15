@@ -245,4 +245,22 @@
     {% include 'modules/modals/promotion.html.twig' %}
 
     {% include 'modules/modals/resign.html.twig' %}
+
+    <div class="modal fade" id="renew-modal" tabindex="-1" aria-labelledby="renewLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Partie terminée</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="end-game-reason"></p>
+                </div>
+                <div class="modal-footer">
+                    <a href="{{ path('index') }}" class="btn btn-secondary">Retour sur la page d'accueil</a>
+                    <a href="{{ path('index') }}?game=create-computer-game" class="btn btn-primary">Nouvelle partie</a>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

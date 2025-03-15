@@ -1363,6 +1363,7 @@ function switchTurn() {
 function gameIsOver(reason, playerWinner, endReason) {
     GAMESTATUS = 'finished';
 
+    $('.end-game-reason').html(endReason);
     $('.tchat').append('<div>' + endReason + '</div>');
 
     $('.piece.' + PLAYERCOLOR).draggable('destroy');
@@ -1429,6 +1430,7 @@ function gameIsOver(reason, playerWinner, endReason) {
         },
         success: function(data) {
             console.log(data);
+            $('#renew-modal').modal('show');
         }
     });
 }
