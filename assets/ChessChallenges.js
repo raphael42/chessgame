@@ -431,11 +431,17 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                         let from = moves[0].from;
                         let to = moves[0].to;
 
+                        $('#' + from).append('<i class="bi bi-exclamation-circle d-inline-flex text-bg-danger rounded-circle exclamation-capture"></i>');
                         setTimeout(() => {
                             if ($('#' + to).find('img').length > 0) {
                                 $('#' + to + ' img').remove();
                             }
                             $('#' + from + ' img').detach().css({top: 0, left: 0}).appendTo('#' + to);
+
+                            $('.exclamation-capture').remove();
+
+                            $('#' + from).addClass('last-move');
+                            $('#' + to).addClass('last-move');
 
                             $('.in-check').removeClass('in-check');
                         }, '400');
@@ -459,6 +465,8 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                 if (inCheck) {
                     challengeDone = true;
                 } else {
+                    $('#challenge-description').html('Vous avez perdu !<br><button class="mt-1 btn btn-danger" onclick="window.location.reload()">Réessayez</button>');
+                    $('#challenge-description').addClass('alert alert-danger');
                     gameLost = true;
                 }
             } else { // Challenge ends when there is no black pieces anymore
