@@ -20,29 +20,90 @@ class LearnController extends AbstractController
     {
         $challenges = $entityManager->getRepository(Entity\Challenge::class)->findAll();
 
-        // If user is connected, use the user
+        // Get games done using the cookie
+        $challengeCookie = $request->cookies->get('challenge-cookie');
+
+        // The cookie doesn't exists, create one
+        if (is_null($challengeCookie)) {
+            $challengeCookie = time().bin2hex(random_bytes(5));
+
+            setcookie('challenge-cookie', $challengeCookie, [
+                'expires' => time() + (20 * 365 * 24 * 60 * 60), // expiration : 20 years to not expire it
+                'path' => '/',
+                'samesite' => 'Lax',
+            ]);
+        }
+
+        $challengesUserCookie = $entityManager->getRepository(Entity\ChallengeUser::class)->findBy([
+            'session' => $challengeCookie
+        ]);
+
+        // If user is connected, check the user's challenges
         if ($user !== null) {
+            // Get challenges done using the user
             $challengesUser = $entityManager->getRepository(Entity\ChallengeUser::class)->findBy([
                 'user' => $user
             ]);
-        } else {
-            // If not, use a cookie
-            $challengeCookie = $request->cookies->get('challenge-cookie');
 
-            // The cookie doesn't exists, create one
-            if (is_null($challengeCookie)) {
-                $challengeCookie = time().bin2hex(random_bytes(5));
-
-                setcookie('challenge-cookie', $challengeCookie, [
-                    'expires' => time() + (20 * 365 * 24 * 60 * 60), // expiration : 20 years to not expire it
-                    'path' => '/',
-                    'samesite' => 'Lax',
-                ]);
+            $challengeCleanDoublons = [];
+            foreach ($challengesUserCookie as $oneChallengeCookie) {
+                $challengeCleanDoublons[$oneChallengeCookie->getChallenge()->getId()] = [
+                    'cookieEntity' => $oneChallengeCookie,
+                    'loggedEntity' => null,
+                ];
             }
 
-            $challengesUser = $entityManager->getRepository(Entity\ChallengeUser::class)->findBy([
-                'session' => $challengeCookie
-            ]);
+            foreach ($challengesUser as $challengeLogged) {
+                $idChallenge = $challengeLogged->getChallenge()->getId();
+                if (isset($challengeCleanDoublons[$idChallenge])) {
+                    $challengeCleanDoublons[$idChallenge]['loggedEntity'] = $challengeLogged;
+                } else {
+                    $challengeCleanDoublons[$idChallenge] = [
+                        'cookieEntity' => null,
+                        'loggedEntity' => $challengeLogged,
+                    ];
+                }
+            }
+
+            $flushDb = false;
+            foreach ($challengeCleanDoublons as $oneChallengeDoublon) {
+                // If the challenge is only in the cookie, set the user
+                if (!isset($oneChallengeDoublon['loggedEntity'])) {
+                    $oneChallengeDoublon['cookieEntity']->setUser($user);
+                    $entityManager->persist($oneChallengeDoublon['cookieEntity']);
+                    $flushDb = true;
+
+                // If the challenge is only in the user, set the session
+                } elseif (!isset($oneChallengeDoublon['cookieEntity'])) {
+                    $oneChallengeDoublon['loggedEntity']->setSession($challengeCookie);
+                    $entityManager->persist($oneChallengeDoublon['loggedEntity']);
+                    $flushDb = true;
+
+                // If the challenge is in both, check the score to keep the highest in the user
+                } else {
+                    // If the score is higher in the cookie, set the cookie as the new user
+                    if ($oneChallengeDoublon['loggedEntity']->getScore() < $oneChallengeDoublon['cookieEntity']->getScore()) {
+                        $oneChallengeDoublon['cookieEntity']->setUser($user);
+                        $entityManager->persist($oneChallengeDoublon['cookieEntity']);
+
+                        $oneChallengeDoublon['loggedEntity']->setUser(null);
+                        $entityManager->persist($oneChallengeDoublon['loggedEntity']);
+
+                        $flushDb = true;
+                    }
+                }
+            }
+
+            if ($flushDb) {
+                $entityManager->flush();
+
+                // Get challenges again if there is a change
+                $challengesUser = $entityManager->getRepository(Entity\ChallengeUser::class)->findBy([
+                    'user' => $user
+                ]);
+            }
+        } else {
+            $challengesUser = $challengesUserCookie;
         }
 
         $challengesAdvancement = [];
