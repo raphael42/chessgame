@@ -109,13 +109,13 @@ class LearnController extends AbstractController
         $challengesAdvancement = [];
         $totalStars = 0;
         foreach ($challenges as $oneChallenge) {
-            if (!isset($challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()])) {
-                $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = null;
+            if (!isset($challengesAdvancement[$oneChallenge->getChallengeCategory()->getSlug()][$oneChallenge->getOrdering()])) {
+                $challengesAdvancement[$oneChallenge->getChallengeCategory()->getSlug()][$oneChallenge->getOrdering()] = null;
             }
 
             foreach ($challengesUser as $oneChallengeUser) {
                 if ($oneChallenge->getId() === $oneChallengeUser->getChallenge()->getId()) {
-                    $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = $oneChallengeUser->getScore();
+                    $challengesAdvancement[$oneChallenge->getChallengeCategory()->getSlug()][$oneChallenge->getOrdering()] = $oneChallengeUser->getScore();
                     $totalStars += $oneChallengeUser->getScore();
                 }
             }
@@ -187,13 +187,13 @@ class LearnController extends AbstractController
 
         $challengesAdvancement = [];
         foreach ($challenges as $oneChallenge) {
-            if (!isset($challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()])) {
-                $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = null;
+            if (!isset($challengesAdvancement[$oneChallenge->getChallengeCategory()->getSlug()][$oneChallenge->getOrdering()])) {
+                $challengesAdvancement[$oneChallenge->getChallengeCategory()->getSlug()][$oneChallenge->getOrdering()] = null;
             }
 
             foreach ($challengesUser as $oneChallengeUser) {
                 if ($oneChallenge->getId() === $oneChallengeUser->getChallenge()->getId()) {
-                    $challengesAdvancement[$oneChallenge->getSlug()][$oneChallenge->getOrdering()] = $oneChallengeUser->getScore();
+                    $challengesAdvancement[$oneChallenge->getChallengeCategory()->getSlug()][$oneChallenge->getOrdering()] = $oneChallengeUser->getScore();
                 }
             }
         }
@@ -214,16 +214,16 @@ class LearnController extends AbstractController
         $nextChallengeExist = false; // Defines if there is a next challenge, to redirect to the next or display modal
         $nextChallengeCategory = null;
         foreach ($challenges as $oneChallenge) {
-            if ($gameId === $oneChallenge->getOrdering() && $gameCategory === $oneChallenge->getSlug()) {
+            if ($gameId === $oneChallenge->getOrdering() && $gameCategory === $oneChallenge->getChallengeCategory()->getSlug()) {
                 $currentChallenge = $oneChallenge;
-                $currentChallengeSlug = $oneChallenge->getSlug();
+                $currentChallengeSlug = $oneChallenge->getChallengeCategory()->getSlug();
             }
 
-            if (is_null($nextChallengeCategory) && !is_null($currentChallengeSlug) && $currentChallengeSlug !== $oneChallenge->getSlug()) {
-                $nextChallengeCategory = $oneChallenge->getSlug();
+            if (is_null($nextChallengeCategory) && !is_null($currentChallengeSlug) && $currentChallengeSlug !== $oneChallenge->getChallengeCategory()->getSlug()) {
+                $nextChallengeCategory = $oneChallenge->getChallengeCategory()->getSlug();
             }
 
-            if (($gameId + 1) === $oneChallenge->getOrdering() && $gameCategory === $oneChallenge->getSlug()) {
+            if (($gameId + 1) === $oneChallenge->getOrdering() && $gameCategory === $oneChallenge->getChallengeCategory()->getSlug()) {
                 $nextChallengeExist = true;
             }
         }
@@ -255,8 +255,12 @@ class LearnController extends AbstractController
             }
         }
 
-        $challenge = $entityManager->getRepository(Entity\Challenge::class)->findOneBy([
+        $challengeCategorie = $entityManager->getRepository(Entity\ChallengeCategory::class)->findOneBy([
             'slug' => $data['category'],
+        ]);
+
+        $challenge = $entityManager->getRepository(Entity\Challenge::class)->findOneBy([
+            'challengeCategory' => $challengeCategorie,
             'ordering' => $data['id'],
         ]);
 

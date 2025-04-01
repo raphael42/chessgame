@@ -19,12 +19,6 @@ class Challenge
     #[ORM\Column]
     private ?int $ordering = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $title = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $subtitle = null;
-
     #[ORM\Column]
     private ?int $score_goal = null;
 
@@ -40,8 +34,8 @@ class Challenge
     #[ORM\Column(length: 255)]
     private ?string $fen = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $slug = null;
+    #[ORM\ManyToOne(inversedBy: 'challenges')]
+    private ?ChallengeCategory $challengeCategory = null;
 
     public function __construct()
     {
@@ -61,30 +55,6 @@ class Challenge
     public function setOrdering(int $ordering): static
     {
         $this->ordering = $ordering;
-
-        return $this;
-    }
-
-    public function getTitle(): ?string
-    {
-        return $this->title;
-    }
-
-    public function setTitle(string $title): static
-    {
-        $this->title = $title;
-
-        return $this;
-    }
-
-    public function getSubtitle(): ?string
-    {
-        return $this->subtitle;
-    }
-
-    public function setSubtitle(string $subtitle): static
-    {
-        $this->subtitle = $subtitle;
 
         return $this;
     }
@@ -155,14 +125,14 @@ class Challenge
         return $this;
     }
 
-    public function getSlug(): ?string
+    public function getChallengeCategory(): ?ChallengeCategory
     {
-        return $this->slug;
+        return $this->challengeCategory;
     }
 
-    public function setSlug(string $slug): static
+    public function setChallengeCategory(?ChallengeCategory $challengeCategory): static
     {
-        $this->slug = $slug;
+        $this->challengeCategory = $challengeCategory;
 
         return $this;
     }

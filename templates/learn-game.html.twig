@@ -8,11 +8,11 @@
         const PIECESIMGURL = "{{ asset('assets/img/pieces/playerColor-chessboard.png') }}";
         const AJAXSAVECHALLENGE = '{{ path('ajaxSaveChallenge') }}';
         {% if nextChallengeExist %}
-            const NEXTCHALLENGEPATH = '{{ path('learnGame', {'gameCategory': currentChallenge.slug, 'gameId': currentChallenge.ordering + 1}) }}';
+            const NEXTCHALLENGEPATH = '{{ path('learnGame', {'gameCategory': currentChallenge.challengeCategory.slug, 'gameId': currentChallenge.ordering + 1}) }}';
         {% else %}
             const NEXTCHALLENGEPATH = null;
         {% endif %}
-        const SLUG = '{{ currentChallenge.slug }}';
+        const SLUG = '{{ currentChallenge.challengeCategory.slug }}';
         const ID = '{{ currentChallenge.ordering }}';
         const SCOREGOAL = '{{ currentChallenge.scoreGoal }}';
     </script>
@@ -44,12 +44,12 @@
                                     {% for slug, listChallenges in challengesAdvancement %}
                                         {% set breakLoop = false %}
                                         {% for onechallenge in challenges %}
-                                            {% if slug == onechallenge.slug and not breakLoop %}
+                                            {% if slug == onechallenge.challengeCategory.slug and not breakLoop %}
                                                 {% set breakLoop = true %}
-                                                {% if slug == currentChallenge.slug %}
-                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': challengeNumberLink[slug]}) }}" class="list-group-item list-group-item-action active" aria-current="true">{{ onechallenge.title }}</a>
+                                                {% if slug == currentChallenge.challengeCategory.slug %}
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': challengeNumberLink[slug]}) }}" class="list-group-item list-group-item-action active" aria-current="true">{{ onechallenge.challengeCategory.title }}</a>
                                                 {% else %}
-                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': challengeNumberLink[slug]}) }}" class="list-group-item list-group-item-action">{{ onechallenge.title }}</a>
+                                                    <a href="{{ path('learnGame', {'gameCategory': slug, 'gameId': challengeNumberLink[slug]}) }}" class="list-group-item list-group-item-action">{{ onechallenge.challengeCategory.title }}</a>
                                                 {% endif %}
                                             {% endif %}
                                         {% endfor %}
@@ -124,8 +124,8 @@
                     {# TODO : display different levels #}
                     <section class="learn-advancement-section">
                         <div class="title bg-primary bg-gradient text-white ps-4">
-                            <h2>{{ currentChallenge.title }}</h2>
-                            <p>{{ currentChallenge.subtitle }}</p>
+                            <h2>{{ currentChallenge.challengeCategory.title }}</h2>
+                            <p>{{ currentChallenge.challengeCategory.subtitle }}</p>
                         </div>
                         <div id="challenge-description" class="text-center mb-3">
                             {{ currentChallenge.description|raw }}
@@ -133,7 +133,7 @@
                         <div class="btn-toolbar justify-content-around" role="toolbar" aria-label="Toolbar with button groups">
                             <div class="btn-group w-100" role="group" aria-label="Btn group">
                                 {% for slug, listChallenges in challengesAdvancement %}
-                                    {% if slug == currentChallenge.slug %}
+                                    {% if slug == currentChallenge.challengeCategory.slug %}
                                         {% set widthBtn = 100 / listChallenges|length %}
                                         {% for oneChallengeOrdering, oneChallengeScore in listChallenges %}
                                             {% set btnClass = 'btn-outline-secondary' %}
