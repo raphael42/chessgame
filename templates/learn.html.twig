@@ -24,481 +24,52 @@
                 </div>
             </section>
 
-            <section class="mt-5">
-                <div class="row">
-                    <div class="col-12">
-                        <h2>Les pièces</h2>
+            {% for section, listChallenges in challengesToDisplay %}
+                <section class="mt-5">
+                    <div class="row">
+                        <div class="col-12">
+                            <h2>{{ section }}</h2>
+                        </div>
                     </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'pawn', 'gameId': challengeNumberLink.pawn}) }}" class="no-decoration">
-                            {% set borderClass = '' %}
-                            {% set textClass = '' %}
-                            {% if ongoingChallengesAdvancement.pawn is defined %}
-                                {% set borderClass = 'border-primary' %}
-                                {% set textClass = 'text-primary' %}
-                            {% elseif finishedChallengesResult.pawn is defined %}
-                                {% set borderClass = 'border-success' %}
-                                {% set textClass = 'text-success' %}
-                            {% endif %}
-                            <div class="card text-bg-light mb-3 {{ borderClass }}">
-                                <div class="card-body {{ textClass }}">
-                                    <h5 class="card-title">Le pion</h5>
-                                    <p class="card-text">Il se déplace uniquement vers l'avant</p>
-                                </div>
-                                {% if ongoingChallengesAdvancement.pawn is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-primary text-white">{{ ongoingChallengesAdvancement.pawn }}</span>
-                                    </span>
-                                {% endif %}
-                                {% if finishedChallengesResult.pawn is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-success text-white">
-                                            {% for i in 1..min(finishedChallengesResult.pawn, 3) %}
-                                                <i class="bi bi-star-fill"></i>
-                                            {% endfor %}
-                                        </span>
-                                    </span>
-                                {% endif %}
+                    <div class="row">
+                        {% for oneChallenge in listChallenges %}
+                            <div class="col-12 col-md-6">
+                                <a href="{{ path('learnGame', {'gameCategory': oneChallenge.slug, 'gameId': challengeNumberLink[oneChallenge.slug]}) }}" class="no-decoration">
+                                    {% set borderClass = '' %}
+                                    {% set textClass = '' %}
+                                    {% if ongoingChallengesAdvancement[oneChallenge.slug] is defined %}
+                                        {% set borderClass = 'border-primary' %}
+                                        {% set textClass = 'text-primary' %}
+                                    {% elseif finishedChallengesResult[oneChallenge.slug] is defined %}
+                                        {% set borderClass = 'border-success' %}
+                                        {% set textClass = 'text-success' %}
+                                    {% endif %}
+                                    <div class="card text-bg-light mb-3 {{ borderClass }}">
+                                        <div class="card-body {{ textClass }}">
+                                            <h5 class="card-title">{{ oneChallenge.title }}</h5>
+                                            <p class="card-text">{{ oneChallenge.subtitle }}</p>
+                                        </div>
+                                        {% if ongoingChallengesAdvancement[oneChallenge.slug] is defined %}
+                                            <span class="ribbon-wrapper">
+                                                <span class="ribbon-display bg-primary text-white">{{ ongoingChallengesAdvancement[oneChallenge.slug] }}</span>
+                                            </span>
+                                        {% endif %}
+                                        {% if finishedChallengesResult[oneChallenge.slug] is defined %}
+                                            <span class="ribbon-wrapper">
+                                                <span class="ribbon-display bg-success text-white">
+                                                    {% for i in 1..min(finishedChallengesResult[oneChallenge.slug], 3) %}
+                                                        <i class="bi bi-star-fill"></i>
+                                                    {% endfor %}
+                                                </span>
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </a>
                             </div>
-                        </a>
+                        {% endfor %}
                     </div>
-                    <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'bishop', 'gameId': challengeNumberLink.bishop}) }}" class="no-decoration">
-                            {% set borderClass = '' %}
-                            {% set textClass = '' %}
-                            {% if ongoingChallengesAdvancement.bishop is defined %}
-                                {% set borderClass = 'border-primary' %}
-                                {% set textClass = 'text-primary' %}
-                            {% elseif finishedChallengesResult.bishop is defined %}
-                                {% set borderClass = 'border-success' %}
-                                {% set textClass = 'text-success' %}
-                            {% endif %}
-                            <div class="card text-bg-light mb-3 {{ borderClass }}">
-                                <div class="card-body {{ textClass }}">
-                                    <h5 class="card-title">Le fou</h5>
-                                    <p class="card-text">Il se déplace en diagonal</p>
-                                </div>
-                                {% if ongoingChallengesAdvancement.bishop is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-primary text-white">{{ ongoingChallengesAdvancement.bishop }}</span>
-                                    </span>
-                                {% endif %}
-                                {% if finishedChallengesResult.bishop is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-success text-white">
-                                            {% for i in 1..min(finishedChallengesResult.bishop, 3) %}
-                                                <i class="bi bi-star-fill"></i>
-                                            {% endfor %}
-                                        </span>
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'knight', 'gameId': challengeNumberLink.knight}) }}" class="no-decoration">
-                            {% set borderClass = '' %}
-                            {% set textClass = '' %}
-                            {% if ongoingChallengesAdvancement.knight is defined %}
-                                {% set borderClass = 'border-primary' %}
-                                {% set textClass = 'text-primary' %}
-                            {% elseif finishedChallengesResult.knight is defined %}
-                                {% set borderClass = 'border-success' %}
-                                {% set textClass = 'text-success' %}
-                            {% endif %}
-                            <div class="card text-bg-light mb-3 {{ borderClass }}">
-                                <div class="card-body {{ textClass }}">
-                                    <h5 class="card-title">Le cavalier</h5>
-                                    <p class="card-text">Il se déplace en forme de L</p>
-                                </div>
-                                {% if ongoingChallengesAdvancement.knight is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-primary text-white">{{ ongoingChallengesAdvancement.knight }}</span>
-                                    </span>
-                                {% endif %}
-                                {% if finishedChallengesResult.knight is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-success text-white">
-                                            {% for i in 1..min(finishedChallengesResult.knight, 3) %}
-                                                <i class="bi bi-star-fill"></i>
-                                            {% endfor %}
-                                        </span>
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'rook', 'gameId': challengeNumberLink.rook}) }}" class="no-decoration">
-                            {% set borderClass = '' %}
-                            {% set textClass = '' %}
-                            {% if ongoingChallengesAdvancement.rook is defined %}
-                                {% set borderClass = 'border-primary' %}
-                                {% set textClass = 'text-primary' %}
-                            {% elseif finishedChallengesResult.rook is defined %}
-                                {% set borderClass = 'border-success' %}
-                                {% set textClass = 'text-success' %}
-                            {% endif %}
-                            <div class="card text-bg-light mb-3 {{ borderClass }}">
-                                <div class="card-body {{ textClass }}">
-                                    <h5 class="card-title">La tour</h5>
-                                    <p class="card-text">Elle se déplace sur une ligne droite</p>
-                                </div>
-                                {% if ongoingChallengesAdvancement.rook is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-primary text-white">{{ ongoingChallengesAdvancement.rook }}</span>
-                                    </span>
-                                {% endif %}
-                                {% if finishedChallengesResult.rook is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-success text-white">
-                                            {% for i in 1..min(finishedChallengesResult.rook, 3) %}
-                                                <i class="bi bi-star-fill"></i>
-                                            {% endfor %}
-                                        </span>
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'queen', 'gameId': challengeNumberLink.queen}) }}" class="no-decoration">
-                            {% set borderClass = '' %}
-                            {% set textClass = '' %}
-                            {% if ongoingChallengesAdvancement.queen is defined %}
-                                {% set borderClass = 'border-primary' %}
-                                {% set textClass = 'text-primary' %}
-                            {% elseif finishedChallengesResult.queen is defined %}
-                                {% set borderClass = 'border-success' %}
-                                {% set textClass = 'text-success' %}
-                            {% endif %}
-                            <div class="card text-bg-light mb-3 {{ borderClass }}">
-                                <div class="card-body {{ textClass }}">
-                                    <h5 class="card-title">La reine</h5>
-                                    <p class="card-text">Dame = tour + fou</p>
-                                </div>
-                                {% if ongoingChallengesAdvancement.queen is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-primary text-white">{{ ongoingChallengesAdvancement.queen }}</span>
-                                    </span>
-                                {% endif %}
-                                {% if finishedChallengesResult.queen is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-success text-white">
-                                            {% for i in 1..min(finishedChallengesResult.queen, 3) %}
-                                                <i class="bi bi-star-fill"></i>
-                                            {% endfor %}
-                                        </span>
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'king', 'gameId': challengeNumberLink.king}) }}" class="no-decoration">
-                            {% set borderClass = '' %}
-                            {% set textClass = '' %}
-                            {% if ongoingChallengesAdvancement.king is defined %}
-                                {% set borderClass = 'border-primary' %}
-                                {% set textClass = 'text-primary' %}
-                            {% elseif finishedChallengesResult.king is defined %}
-                                {% set borderClass = 'border-success' %}
-                                {% set textClass = 'text-success' %}
-                            {% endif %}
-                            <div class="card text-bg-light mb-3 {{ borderClass }}">
-                                <div class="card-body {{ textClass }}">
-                                    <h5 class="card-title">Le roi</h5>
-                                    <p class="card-text">La pièce la plus importante</p>
-                                </div>
-                                {% if ongoingChallengesAdvancement.king is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-primary text-white">{{ ongoingChallengesAdvancement.king }}</span>
-                                    </span>
-                                {% endif %}
-                                {% if finishedChallengesResult.king is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-success text-white">
-                                            {% for i in 1..min(finishedChallengesResult.king, 3) %}
-                                                <i class="bi bi-star-fill"></i>
-                                            {% endfor %}
-                                        </span>
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </section>
-
-            <section class="mt-5">
-                <div class="row">
-                    <div class="col-12">
-                        <h2>Les fondamentaux</h2>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'capture', 'gameId': challengeNumberLink.capture}) }}" class="no-decoration">
-                            {% set borderClass = '' %}
-                            {% set textClass = '' %}
-                            {% if ongoingChallengesAdvancement.capture is defined %}
-                                {% set borderClass = 'border-primary' %}
-                                {% set textClass = 'text-primary' %}
-                            {% elseif finishedChallengesResult.capture is defined %}
-                                {% set borderClass = 'border-success' %}
-                                {% set textClass = 'text-success' %}
-                            {% endif %}
-                            <div class="card text-bg-light mb-3 {{ borderClass }}">
-                                <div class="card-body {{ textClass }}">
-                                    <h5 class="card-title">Capturer</h5>
-                                    <p class="card-text">Prenez les pièces adverses</p>
-                                </div>
-                                {% if ongoingChallengesAdvancement.capture is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-primary text-white">{{ ongoingChallengesAdvancement.capture }}</span>
-                                    </span>
-                                {% endif %}
-                                {% if finishedChallengesResult.capture is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-success text-white">
-                                            {% for i in 1..min(finishedChallengesResult.capture, 3) %}
-                                                <i class="bi bi-star-fill"></i>
-                                            {% endfor %}
-                                        </span>
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'protect', 'gameId': challengeNumberLink.protect}) }}" class="no-decoration">
-                            {% set borderClass = '' %}
-                            {% set textClass = '' %}
-                            {% if ongoingChallengesAdvancement.protect is defined %}
-                                {% set borderClass = 'border-primary' %}
-                                {% set textClass = 'text-primary' %}
-                            {% elseif finishedChallengesResult.protect is defined %}
-                                {% set borderClass = 'border-success' %}
-                                {% set textClass = 'text-success' %}
-                            {% endif %}
-                            <div class="card text-bg-light mb-3 {{ borderClass }}">
-                                <div class="card-body {{ textClass }}">
-                                    <h5 class="card-title">Protéger</h5>
-                                    <p class="card-text">Assurez la sécurité de vos pièces</p>
-                                </div>
-                                {% if ongoingChallengesAdvancement.protect is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-primary text-white">{{ ongoingChallengesAdvancement.protect }}</span>
-                                    </span>
-                                {% endif %}
-                                {% if finishedChallengesResult.protect is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-success text-white">
-                                            {% for i in 1..min(finishedChallengesResult.protect, 3) %}
-                                                <i class="bi bi-star-fill"></i>
-                                            {% endfor %}
-                                        </span>
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'fight', 'gameId': challengeNumberLink.fight}) }}" class="no-decoration">
-                            {% set borderClass = '' %}
-                            {% set textClass = '' %}
-                            {% if ongoingChallengesAdvancement.fight is defined %}
-                                {% set borderClass = 'border-primary' %}
-                                {% set textClass = 'text-primary' %}
-                            {% elseif finishedChallengesResult.fight is defined %}
-                                {% set borderClass = 'border-success' %}
-                                {% set textClass = 'text-success' %}
-                            {% endif %}
-                            <div class="card text-bg-light mb-3 {{ borderClass }}">
-                                <div class="card-body {{ textClass }}">
-                                    <h5 class="card-title">Combat</h5>
-                                    <p class="card-text">Capturez et défendez les pièces</p>
-                                </div>
-                                {% if ongoingChallengesAdvancement.fight is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-primary text-white">{{ ongoingChallengesAdvancement.fight }}</span>
-                                    </span>
-                                {% endif %}
-                                {% if finishedChallengesResult.fight is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-success text-white">
-                                            {% for i in 1..min(finishedChallengesResult.fight, 3) %}
-                                                <i class="bi bi-star-fill"></i>
-                                            {% endfor %}
-                                        </span>
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'check', 'gameId': challengeNumberLink.check}) }}" class="no-decoration">
-                            {% set borderClass = '' %}
-                            {% set textClass = '' %}
-                            {% if ongoingChallengesAdvancement.check is defined %}
-                                {% set borderClass = 'border-primary' %}
-                                {% set textClass = 'text-primary' %}
-                            {% elseif finishedChallengesResult.check is defined %}
-                                {% set borderClass = 'border-success' %}
-                                {% set textClass = 'text-success' %}
-                            {% endif %}
-                            <div class="card text-bg-light mb-3 {{ borderClass }}">
-                                <div class="card-body {{ textClass }}">
-                                    <h5 class="card-title">Échec en un coup</h5>
-                                    <p class="card-text">Attaquez le Roi adverse</p>
-                                </div>
-                                {% if ongoingChallengesAdvancement.check is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-primary text-white">{{ ongoingChallengesAdvancement.check }}</span>
-                                    </span>
-                                {% endif %}
-                                {% if finishedChallengesResult.check is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-success text-white">
-                                            {% for i in 1..min(finishedChallengesResult.check, 3) %}
-                                                <i class="bi bi-star-fill"></i>
-                                            {% endfor %}
-                                        </span>
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'outcheck', 'gameId': challengeNumberLink.outcheck}) }}" class="no-decoration">
-                            {% set borderClass = '' %}
-                            {% set textClass = '' %}
-                            {% if ongoingChallengesAdvancement.outcheck is defined %}
-                                {% set borderClass = 'border-primary' %}
-                                {% set textClass = 'text-primary' %}
-                            {% elseif finishedChallengesResult.outcheck is defined %}
-                                {% set borderClass = 'border-success' %}
-                                {% set textClass = 'text-success' %}
-                            {% endif %}
-                            <div class="card text-bg-light mb-3 {{ borderClass }}">
-                                <div class="card-body {{ textClass }}">
-                                    <h5 class="card-title">Parer un échec</h5>
-                                    <p class="card-text">Défendez votre Roi</p>
-                                </div>
-                                {% if ongoingChallengesAdvancement.outcheck is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-primary text-white">{{ ongoingChallengesAdvancement.outcheck }}</span>
-                                    </span>
-                                {% endif %}
-                                {% if finishedChallengesResult.outcheck is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-success text-white">
-                                            {% for i in 1..min(finishedChallengesResult.outcheck, 3) %}
-                                                <i class="bi bi-star-fill"></i>
-                                            {% endfor %}
-                                        </span>
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <a href="{{ path('learnGame', {'gameCategory': 'checkmate', 'gameId': challengeNumberLink.checkmate}) }}" class="no-decoration">
-                            {% set borderClass = '' %}
-                            {% set textClass = '' %}
-                            {% if ongoingChallengesAdvancement.checkmate is defined %}
-                                {% set borderClass = 'border-primary' %}
-                                {% set textClass = 'text-primary' %}
-                            {% elseif finishedChallengesResult.checkmate is defined %}
-                                {% set borderClass = 'border-success' %}
-                                {% set textClass = 'text-success' %}
-                            {% endif %}
-                            <div class="card text-bg-light mb-3 {{ borderClass }}">
-                                <div class="card-body {{ textClass }}">
-                                    <h5 class="card-title">Mat en un coup</h5>
-                                    <p class="card-text">Matez le Roi adverse</p>
-                                </div>
-                                {% if ongoingChallengesAdvancement.checkmate is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-primary text-white">{{ ongoingChallengesAdvancement.checkmate }}</span>
-                                    </span>
-                                {% endif %}
-                                {% if finishedChallengesResult.checkmate is defined %}
-                                    <span class="ribbon-wrapper">
-                                        <span class="ribbon-display bg-success text-white">
-                                            {% for i in 1..min(finishedChallengesResult.checkmate, 3) %}
-                                                <i class="bi bi-star-fill"></i>
-                                            {% endfor %}
-                                        </span>
-                                    </span>
-                                {% endif %}
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </section>
-
-            {# <section>
-                <div class="row">
-                    <div class="col-12">
-                        <h2>Intermédiaire</h2>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-12 col-md-6">
-                        Le pion
-                    </div>
-                    <div class="col-12 col-md-6">
-                        Le fou
-                    </div>
-                    <div class="col-12 col-md-6">
-                        Le cavalier
-                    </div>
-                    <div class="col-12 col-md-6">
-                        La tour
-                    </div>
-                    <div class="col-12 col-md-6">
-                        La reine
-                    </div>
-                    <div class="col-12 col-md-6">
-                        Le roi
-                    </div>
-                </div>
-            </section>
-
-            <section>
-                <div class="row">
-                    <div class="col-12">
-                        <h2>Avancé</h2>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-12 col-md-6">
-                        Le pion
-                    </div>
-                    <div class="col-12 col-md-6">
-                        Le fou
-                    </div>
-                    <div class="col-12 col-md-6">
-                        Le cavalier
-                    </div>
-                    <div class="col-12 col-md-6">
-                        La tour
-                    </div>
-                    <div class="col-12 col-md-6">
-                        La reine
-                    </div>
-                    <div class="col-12 col-md-6">
-                        Le roi
-                    </div>
-                </div>
-            </section> #}
+                </section>
+            {% endfor %}
         </div>
     </div>
 {% endblock %}

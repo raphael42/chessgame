@@ -33,6 +33,9 @@ class ChallengeCategory
     #[ORM\OneToMany(targetEntity: Challenge::class, mappedBy: 'challengeCategory')]
     private Collection $challenges;
 
+    #[ORM\ManyToOne(inversedBy: 'challengeCategories')]
+    private ?ChallengeSection $challengeSection = null;
+
     public function __construct()
     {
         $this->challenges = new ArrayCollection();
@@ -117,6 +120,18 @@ class ChallengeCategory
                 $challenge->setChallengeCategory(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getChallengeSection(): ?ChallengeSection
+    {
+        return $this->challengeSection;
+    }
+
+    public function setChallengeSection(?ChallengeSection $challengeSection): static
+    {
+        $this->challengeSection = $challengeSection;
 
         return $this;
     }

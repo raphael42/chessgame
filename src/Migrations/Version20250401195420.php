@@ -55,5 +55,7 @@ final class Version20250401195420 extends AbstractMigration
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
+        $this->addSql("DELETE FROM `challenge_category` WHERE `id` IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);");
+        $this->addSql("UPDATE `challenge` SET `challenge_category_id` = NULL WHERE `challenge_category_id` IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);");
     }
 }

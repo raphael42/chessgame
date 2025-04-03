@@ -18,7 +18,16 @@ class LearnController extends AbstractController
 {
     public function learnfunction(#[CurrentUser] ?Entity\User $user, Request $request, EntityManagerInterface $entityManager): Response
     {
-        $challenges = $entityManager->getRepository(Entity\Challenge::class)->findAll();
+        $challenges = $entityManager->getRepository(Entity\Challenge::class)->findAllWithCategoriesOrderedBy();
+
+        $challengesToDisplay = [];
+        foreach ($challenges as $oneChallenge) {
+            if (isset($challengesToDisplay[$oneChallenge->getChallengeCategory()->getChallengeSection()->getLabel()][$oneChallenge->getChallengeCategory()->getOrdering()])) {
+                continue;
+            }
+
+            $challengesToDisplay[$oneChallenge->getChallengeCategory()->getChallengeSection()->getLabel()][$oneChallenge->getChallengeCategory()->getOrdering()] = $oneChallenge->getChallengeCategory();
+        }
 
         // Get games done using the cookie
         $challengeCookie = $request->cookies->get('challenge-cookie');
@@ -148,6 +157,7 @@ class LearnController extends AbstractController
         }
 
         return $this->render('learn.html.twig', [
+            'challengesToDisplay' => $challengesToDisplay,
             'challengesUser' => $challengesUser,
             'ongoingChallengesAdvancement' => $ongoingChallengesAdvancement,
             'finishedChallengesResult' => $finishedChallengesResult,
@@ -158,7 +168,7 @@ class LearnController extends AbstractController
 
     public function learnGamefunction(#[CurrentUser] ?Entity\User $user, Request $request, string $gameCategory, int $gameId, EntityManagerInterface $entityManager): Response
     {
-        $challenges = $entityManager->getRepository(Entity\Challenge::class)->findAll();
+        $challenges = $entityManager->getRepository(Entity\Challenge::class)->findAllWithCategoriesOrderedBy();
 
         // If user is connected, use the user
         if ($user !== null) {
@@ -255,12 +265,12 @@ class LearnController extends AbstractController
             }
         }
 
-        $challengeCategorie = $entityManager->getRepository(Entity\ChallengeCategory::class)->findOneBy([
+        $challengeCategories = $entityManager->getRepository(Entity\ChallengeCategory::class)->findOneBy([
             'slug' => $data['category'],
         ]);
 
         $challenge = $entityManager->getRepository(Entity\Challenge::class)->findOneBy([
-            'challengeCategory' => $challengeCategorie,
+            'challengeCategory' => $challengeCategories,
             'ordering' => $data['id'],
         ]);
 
