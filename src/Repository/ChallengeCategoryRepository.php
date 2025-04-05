@@ -2,22 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\Challenge;
+use App\Entity\ChallengeCategory;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Challenge>
+ * @extends ServiceEntityRepository<ChallengeCategory>
  */
-class ChallengeRepository extends ServiceEntityRepository
+class ChallengeCategoryRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Challenge::class);
+        parent::__construct($registry, ChallengeCategory::class);
     }
 
     //    /**
-    //     * @return Challenge[] Returns an array of Challenge objects
+    //     * @return ChallengeCategory[] Returns an array of ChallengeCategory objects
     //     */
     //    public function findByExampleField($value): array
     //    {
@@ -31,7 +31,7 @@ class ChallengeRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Challenge
+    //    public function findOneBySomeField($value): ?ChallengeCategory
     //    {
     //        return $this->createQueryBuilder('c')
     //            ->andWhere('c.exampleField = :val')
@@ -40,19 +40,4 @@ class ChallengeRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
-
-    /**
-     * @return Challenge[] Returns an array of Challenge objects ordered by challengeSection.ordering, challengeCategory.ordering and challenge.ordering
-     */
-    public function findAllWithCategoriesOrderedBy(): array
-    {
-        return $this->createQueryBuilder('c')
-            ->leftJoin('c.challengeCategory', 'cat')
-            ->leftJoin('cat.challengeSection', 'sec')
-            ->orderBy('sec.ordering', 'ASC')
-            ->addOrderBy('cat.ordering', 'ASC')
-            ->addOrderBy('c.ordering', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
 }
