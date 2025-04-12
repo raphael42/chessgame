@@ -113,7 +113,7 @@
                         </div>
                     </div>
                     <div id="board">
-                        {% if player.color == 'white' %}
+                        {% if player.color == 'w' %}
                             {% for key, column in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] %}
                                 <div class="one-column">
                                     {% for line in 8..1 %}
@@ -221,7 +221,7 @@
 
                             <div class="history-section-before {{ game.status not in ['begining', 'waiting-player'] ? 'd-none' }}">
                                 <div id="playerturn-start">
-                                    {% if player.color == 'w' or player.color == 'white' %}
+                                    {% if player.color == 'w' %}
                                         <div>
                                             <i class="bi bi-info-circle-fill"></i> Vous jouez avec les blancs.
                                         </div>

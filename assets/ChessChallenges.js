@@ -33,11 +33,7 @@ let nbMoves = 0;
 $(function() {
     if (chess.inCheck() === true) {
         let kingposition = null;
-        if (chess.turn() === 'w') {
-            kingposition = getKingPosition(FEN, 'white');
-        } else {
-            kingposition = getKingPosition(FEN, 'black');
-        }
+        kingposition = getKingPosition(FEN, chess.turn());
 
         $('#' + kingposition).addClass('in-check');
     }
@@ -55,7 +51,7 @@ $(function() {
         });
 
         // Select one of the player piece
-        if ($(this).find('.piece.white').length === 1) {
+        if ($(this).find('.piece.w').length === 1) {
             var samePieceClicked = false;
             if ($(this).hasClass('clicked')) {
                 var samePieceClicked = true;
@@ -134,7 +130,7 @@ $(function() {
 });
 
 function setupDraggable(jQueryElement) {
-    let elementToDraggable = '.piece.white';
+    let elementToDraggable = '.piece.w';
     if (typeof jQueryElement !== 'undefined') {
         elementToDraggable = jQueryElement;
     }
@@ -188,18 +184,18 @@ function placePieces(fen) {
     var fenSplitPieces = fenSplit[0].split('/');
 
     var piecesLabel = {
-        'r': 'black-rook',
-        'n': 'black-knight',
-        'b': 'black-bishop',
-        'q': 'black-queen',
-        'k': 'black-king',
-        'p': 'black-pawn',
-        'R': 'white-rook',
-        'N': 'white-knight',
-        'B': 'white-bishop',
-        'Q': 'white-queen',
-        'K': 'white-king',
-        'P': 'white-pawn',
+        'r': 'b-rook',
+        'n': 'b-knight',
+        'b': 'b-bishop',
+        'q': 'b-queen',
+        'k': 'b-king',
+        'p': 'b-pawn',
+        'R': 'w-rook',
+        'N': 'w-knight',
+        'B': 'w-bishop',
+        'Q': 'w-queen',
+        'K': 'w-king',
+        'P': 'w-pawn',
         '*': 'star',
     };
 
@@ -232,14 +228,14 @@ function placePieces(fen) {
             src = PIECESIMGURL;
             src = src.replace('playerColor-chessboard', chessboard[k]);
             src = src.replace('png', 'svg');
-            $('#' + k).append('<img class="piece black" src="' + src + '" alt>');
+            $('#' + k).append('<img class="piece b" src="' + src + '" alt>');
         } else {
             src = PIECESIMGURL;
             src = src.replace('playerColor-chessboard', chessboard[k]);
 
-            color = 'white';
-            if (chessboard[k].indexOf('white') == -1){
-                color = 'black';
+            color = 'w';
+            if (chessboard[k].indexOf('w-') == -1){
+                color = 'b';
             }
             $('#' + k).append('<img class="piece ' + color + '" src="' + src + '" alt>');
         }
@@ -286,7 +282,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         let inCheck = chess.inCheck();
         $('.in-check').removeClass('in-check');
         if (moving.flags === 'illegal-incheck') {
-            let kingposition = getKingPosition(chess.fen(), 'white');
+            let kingposition = getKingPosition(chess.fen(), 'w');
             if (kingposition === squareIdFrom) { // king moved, keep it in check in his new square
                 $('#' + squareIdTo).addClass('in-check');
             } else { // king didn't move, keep it in check in his original square
@@ -297,7 +293,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             $('#challenge-description').addClass('alert alert-danger');
         } else {
             if (inCheck) {
-                let kingposition = getKingPosition(chess.fen(), 'black');
+                let kingposition = getKingPosition(chess.fen(), 'b');
                 $('#' + kingposition).addClass('in-check');
             }
         }
@@ -311,14 +307,10 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                 $('#' + squareIdFrom + ' img').remove();
             }
 
-            let color = 'white';
-            if (moving.color === 'b') {
-                color = 'black';
-            }
             let src = PIECESIMGURL;
             src = src.replace('chessboard', piecesPromotion[promotion]);
-            src = src.replace('playerColor', color);
-            $('#' + squareIdTo).append('<img class="piece ' + color + '" src="' + src + '" alt>');
+            src = src.replace('playerColor', moving.color);
+            $('#' + squareIdTo).append('<img class="piece ' + moving.color + '" src="' + src + '" alt>');
             setupDraggable('#' + squareIdTo + ' img');
         } else {
             // css top and left are set because when dropping piece, a strange thing happen
@@ -529,7 +521,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                     if (NEXTCHALLENGEPATH !== null) {
                         setTimeout(() => {
                             document.location.href = NEXTCHALLENGEPATH;
-                        }, '200');
+                        }, '500');
                     } else { // If it's the last, display the final modal
                         $('#final-modal').modal('show');
                     }
@@ -562,7 +554,7 @@ function getKingPosition(fen, color) {
         columnKey = 0;
         for (var j in count) {
             if ($.inArray(count[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) {
-                if ((color === 'white' && count[j] === 'K') || (color === 'black' && count[j] === 'k')) {
+                if ((color === 'w' && count[j] === 'K') || (color === 'b' && count[j] === 'k')) {
                     return column[columnKey] + line;
                 }
                 columnKey += 1;

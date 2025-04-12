@@ -33,8 +33,8 @@ class CreateGameRandom extends AbstractType
             ->add('color', ChoiceType::class, [
                 'label' => 'Choisissez votre couleur',
                 'choices' => array(
-                    'Blanc' => 'white',
-                    'Noir' => 'black',
+                    'Blanc' => 'w',
+                    'Noir' => 'b',
                     'Aléatoire' => 'random',
                 ),
                 'expanded' => true,

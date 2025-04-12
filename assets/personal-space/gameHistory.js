@@ -11,18 +11,18 @@ $(function() {
         var fenSplit = fen.split(' ');
         var fenSplitPieces = fenSplit[0].split('/');
         var piecesLabel = {
-            'r': 'black-rook',
-            'n': 'black-knight',
-            'b': 'black-bishop',
-            'q': 'black-queen',
-            'k': 'black-king',
-            'p': 'black-pawn',
-            'R': 'white-rook',
-            'N': 'white-knight',
-            'B': 'white-bishop',
-            'Q': 'white-queen',
-            'K': 'white-king',
-            'P': 'white-pawn',
+            'r': 'b-rook',
+            'n': 'b-knight',
+            'b': 'b-bishop',
+            'q': 'b-queen',
+            'k': 'b-king',
+            'p': 'b-pawn',
+            'R': 'w-rook',
+            'N': 'w-knight',
+            'B': 'w-bishop',
+            'Q': 'w-queen',
+            'K': 'w-king',
+            'P': 'w-pawn',
         };
 
         var column = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
@@ -50,9 +50,9 @@ $(function() {
             src = PIECESIMGURL;
             src = src.replace("playerColor-chessboard", chessboard[k]);
 
-            color = 'white';
-            if (chessboard[k].indexOf('white') == -1){
-                color = 'black';
+            color = 'w';
+            if (chessboard[k].indexOf('w-') == -1){
+                color = 'b';
             }
             $('#' + idGame + '-' + k).append('<img class="piece ' + color + '" src="' + src + '" alt>');
         }

@@ -109,7 +109,7 @@ class HomeController extends AbstractController
         $timePerPlayer = $timePerPlayer;
         if ($color === 'random') {
             $test = rand(0, 1);
-            $color = ($test === 0) ? 'white' : 'black';
+            $color = ($test === 0) ? 'w' : 'b';
         }
         $playerCreatorColor = $color;
         $playerCreatorEntity->setColor($color);
@@ -120,7 +120,7 @@ class HomeController extends AbstractController
         $entityManager->persist($playerCreatorEntity);
 
         $playerGuestEntity = new Entity\Player();
-        $color = ($color === 'white') ? 'black' : 'white';
+        $color = ($color === 'w') ? 'b' : 'w';
         $playerGuestColor = $color;
         $playerGuestEntity->setColor($color);
         $playerGuestEntity->setGameCreator(false);

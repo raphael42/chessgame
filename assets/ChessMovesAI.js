@@ -2,7 +2,7 @@ import $ from 'jquery';
 import 'jquery-ui/ui/widgets/draggable';
 import 'jquery-ui/ui/widgets/droppable';
 import { Chess } from 'chess.js';
-import { Fireworks } from 'fireworks-js';
+import { lauchFireworks, placePieces, getKingPosition, promotionPiece } from './utils';
 require('bootstrap');
 
 var HISTORYINDEX = null;
@@ -14,7 +14,7 @@ if (PGN !== null) {
 }
 
 var turn = null;
-placePieces(FEN);
+placePieces(FEN, false, chess);
 
 let whiteScore = 0;
 let blackScore = 0;
@@ -29,38 +29,6 @@ const piecesRanking = {
 };
 
 calculateMaterial(FEN);
-
-// if (PLAYERCOLOR === 'b' || PLAYERCOLOR === 'black') {
-//     var piecesAiRanking = {
-//         'p': 10,
-//         'n': 30,
-//         'b': 30,
-//         'r': 50,
-//         'q': 90,
-//         'k': 900,
-//         'P': -10,
-//         'N': -30,
-//         'B': -30,
-//         'R': -50,
-//         'Q': -90,
-//         'K': -900,
-//     };
-// } else {
-//     var piecesAiRanking = {
-//         'p': -10,
-//         'n': -30,
-//         'b': -30,
-//         'r': -50,
-//         'q': -90,
-//         'k': -900,
-//         'P': 10,
-//         'N': 30,
-//         'B': 30,
-//         'R': 50,
-//         'Q': 90,
-//         'K': 900,
-//     };
-// }
 
 var piecesAiRanking = {
     'p': 10,
@@ -199,20 +167,14 @@ var blackPiecePositionRanking = {
 
 $(function() {
     if (chess.inCheck() === true) {
-        let kingposition = null;
-        if (chess.turn() === 'w') {
-            kingposition = getKingPosition(FEN, 'white');
-        } else {
-            kingposition = getKingPosition(FEN, 'black');
-        }
-
+        let kingposition = getKingPosition(FEN, chess.turn());
         $('#' + kingposition).addClass('in-check');
     }
 
     if (GAMESTATUS !== 'finished') {
         // It's white turn
         if (chess.turn() === 'w') {
-            if (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white') { // Player has white, so it's his turn
+            if (PLAYERCOLOR === 'w') { // Player has white, so it's his turn
                 $('#title').html('C\'est votre tour ! | ' + SERVERNAME);
             } else { // Player has black, so it's the AI turn
                 $('#title').html('En attente de l\'adversaire | ' + SERVERNAME);
@@ -221,7 +183,7 @@ $(function() {
 
         // It's black turn
         } else {
-            if (PLAYERCOLOR === 'b' || PLAYERCOLOR === 'black') { // Player has black, so it's his turn
+            if (PLAYERCOLOR === 'b') { // Player has black, so it's his turn
                 $('#title').html('C\'est votre tour ! | ' + SERVERNAME);
             } else { // Player has white, so it's the AI turn
                 $('#title').html('En attente de l\'adversaire | ' + SERVERNAME);
@@ -231,6 +193,7 @@ $(function() {
     }
 
     $('#board').off().on('click', '.chess-table', function() {
+        console.log('cccc');
         // If player is watching history, disable the possibility to move
         if (HISTORYINVIEW) {
             return;
@@ -264,8 +227,8 @@ $(function() {
         if ($(this).find('.piece.' + PLAYERCOLOR).length === 1) {
             let playerTurn = chess.turn(); // Which player turn it is
             if (
-                (PLAYERCOLOR === 'white' && playerTurn === 'b') ||
-                (PLAYERCOLOR === 'black' && playerTurn === 'w')
+                (PLAYERCOLOR === 'w' && playerTurn === 'b') ||
+                (PLAYERCOLOR === 'b' && playerTurn === 'w')
             ) { // If not the player turn, then make a premove
                 if ($(this).hasClass('clicked-premove')) {
                     $('.chess-table.clicked-premove').removeClass('clicked-premove');
@@ -326,7 +289,7 @@ $(function() {
             var tmp3 = squareIdTo.split('');
             var idToLine = parseInt(tmp3[1]);
 
-            if (squareFromInfos !== null && squareFromInfos['type'] === 'p' && ((PLAYERCOLOR === 'white' && squareFromInfos['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (PLAYERCOLOR === 'black' && squareFromInfos['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
+            if (squareFromInfos !== null && squareFromInfos['type'] === 'p' && ((PLAYERCOLOR === 'w' && squareFromInfos['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (PLAYERCOLOR === 'b' && squareFromInfos['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
                 promotionPiece(function(promotion) {
                     processMove(squareIdFrom, squareIdTo, promotion);
                 });
@@ -370,8 +333,8 @@ $(function() {
 
             let playerTurn = chess.turn(); // Which player turn it is
             if (
-                (PLAYERCOLOR === 'white' && playerTurn === 'b') ||
-                (PLAYERCOLOR === 'black' && playerTurn === 'w')
+                (PLAYERCOLOR === 'w' && playerTurn === 'b') ||
+                (PLAYERCOLOR === 'b' && playerTurn === 'w')
             ) { // If not the player turn, then make a premove
                 $(this).addClass('clicked-premove');
                 $(this).data('premove', 2);
@@ -388,7 +351,7 @@ $(function() {
                 var idToLine = parseInt(tmp3[1]);
 
                 var promotion = null;
-                if (squareFromInfos !== null && squareFromInfos['type'] === 'p' && ((PLAYERCOLOR === 'white' && squareFromInfos['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (PLAYERCOLOR === 'black' && squareFromInfos['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
+                if (squareFromInfos !== null && squareFromInfos['type'] === 'p' && ((PLAYERCOLOR === 'w' && squareFromInfos['color'] === 'w' && idFromLine === 7 && idToLine === 8) || (PLAYERCOLOR === 'b' && squareFromInfos['color'] === 'b' && idFromLine === 2 && idToLine === 1))) {
                     promotionPiece(function(promotion) {
                         processMove(squareIdFrom, squareIdTo, promotion);
                     });
@@ -432,11 +395,11 @@ $(function() {
 
             // if san ends with '+', then the other color player is in check, display the class. If ends with '#', it's checkmate but apply the color too
             if ((chessHistory[chessHistory.length - 1].san).endsWith('+') || (chessHistory[chessHistory.length - 1].san).endsWith('#')) {
-                let kingposition = null;
-                if (chessHistory[chessHistory.length - 1].color === 'white' || chessHistory[chessHistory.length - 1].color === 'w') {
-                    kingposition = getKingPosition(chessHistory[chessHistory.length - 1].after, 'black');
-                } else if (chessHistory[chessHistory.length - 1].color === 'black' || chessHistory[chessHistory.length - 1].color === 'b') {
-                    kingposition = getKingPosition(chessHistory[chessHistory.length - 1].after, 'white');
+                let kingposition = '';
+                if (chessHistory[chessHistory.length - 1].color === 'w') {
+                    kingposition = getKingPosition(chessHistory[chessHistory.length - 1].after, 'b');
+                } else {
+                    kingposition = getKingPosition(chessHistory[chessHistory.length - 1].after, 'w');
                 }
                 $('#' + kingposition).addClass('in-check');
             }
@@ -470,11 +433,11 @@ $(function() {
 
                 // if san ends with '+', then the other color player is in check, display the class. If ends with '#', it's checkmate but apply the color too
                 if ((chessHistory[HISTORYINDEX].san).endsWith('+') || (chessHistory[HISTORYINDEX].san).endsWith('#')) {
-                    let kingposition = null;
-                    if (chessHistory[HISTORYINDEX].color === 'white' || chessHistory[HISTORYINDEX].color === 'w') {
-                        kingposition = getKingPosition(fen, 'black');
-                    } else if (chessHistory[HISTORYINDEX].color === 'black' || chessHistory[HISTORYINDEX].color === 'b') {
-                        kingposition = getKingPosition(fen, 'white');
+                    let kingposition = '';
+                    if (chessHistory[HISTORYINDEX].color === 'w') {
+                        kingposition = getKingPosition(fen, 'b')
+                    } else {
+                        kingposition = getKingPosition(fen, 'w')
                     }
                     $('#' + kingposition).addClass('in-check');
                 }
@@ -508,11 +471,12 @@ $(function() {
 
             // if san ends with '+', then the other color player is in check, display the class.  If ends with '#', it's checkmate but apply the color too
             if ((chessHistory[HISTORYINDEX].san).endsWith('+') || (chessHistory[HISTORYINDEX].san).endsWith('#')) {
-                let kingposition = null;
-                if (chessHistory[HISTORYINDEX].color === 'white' || chessHistory[HISTORYINDEX].color === 'w') {
-                    kingposition = getKingPosition(chessHistory[HISTORYINDEX].after, 'black');
-                } else if (chessHistory[HISTORYINDEX].color === 'black' || chessHistory[HISTORYINDEX].color === 'b') {
-                    kingposition = getKingPosition(chessHistory[HISTORYINDEX].after, 'white');
+                let kingposition = '';
+                if (chessHistory[HISTORYINDEX].color === 'w') {
+                    kingposition = getKingPosition(chessHistory[HISTORYINDEX].after, 'b');
+                }
+                if (chessHistory[HISTORYINDEX].color === 'b') {
+                    kingposition = getKingPosition(chessHistory[HISTORYINDEX].after, 'w');
                 }
                 $('#' + kingposition).addClass('in-check');
             }
@@ -576,11 +540,11 @@ $(function() {
 
                 // if san ends with '+', then the other color player is in check, display the class. If ends with '#', it's checkmate but apply the color too
                 if ((chessHistory[i].san).endsWith('+') || (chessHistory[i].san).endsWith('#')) {
-                    let kingposition = null;
-                    if (chessHistory[i].color === 'white' || chessHistory[i].color === 'w') {
-                        kingposition = getKingPosition(chessHistory[i].after, 'black');
-                    } else if (chessHistory[i].color === 'black' || chessHistory[i].color === 'b') {
-                        kingposition = getKingPosition(chessHistory[i].after, 'white');
+                    let kingposition = '';
+                    if (chessHistory[i].color === 'w') {
+                        kingposition = getKingPosition(chessHistory[i].after, 'b');
+                    } else {
+                        kingposition = getKingPosition(chessHistory[i].after, 'w');
                     }
                     $('#' + kingposition).addClass('in-check');
                 }
@@ -609,10 +573,10 @@ $(function() {
         $('#confirm-resign-modal').off().on('click', function() {
             $('#resign-modal').modal('hide');
 
-            if (PLAYERCOLOR === 'white') {
-                gameIsOver('resign', 'b', 'Black win ! White resign');
+            if (PLAYERCOLOR === 'w') {
+                gameIsOver('resign', PLAYERCOLOR, 'Black win ! White resign');
             } else {
-                gameIsOver('resign', 'w', 'White win ! Black resign');
+                gameIsOver('resign', PLAYERCOLOR, 'White win ! Black resign');
             }
         });
     });
@@ -649,17 +613,12 @@ $(function() {
             $('#move-san-b-' + moveNumber2).empty();
         }
 
-        placePieces(chess.fen());
+        placePieces(chess.fen(), false, chess);
 
         $('.in-check').removeClass('in-check');
         if (chess.inCheck() === true) {
-            if (chess.turn() === 'w') {
-                let kingposition = getKingPosition(chess.fen(), 'white');
-                $('#' + kingposition).addClass('in-check');
-            } else if (chess.turn() === 'b') {
-                let kingposition = getKingPosition(chess.fen(), 'black');
-                $('#' + kingposition).addClass('in-check');
-            }
+            let kingposition = getKingPosition(chess.fen(), chess.turn());
+            $('#' + kingposition).addClass('in-check');
         }
 
         $('.last-history-move').removeClass('last-history-move');
@@ -735,8 +694,8 @@ function setupDraggable(jQueryElement) {
             const self = $(this);
             let playerTurn = chess.turn(); // Which player turn it is
             if (
-                (PLAYERCOLOR === 'white' && playerTurn === 'b') ||
-                (PLAYERCOLOR === 'black' && playerTurn === 'w')
+                (PLAYERCOLOR === 'w' && playerTurn === 'b') ||
+                (PLAYERCOLOR === 'b' && playerTurn === 'w')
             ) { // If not the player turn, then make a premove
                 $(self).parent().addClass('clicked-premove');
                 $(self).parent().data('premove', 1);
@@ -802,13 +761,13 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
 
     if (moving !== null) {
         if (chess.inCheck() === true) {
+            let kingposition = '';
             if (moving.color === 'w') {
-                var kingposition = getKingPosition(chess.fen(), 'black');
-                $('#' + kingposition).addClass('in-check');
-            } else if (moving.color === 'b') {
-                var kingposition = getKingPosition(chess.fen(), 'white');
-                $('#' + kingposition).addClass('in-check');
+                kingposition = getKingPosition(chess.fen(), 'b');
+            } else {
+                kingposition = getKingPosition(chess.fen(), 'w');
             }
+            $('#' + kingposition).addClass('in-check');
         }
 
         if (wasInCheck) {
@@ -860,14 +819,10 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                 $('#' + squareIdFrom + ' img').remove();
             }
 
-            let color = 'white';
-            if (moving.color === 'b') {
-                color = 'black';
-            }
             let src = PIECESIMGURL;
             src = src.replace('chessboard', piecesPromotion[promotion]);
-            src = src.replace('playerColor', color);
-            $('#' + squareIdTo).append('<img class="piece ' + color + '" src="' + src + '" alt>');
+            src = src.replace('playerColor', moving.color);
+            $('#' + squareIdTo).append('<img class="piece ' + moving.color + '" src="' + src + '" alt>');
             setupDraggable('#' + squareIdTo + ' img');
         } else {
             // css top and left are set because when dropping piece, a strange thing happen
@@ -953,8 +908,8 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
         let playerTurn = chess.turn(); // Which player turn it is
         if (
             GAMESTATUS !== 'finished' &&
-            ((PLAYERCOLOR === 'white' && playerTurn === 'b') ||
-            (PLAYERCOLOR === 'black' && playerTurn === 'w'))
+            ((PLAYERCOLOR === 'w' && playerTurn === 'b') ||
+            (PLAYERCOLOR === 'b' && playerTurn === 'w'))
         ) { // And is not finished, it's not the player turn, then make an AI move
             AiPlay();
         }
@@ -1216,7 +1171,7 @@ function calculateMaterial(fen) {
     let advantageBlack = blackScore - whiteScore;
 
     if (advantageWhite > 0) {
-        if (PLAYERCOLOR === 'white' || PLAYERCOLOR === 'w') {
+        if (PLAYERCOLOR === 'w') {
             $('.score-player').html('+' + advantageWhite);
             $('.score-opponent').html('');
         } else {
@@ -1224,7 +1179,7 @@ function calculateMaterial(fen) {
             $('.score-player').html('');
         }
     } else if (advantageBlack > 0) {
-        if (PLAYERCOLOR === 'black' || PLAYERCOLOR === 'b') {
+        if (PLAYERCOLOR === 'b') {
             $('.score-player').html('+' + advantageBlack);
             $('.score-opponent').html('');
         } else {
@@ -1244,113 +1199,6 @@ function calculateMaterial(fen) {
     };
 }
 
-function promotionPiece(callback) {
-    $('#promotion-modal').modal('show');
-    $('#promotion-modal .promotion-piece-button').on('click', function() {
-        var piece = $(this).attr('id');
-        $('#promotion-modal').modal('hide');
-        callback(piece);
-    });
-}
-
-function getKingPosition(fen, color) {
-    var tmp = fen.split(' ');
-    var tmp2 = tmp[0].split('/');
-    var column = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-    var columnKey = 0;
-    var line = 8;
-    var count = '';
-
-    for (var i in tmp2) {
-        count = tmp2[i].split('');
-        columnKey = 0;
-        for (var j in count) {
-            if ($.inArray(count[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) {
-                if ((color === 'white' && count[j] === 'K') || (color === 'black' && count[j] === 'k')) {
-                    return column[columnKey] + line;
-                }
-                columnKey += 1;
-            } else {
-                columnKey += parseInt(count[j]);
-            }
-        }
-        line--;
-    }
-
-    return null;
-}
-
-function placePieces(fen, noLastMove) {
-    // First remove all pieces if there is some
-    $('.chess-table').each(function() {
-        let pieceImg = $(this).find('img');
-        if (pieceImg.length > 0) {
-            pieceImg.remove();
-        }
-    });
-
-    var fenSplit = fen.split(' ');
-    var fenSplitPieces = fenSplit[0].split('/');
-
-    var piecesLabel = {
-        'r': 'black-rook',
-        'n': 'black-knight',
-        'b': 'black-bishop',
-        'q': 'black-queen',
-        'k': 'black-king',
-        'p': 'black-pawn',
-        'R': 'white-rook',
-        'N': 'white-knight',
-        'B': 'white-bishop',
-        'Q': 'white-queen',
-        'K': 'white-king',
-        'P': 'white-pawn',
-    };
-
-    var column = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-    var columnKey = 0;
-    var line = 8;
-    var chessboard = [];
-    var count = '';
-    for (var i in fenSplitPieces) {
-        count = fenSplitPieces[i].split('');
-        columnKey = 0;
-        for (var j in count) {
-            if ($.inArray(count[j], ['r', 'n', 'b', 'q', 'k', 'p', 'R', 'N', 'B', 'Q', 'K', 'P']) !== -1) {
-                chessboard[column[columnKey] + line] = piecesLabel[count[j]];
-                columnKey += 1;
-            } else {
-                columnKey += parseInt(count[j]);
-            }
-        }
-        line--;
-    }
-
-    let src = null;
-    var color = null;
-    for (var k in chessboard) {
-        src = PIECESIMGURL;
-        src = src.replace("playerColor-chessboard", chessboard[k]);
-
-        color = 'white';
-        if (chessboard[k].indexOf('white') == -1){
-            color = 'black';
-        }
-        $('#' + k).append('<img class="piece ' + color + '" src="' + src + '" alt>');
-    }
-
-    // Set in green color the last move
-    if (typeof noLastMove === 'undefined' || noLastMove !== true) {
-        let historyVerbose = chess.history({verbose: true});
-        let lastMoveHistory = historyVerbose[historyVerbose.length - 1];
-        $('.last-move').removeClass('last-move');
-        if (typeof lastMoveHistory !== 'undefined') {
-            $('#' + lastMoveHistory.from).addClass('last-move');
-            $('#' + lastMoveHistory.to).addClass('last-move');
-        }
-    }
-}
-
 function switchTurn() {
     if (turn === 'player') {
         turn = 'opponent';
@@ -1368,46 +1216,9 @@ function gameIsOver(reason, playerWinner, endReason) {
 
     $('.piece.' + PLAYERCOLOR).draggable('destroy');
 
-    let launchFireworks = false;
-    if (playerWinner === 'w' && (PLAYERCOLOR === 'w' || PLAYERCOLOR === 'white')) {
-        launchFireworks = true;
-    }
-
-    if (playerWinner === 'b' && (PLAYERCOLOR === 'b' || PLAYERCOLOR === 'black')) {
-        launchFireworks = true;
-    }
-
-    if (launchFireworks) {
-        const container = document.querySelector('#fireworks-container');
-        const fireworks = new Fireworks(container, {
-            autoresize: false,
-            rocketsPoint: {
-                min: 50,
-                max: 50
-            },
-            hue: { min: 0, max: 345 },
-            delay: { min: 15, max: 30 },
-            speed: 2,
-            acceleration: 1.05,
-            friction: 0.98,
-            gravity: 1.5,
-            particles: 50,
-            trace: 3,
-            traceSpeed: 10,
-        });
-        fireworks.start();
-
-        // After 2 seconds, we set intensity to 0. It hides the firework
-        setTimeout(() => {
-            fireworks.updateOptions({
-                intensity: 0,
-            });
-
-            // After 3 seconds more, we stop the firework
-            setTimeout(() => {
-                fireworks.stop();
-            }, 3000);
-        }, 2000);
+    // The player is the winner
+    if (playerWinner === PLAYERCOLOR) {
+        lauchFireworks('#fireworks-container');
     }
 
     const data = {

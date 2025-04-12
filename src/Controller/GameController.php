@@ -114,11 +114,11 @@ class GameController extends AbstractController
 
         $arrMovesForHtml = []; // array moves for html rebuilt
         foreach ($moves as $oneMove) {
-            if ($oneMove->getPlayer()->getColor() === 'white') {
+            if ($oneMove->getPlayer()->getColor() === 'w') {
                 $arrMovesForHtml[$oneMove->getMoveNumber()]['san_white'] = $oneMove->getSan();
             }
 
-            if ($oneMove->getPlayer()->getColor() === 'black') {
+            if ($oneMove->getPlayer()->getColor() === 'b') {
                 $arrMovesForHtml[$oneMove->getMoveNumber()]['san_black'] = $oneMove->getSan();
             }
         }
