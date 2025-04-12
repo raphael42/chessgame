@@ -76,10 +76,10 @@ class MessageHandler implements MessageComponentInterface
                 }
 
                 $color = $oneGame->getCreatorColorChose();
-                if ($color === 'white' || $color === 'w') { // If game creator chose white, you will play with black
-                    $color = 'black';
-                } elseif ($color === 'black' || $color === 'b') { // If game creator chose black, you will play with white
-                    $color = 'white';
+                if ($color === 'w') { // If game creator chose white, you will play with black
+                    $color = 'b';
+                } elseif ($color === 'b') { // If game creator chose black, you will play with white
+                    $color = 'w';
                 }
                 // ELSE : game creator chose random, keep the value from DB, it is 'random'. We know the color but do not display it to the user
 
@@ -128,10 +128,10 @@ class MessageHandler implements MessageComponentInterface
         // The game that has been created is random and waiting for a player, send the information to the users connected in the homepage
         if ($queryParams['gameType'] === 'random' && $queryParams['gameStatus'] === 'waiting-player') {
             $color = $this->gameEntity[$idGame]->getCreatorColorChose();
-            if ($color === 'white' || $color === 'w') { // If game creator chose white, you will play with black
-                $color = 'black';
-            } elseif ($color === 'black' || $color === 'b') { // If game creator chose black, you will play with white
-                $color = 'white';
+            if ($color === 'w') { // If game creator chose white, you will play with black
+                $color = 'b';
+            } elseif ($color === 'b') { // If game creator chose black, you will play with white
+                $color = 'w';
             }
             // ELSE : game creator chose random, keep the value from DB, it is 'random'. We know the color but do not display it to the user
 
@@ -285,9 +285,9 @@ class MessageHandler implements MessageComponentInterface
             $messagesEntity->setDateInsert($dateTimeNow);
             // It's a message from the tchat, set the player
             if (isset($msgArray['method'], $msgArray['color']) && !empty($msgArray['color']) && $msgArray['method'] === 'tchat-message') {
-                if ($msgArray['color'] === 'w' || $msgArray['color'] === 'white') {
+                if ($msgArray['color'] === 'w') {
                     $messagesEntity->setPlayer($this->playerWhiteEntity[$idGame]);
-                } elseif ($msgArray['color'] === 'b' || $msgArray['color'] === 'black') {
+                } elseif ($msgArray['color'] === 'b') {
                     $messagesEntity->setPlayer($this->playerBlackEntity[$idGame]);
                 }
             }
@@ -317,7 +317,7 @@ class MessageHandler implements MessageComponentInterface
 
             $winnerColor = 'w';
             // Color resign is white, the winner is black
-            if ($msgArray['color'] === 'w' || $msgArray['color'] === 'white') {
+            if ($msgArray['color'] === 'w') {
                 $winnerColor = 'b';
             }
 
@@ -474,9 +474,9 @@ class MessageHandler implements MessageComponentInterface
 
         // Game is timeout
         if (isset($msgArray['method']) && $msgArray['method'] === 'timeout') {
-            $colorWinner = 'white';
-            if ($msgArray['colorWinner'] === 'b' || $msgArray['colorWinner'] === 'black') {
-                $colorWinner = 'black';
+            $colorWinner = 'w';
+            if ($msgArray['colorWinner'] === 'b') {
+                $colorWinner = 'b';
             }
 
             $this->gameEntity[$idGame]->setStatus('finished');
@@ -485,7 +485,7 @@ class MessageHandler implements MessageComponentInterface
 
             $this->em->persist($this->gameEntity[$idGame]);
 
-            if ($colorWinner === 'white') { // Whites win, set black timer to 0
+            if ($colorWinner === 'w') { // Whites win, set black timer to 0
                 $this->playerBlackEntity[$idGame]->setTimeLeft(0);
                 $this->em->persist($this->playerBlackEntity[$idGame]);
             } else { // Balcks win, set white timer to 0
@@ -688,14 +688,14 @@ class MessageHandler implements MessageComponentInterface
         // Get the players datas too if not isset
         if (!isset($this->playerWhiteEntity[$idGame])) {
             $this->playerWhiteEntity[$idGame] = $this->em->getRepository(Entity\Player::class)->findOneBy([
-                'color' => 'white',
+                'color' => 'w',
                 'game' => $this->gameEntity[$idGame]->getId(),
             ]);
         }
 
         if (!isset($this->playerBlackEntity[$idGame])) {
             $this->playerBlackEntity[$idGame] = $this->em->getRepository(Entity\Player::class)->findOneBy([
-                'color' => 'black',
+                'color' => 'b',
                 'game' => $this->gameEntity[$idGame]->getId(),
             ]);
         }

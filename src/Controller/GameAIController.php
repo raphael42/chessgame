@@ -117,11 +117,11 @@ class GameAIController extends AbstractController
 
         $arrMovesForHtml = []; // array moves for html rebuilt
         foreach ($moves as $oneMove) {
-            if ($oneMove->getPlayer()->getColor() === 'white') {
+            if ($oneMove->getPlayer()->getColor() === 'w') {
                 $arrMovesForHtml[$oneMove->getMoveNumber()]['san_white'] = $oneMove->getSan();
             }
 
-            if ($oneMove->getPlayer()->getColor() === 'black') {
+            if ($oneMove->getPlayer()->getColor() === 'b') {
                 $arrMovesForHtml[$oneMove->getMoveNumber()]['san_black'] = $oneMove->getSan();
             }
         }
@@ -228,13 +228,9 @@ class GameAIController extends AbstractController
         $entityManager->persist($game);
 
 
-        $color = 'white';
-        if ($data['color'] === 'b') {
-            $color = 'black';
-        }
         $player = $entityManager->getRepository(Entity\Player::class)->findOneBy([
             'game' => $game->getId(),
-            'color' => $color,
+            'color' => $data['color'],
         ]);
         $movesEntity = new Entity\Moves();
         $movesEntity->setPlayer($player);

@@ -52,7 +52,7 @@
                 <div class="row height240">
                     <div class="col-4 game-history-board">
                         <div class="board-account-history">
-                            {% if oneGame.color == 'white' %}
+                            {% if oneGame.color == 'w' %}
                                 {% for key, column in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] %}
                                     <div class="one-column">
                                         {% for line in 8..1 %}
@@ -116,11 +116,11 @@
                                         {% set reason = 'Abandon' %}
                                     {% endif %}
 
-                                    {% if (oneGame.color == 'white' or oneGame.color == 'w') and oneGame.game.winner == 'w' %} {# victory while playing white #}
+                                    {% if oneGame.color == 'w' and oneGame.game.winner == 'w' %} {# victory while playing white #}
                                         <p class="text-success">Victoire des Blancs : {{ reason }}</p>
-                                    {% elseif (oneGame.color == 'black' or oneGame.color == 'b') and oneGame.game.winner == 'b' %} {# victory while playing black #}
+                                    {% elseif oneGame.color == 'b' and oneGame.game.winner == 'b' %} {# victory while playing black #}
                                         <p class="text-success">Victoire des Noirs : {{ reason }}</p>
-                                    {% elseif (oneGame.color == 'white' or oneGame.color == 'w') and oneGame.game.winner == 'b' %} {# lose while playing white #}
+                                    {% elseif oneGame.color == 'w' and oneGame.game.winner == 'b' %} {# lose while playing white #}
                                         <p class="text-danger">Victoire des Noirs : {{ reason }}</p>
                                     {% else %} {# lose while playing black #}
                                         <p class="text-danger">Victoire des Blancs : {{ reason }}</p>
