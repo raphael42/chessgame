@@ -2,7 +2,7 @@ import $ from 'jquery';
 import 'jquery-ui/ui/widgets/draggable';
 import 'jquery-ui/ui/widgets/droppable';
 import { Chess } from 'chess.js';
-import { lauchFireworks, placePieces, getKingPosition, promotionPiece } from './utils';
+import { lauchFireworks, placePieces, getKingPosition, promotionPiece, calculateMaterial } from './utils';
 require('bootstrap');
 
 var HISTORYINDEX = null;
@@ -16,19 +16,7 @@ if (PGN !== null) {
 var turn = null;
 placePieces(FEN, false, chess);
 
-let whiteScore = 0;
-let blackScore = 0;
-
-const piecesRanking = {
-    'p': 1,
-    'n': 3,
-    'b': 3,
-    'r': 5,
-    'q': 9,
-    'k': 0,
-};
-
-calculateMaterial(FEN);
+calculateMaterial(FEN, PLAYERCOLOR);
 
 var piecesAiRanking = {
     'p': 10,
@@ -631,7 +619,7 @@ $(function() {
             $('#move-san-' + fenSplitForHistory[1] + '-' + fenSplitForHistory[5]).addClass('last-history-move');
         }
 
-        calculateMaterial(chess.fen());
+        calculateMaterial(chess.fen(), PLAYERCOLOR);
 
         setupDraggable();
 
@@ -930,7 +918,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
             }
         });
 
-        calculateMaterial(lastMoveHistory.after);
+        calculateMaterial(lastMoveHistory.after,PLAYERCOLOR);
 
         return true;
     }
@@ -1134,68 +1122,6 @@ function calculateScoreNoSquare(fen, color) {
     return {
         'w': whiteScore - blackScore,
         'b': blackScore - whiteScore,
-    };
-}
-
-// Function to calculate the current score of the game
-function calculateMaterial(fen) {
-    whiteScore = 0;
-    blackScore = 0;
-
-    const fenSplit = fen.split(' ');
-
-    // Loop on each FEN caracters
-    for (const char of fenSplit[0]) {
-        // If slash found, go next
-        if (char === '/') {
-            continue;
-        }
-
-        // If number found (empty square), go next
-        if (/[0-9]/.test(char)) {
-            continue;
-        }
-
-        // Get value of piece
-        const pieceValue = piecesRanking[char.toLowerCase()];
-
-        // If it's cap, it's a white piece
-        if (char === char.toUpperCase()) {
-            whiteScore += pieceValue;
-        } else {
-            blackScore += pieceValue;
-        }
-    }
-
-    let advantageWhite = whiteScore - blackScore;
-    let advantageBlack = blackScore - whiteScore;
-
-    if (advantageWhite > 0) {
-        if (PLAYERCOLOR === 'w') {
-            $('.score-player').html('+' + advantageWhite);
-            $('.score-opponent').html('');
-        } else {
-            $('.score-opponent').html('+' + advantageWhite);
-            $('.score-player').html('');
-        }
-    } else if (advantageBlack > 0) {
-        if (PLAYERCOLOR === 'b') {
-            $('.score-player').html('+' + advantageBlack);
-            $('.score-opponent').html('');
-        } else {
-            $('.score-opponent').html('+' + advantageBlack);
-            $('.score-player').html('');
-        }
-    } else {
-        $('.score-player').html('');
-        $('.score-opponent').html('');
-    }
-
-    return {
-        white: whiteScore,
-        black: blackScore,
-        advantageWhite: whiteScore - blackScore,
-        advantageBlack: blackScore - whiteScore,
     };
 }
 

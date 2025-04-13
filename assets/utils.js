@@ -50,6 +50,28 @@ export function lauchFireworks(element) {
     }, 2000);
 }
 
+/**
+ * Places chess pieces on the board based on the provided FEN string.
+ *
+ * @param {string} fen - The FEN (Forsyth-Edwards Notation) string representing the chessboard state.
+ * @param {boolean} [noLastMove=false] - If true, the last move will not be highlighted.
+ * @param {object} [chess] - An optional Chess.js instance to retrieve the move history for highlighting the last move.
+ *
+ * @description
+ * This function parses the FEN string to determine the positions of the chess pieces
+ * and places them on the board. It also highlights the last move if applicable.
+ * The function assumes the presence of a DOM structure with elements representing
+ * the chessboard squares, identified by their IDs (e.g., "a1", "b2").
+ *
+ * @example
+ * // Example usage:
+ * const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+ * placePieces(fen, false, chessInstance);
+ *
+ * @global
+ * - Assumes the presence of a global variable `PIECESIMGURL` for the image URL template.
+ * - Uses jQuery for DOM manipulation.
+ */
 export function placePieces(fen, noLastMove, chess) {
     // First remove all pieces if there is some
     $('.chess-table').each(function() {
@@ -123,6 +145,13 @@ export function placePieces(fen, noLastMove, chess) {
     }
 }
 
+/**
+ * Retrieves the position of the king on a chessboard based on the FEN string and the specified color.
+ *
+ * @param {string} fen - The FEN (Forsyth-Edwards Notation) string representing the chessboard state.
+ * @param {string} color - The color of the king to locate ('w' for white, 'b' for black).
+ * @returns {string|null} The position of the king in algebraic notation (e.g., "e1"), or null if not found.
+ */
 export function getKingPosition(fen, color) {
     var tmp = fen.split(' ');
     var tmp2 = tmp[0].split('/');
@@ -150,6 +179,18 @@ export function getKingPosition(fen, color) {
     return null;
 }
 
+/**
+ * Displays a modal dialog for pawn promotion in a chess game and handles the selection of the promotion piece.
+ *
+ * @param {function(string): void} callback - A callback function that is invoked with the ID of the selected promotion piece.
+ * The ID corresponds to the piece chosen by the user (e.g., 'queen', 'rook', 'bishop', 'knight').
+ *
+ * @example
+ * promotionPiece(function(selectedPiece) {
+ *     console.log('User selected:', selectedPiece);
+ *     // Handle the selected piece (e.g., update the game state)
+ * });
+ */
 export function promotionPiece(callback) {
     $('#promotion-modal').modal('show');
     $('#promotion-modal .promotion-piece-button').on('click', function() {
@@ -157,4 +198,96 @@ export function promotionPiece(callback) {
         $('#promotion-modal').modal('hide');
         callback(piece);
     });
+}
+
+
+/**
+ * Calculates the material score for a chess game based on the FEN string and updates the UI with the score.
+ *
+ * @param {string} fen - The FEN (Forsyth-Edwards Notation) string representing the current state of the chessboard.
+ * @param {string} playerColor - The color of the player ('w' for white, 'b' for black).
+ * @returns {Object} An object containing the material scores and advantages:
+ *   - {number} white: The total material score for white.
+ *   - {number} black: The total material score for black.
+ *   - {number} advantageWhite: The material advantage for white (whiteScore - blackScore).
+ *   - {number} advantageBlack: The material advantage for black (blackScore - whiteScore).
+ *
+ * @throws {ReferenceError} If the variable `piecesRanking` is not defined.
+ * @throws {ReferenceError} If jQuery ($) is not available for DOM manipulation.
+ *
+ * @example
+ * const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+ * const playerColor = 'w';
+ * const result = calculateMaterial(fen, playerColor);
+ * console.log(result);
+ * // Output: { white: 39, black: 39, advantageWhite: 0, advantageBlack: 0 }
+ */
+export function calculateMaterial(fen, playerColor) {
+    let whiteScore = 0;
+    let blackScore = 0;
+
+    const piecesRanking = {
+        'p': 1,
+        'n': 3,
+        'b': 3,
+        'r': 5,
+        'q': 9,
+        'k': 0,
+    };
+
+    const fenSplit = fen.split(' ');
+
+    // Loop on each FEN caracters
+    for (const char of fenSplit[0]) {
+        // If slash found, go next
+        if (char === '/') {
+            continue;
+        }
+
+        // If number found (empty square), go next
+        if (/[0-9]/.test(char)) {
+            continue;
+        }
+
+        // Get value of piece
+        const pieceValue = piecesRanking[char.toLowerCase()];
+
+        // If it's cap, it's a white piece
+        if (char === char.toUpperCase()) {
+            whiteScore += pieceValue;
+        } else {
+            blackScore += pieceValue;
+        }
+    }
+
+    let advantageWhite = whiteScore - blackScore;
+    let advantageBlack = blackScore - whiteScore;
+
+    if (advantageWhite > 0) {
+        if (playerColor === 'w') {
+            $('.score-player').html('+' + advantageWhite);
+            $('.score-opponent').html('');
+        } else {
+            $('.score-opponent').html('+' + advantageWhite);
+            $('.score-player').html('');
+        }
+    } else if (advantageBlack > 0) {
+        if (playerColor === 'b') {
+            $('.score-player').html('+' + advantageBlack);
+            $('.score-opponent').html('');
+        } else {
+            $('.score-opponent').html('+' + advantageBlack);
+            $('.score-player').html('');
+        }
+    } else {
+        $('.score-player').html('');
+        $('.score-opponent').html('');
+    }
+
+    return {
+        white: whiteScore,
+        black: blackScore,
+        advantageWhite: whiteScore - blackScore,
+        advantageBlack: blackScore - whiteScore,
+    };
 }
