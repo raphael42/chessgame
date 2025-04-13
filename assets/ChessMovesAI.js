@@ -561,11 +561,11 @@ $(function() {
         $('#confirm-resign-modal').off().on('click', function() {
             $('#resign-modal').modal('hide');
 
+            let reasonMessage = 'White win ! Black resign';
             if (PLAYERCOLOR === 'w') {
-                gameIsOver('resign', PLAYERCOLOR, 'Black win ! White resign');
-            } else {
-                gameIsOver('resign', PLAYERCOLOR, 'White win ! Black resign');
+                reasonMessage = 'Black win ! White resign';
             }
+            gameIsOver(PLAYERCOLOR, reasonMessage, 'resign');
         });
     });
 
@@ -850,11 +850,10 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                 lastMoveHistory['gameReason'] = 'checkmate';
                 if (moving.color === 'w') {
                     lastMoveHistory['message'] = 'White win ! Black is checkmate'
-                    gameIsOver(lastMoveHistory['gameReason'], 'w', lastMoveHistory['message']);
                 } else {
                     lastMoveHistory['message'] = 'Black win ! White is checkmate';
-                    gameIsOver(lastMoveHistory['gameReason'], 'b', lastMoveHistory['message']);
                 }
+                gameIsOver(moving.color, lastMoveHistory['message'], lastMoveHistory['gameReason']);
             } else if (chess.isDraw()) {
                 lastMoveHistory['gameStatus'] = 'draw';
                 if (chess.isStalemate()) {
@@ -870,7 +869,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                     lastMoveHistory['gameReason'] = 'fiftyMoves';
                     lastMoveHistory['message'] = 'Draw ! Fifty moves without progressions';
                 }
-                gameIsOver(lastMoveHistory['gameReason'], 'd', lastMoveHistory['message']);
+                gameIsOver('d', lastMoveHistory['message'], lastMoveHistory['gameReason']);
             }
         }
 
@@ -1134,11 +1133,11 @@ function switchTurn() {
 }
 
 
-function gameIsOver(reason, playerWinner, endReason) {
+function gameIsOver(playerWinner, reasonMessage, reason) {
     GAMESTATUS = 'finished';
 
-    $('.end-game-reason').html(endReason);
-    $('.tchat').append('<div>' + endReason + '</div>');
+    $('.end-game-reason').html(reasonMessage);
+    $('.tchat').append('<div>' + reasonMessage + '</div>');
 
     $('.piece.' + PLAYERCOLOR).draggable('destroy');
 

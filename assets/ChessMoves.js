@@ -253,11 +253,11 @@ $(function() {
 
         // Opponent resign
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'resign') {
+            let reasonMessage = 'Black win ! White resign';
             if (PLAYERCOLOR === 'w') {
-                gameIsOver('win', 'w', 'White win ! Black resign');
-            } else {
-                gameIsOver('win', 'b', 'Black win ! White resign');
+                reasonMessage = 'White win ! Black resign';
             }
+            gameIsOver('b', reasonMessage);
             return;
         }
 
@@ -284,7 +284,7 @@ $(function() {
             if (PLAYERTYPE !== 'spectator') {
                 $('#offer-draw-display').addClass('d-none');
             }
-            gameIsOver('d', null, socketMessage.message);
+            gameIsOver(null, socketMessage.message);
             return;
         }
 
@@ -383,11 +383,11 @@ $(function() {
 
         // Opponent timer is over
         if (typeof socketMessage.method !== 'undefined' && socketMessage.method === 'timeout') {
-            if (socketMessage.colorWinner === 'w') {
-                gameIsOver('win', 'w', 'White win ! Black timer is over');
-            } else {
-                gameIsOver('win', 'b', 'Black win ! White timer is over');
+            let reasonMessage = 'Black win ! White timer is over';
+            if (PLAYERCOLOR === 'w') {
+                reasonMessage = 'White win ! Black timer is over';
             }
+            gameIsOver(socketMessage.colorWinner, reasonMessage);
 
             if (PLAYERCOLOR === 'w' && socketMessage.colorWinner === 'w') {
                 $(".timer-opponent").text("00:00");
@@ -487,21 +487,21 @@ $(function() {
 
             if (chess.isGameOver()) {
                 if (chess.isCheckmate() === true) {
+                    let reasonMessage = 'Black win ! White is checkmate';
                     if (socketMessage.color === 'w') {
-                        gameIsOver('win', 'w', 'White win ! Black is checkmate');
-                    } else {
-                        gameIsOver('win', 'b', 'Black win ! White is checkmate');
+                        reasonMessage = 'White win ! Black is checkmate';
                     }
+                    gameIsOver(socketMessage.color, reasonMessage);
                 } else if (chess.isDraw()) {
+                    let reasonMessage = 'Draw ! Fifty moves without progressions';
                     if (chess.isStalemate()) {
-                        gameIsOver('d', null, 'Draw ! Game is stalemated');
+                        reasonMessage = 'Draw ! Game is stalemated';
                     } else if (chess.isThreefoldRepetition()) {
-                        gameIsOver('d', null, 'Draw ! Threefold repetition');
+                        reasonMessage = 'Draw ! Threefold repetition';
                     } else if (chess.isInsufficientMaterial()) {
-                        gameIsOver('d', null, 'Draw ! Insufficient material');
-                    } else {
-                        gameIsOver('d', null, 'Draw ! Fifty moves without progressions');
+                        reasonMessage = 'Draw ! Insufficient material';
                     }
+                    gameIsOver(null, reasonMessage);
                 }
             }
 
@@ -539,21 +539,21 @@ $(function() {
 
             if (chess.isGameOver()) {
                 if (chess.isCheckmate() === true) {
+                    let reasonMessage = 'Black win ! White is checkmate';
                     if (socketMessage.color === 'w') {
-                        gameIsOver('win', 'w', 'White win ! Black is checkmate');
-                    } else {
-                        gameIsOver('win', 'b', 'Black win ! White is checkmate');
+                        reasonMessage = 'White win ! Black is checkmate';
                     }
+                    gameIsOver(socketMessage.color, reasonMessage);
                 } else if (chess.isDraw()) {
+                    let reasonMessage = 'Draw ! Fifty moves without progressions';
                     if (chess.isStalemate()) {
-                        gameIsOver('d', null, 'Draw ! Game is stalemated');
+                        reasonMessage = 'Draw ! Game is stalemated';
                     } else if (chess.isThreefoldRepetition()) {
-                        gameIsOver('d', null, 'Draw ! Threefold repetition');
+                        reasonMessage = 'Draw ! Threefold repetition';
                     } else if (chess.isInsufficientMaterial()) {
-                        gameIsOver('d', null, 'Draw ! Insufficient material');
-                    } else {
-                        gameIsOver('d', null, 'Draw ! Fifty moves without progressions');
+                        reasonMessage = 'Draw ! Insufficient material';
                     }
+                    gameIsOver(null, reasonMessage);
                 }
             }
 
@@ -1065,11 +1065,11 @@ $(function() {
         $('#confirm-resign-modal').off().on('click', function() {
             $('#resign-modal').modal('hide');
 
+            let reasonMessage = 'White win ! Black resign';
             if (PLAYERCOLOR === 'w') {
-                gameIsOver('win', PLAYERCOLOR, 'Black win ! White resign');
-            } else {
-                gameIsOver('win', PLAYERCOLOR, 'White win ! Black resign');
+                reasonMessage = 'Black win ! White resign';
             }
+            gameIsOver(PLAYERCOLOR, reasonMessage);
 
             try {
                 socket.send(JSON.stringify({
@@ -1123,7 +1123,7 @@ $(function() {
         $('#offer-draw-opponent-response').addClass('d-none');
 
         let message = 'Draw offer accepted';
-        gameIsOver('d', null, message);
+        gameIsOver(null, message);
 
         try {
             socket.send(JSON.stringify({
@@ -1504,11 +1504,10 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                 lastMoveHistory['gameReason'] = 'checkmate';
                 if (moving.color === 'w') {
                     lastMoveHistory['message'] = 'White win ! Black is checkmate';
-                    gameIsOver('win', 'w', lastMoveHistory['message']);
                 } else {
                     lastMoveHistory['message'] = 'Black win ! White is checkmate';
-                    gameIsOver('win', 'b', lastMoveHistory['message']);
                 }
+                gameIsOver(moving.color, lastMoveHistory['message']);
             } else if (chess.isDraw()) {
                 lastMoveHistory['gameStatus'] = 'draw';
                 if (chess.isStalemate()) {
@@ -1524,7 +1523,7 @@ function processMove(squareIdFrom, squareIdTo, promotion) {
                     lastMoveHistory['gameReason'] = 'fiftyMoves';
                     lastMoveHistory['message'] = 'Draw ! Fifty moves without progressions';
                 }
-                gameIsOver('d', null, lastMoveHistory['message']);
+                gameIsOver(null, lastMoveHistory['message']);
             }
         }
 
@@ -1590,12 +1589,11 @@ function updateTimerPlayer() {
     if (remainingTimePlayer <= 0) {
         $(".timer-player").text("00:00");
 
-        // Player turn and player color is white, blacks win
+        // PLAYERCOLOR timer is over. The winner is the opponent
         if (PLAYERCOLOR === 'w') {
-            gameIsOver('win', PLAYERCOLOR, 'Black win ! White timer is over', 'timeout');
-        // Player turn and player color is black, whites win
+            gameIsOver('b', 'Black win ! White timer is over', 'timeout');
         } else if (PLAYERCOLOR === 'b') {
-            gameIsOver('win', PLAYERCOLOR, 'White win ! Black timer is over', 'timeout');
+            gameIsOver('w', 'White win ! Black timer is over', 'timeout');
         }
 
         $('.timer-bottom').removeClass('active');
@@ -1614,14 +1612,12 @@ function updateTimerOpponent() {
     if (remainingTimeOpponent <= 0) {
         $(".timer-opponent").text("00:00");
 
-        // Opponent turn and player color is white, blacks win
+        let reasonMessage = 'Black win ! White timer is over';
         if (PLAYERCOLOR === 'w') {
-            gameIsOver('win', PLAYERCOLOR, 'White win ! Black timer is over', 'timeout');
-
-        // Opponent turn and player color is black, whites win
-        } else if (PLAYERCOLOR === 'b') {
-            gameIsOver('win', PLAYERCOLOR, 'Black win ! White timer is over', 'timeout');
+            reasonMessage = 'White win ! Black timer is over';
         }
+        // Opponent timer is over. The winner is the Player
+        gameIsOver(PLAYERCOLOR, reasonMessage, 'timeout');
 
         $('.timer-top').removeClass('active');
         $('.timer-top').addClass('over');
@@ -1712,7 +1708,7 @@ function switchTurn() {
 }
 
 
-function gameIsOver(status, playerWinner, endReason, socketMessage) {
+function gameIsOver(playerWinner, reasonMessage, socketMessage) {
     // Game is already mark as finished, do not process this again
     if (GAMESTATUS === 'finished') {
         return;
@@ -1740,7 +1736,7 @@ function gameIsOver(status, playerWinner, endReason, socketMessage) {
         }));
     }
 
-    $('.tchat').append('<div>' + endReason + '</div>');
+    $('.tchat').append('<div>' + reasonMessage + '</div>');
 
     $('.piece.' + PLAYERCOLOR).draggable('destroy');
 
